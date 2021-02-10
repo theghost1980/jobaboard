@@ -1,0 +1,228 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;500;600;700&display=swap');
+/* TODO */
+/* root variables */
+
+html, body {
+    padding: 0px;
+    margin: 0px;
+}
+body {
+    font-family: 'Poppins', sans-serif;
+}
+
+/* layout component */
+#mainMenu {
+    display: flex;
+    flex-direction: row;
+    list-style: none;
+    justify-content: center;
+    align-items: center;
+}
+#mainMenu > li {
+    float: inherit;
+    padding: 8px;
+}
+.hideOnLoggin {
+    display: none;
+}
+.blackAbsCont {
+    top: 0px;
+    left: 0px;
+    z-index: 9000;
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.596);
+}
+.loginCont {
+    z-index: 10000;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 320px;
+    height: 200px;
+    justify-content: center;
+    align-items: center;
+    background: wheat;
+}
+.logoSVGCont {
+    display: block;
+    padding: 10px;
+    width: 300px;
+    height: 100px;
+}
+.logoSVG {
+    width: 100%;
+    height: 100%;
+}
+/* end layout */
+
+/* main section - content */
+main {
+    margin-left: 30px;
+    margin-right: 30px;
+}
+/* end main section content */
+
+/* nav section */
+nav {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: auto;
+    align-items: center;
+}
+.profilePicCont {
+    display: flex;
+    width: 60px;
+    height: 60px;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    border: 1px solid black;
+    overflow: unset;
+}
+.profilePic {
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+.userMenu {
+    padding-inline-start: 0px;
+    background: whitesmoke;
+    top: 100px;
+    position: absolute;
+    display: none;
+    flex-direction: column;
+    width: 110px;
+    height: auto;
+    list-style: none;
+    align-items: center;
+}
+.userMenu > li {
+    float: inherit;
+    padding: 8px;
+}
+.showUserMenu {
+    display: flex;
+}
+.menuBottomNav {
+    display: flex;
+    flex-direction: row;
+    overflow: auto;
+    width: 99%;
+    border: 1px solid rgba(0, 0, 0, 0.301);
+    margin: 0 auto;
+}
+.menuBottomNavUl {
+    display: flex;
+    flex-direction: row;
+    list-style: none;
+    /* padding-inline-start: 0px; */
+    height: auto;
+}
+.menuBottomNavUl > li {
+    float: inherit;
+    padding: 8px;
+    cursor: pointer;
+}
+.subMenuCat {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    background: whitesmoke;
+    list-style: none;
+    padding-inline-start: 0px;
+}
+/* end nav section */
+
+/* index page */
+.catBigUl {
+    list-style: none;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-inline-start: 0px;
+}
+.imgContCat {
+    width: 300px;
+    position: relative;
+}
+.catItemCont {
+    cursor: pointer;
+    width: 300px;
+    transition: all .2s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+}
+.catItemCont:hover{
+    position: relative;
+    transform: scale(1.04);
+    z-index: 10000;
+}
+.imgCat {
+    width: 100%;
+    height: 100%;
+}
+.imgContCat > h2 {
+    position: absolute;
+    bottom: 0px;
+    color: white;
+    text-shadow: 2px 2px orange;
+    left: 5px;
+}
+.content {
+    margin-left: 10px;
+    margin-right: 10px;
+}
+.subMenuCatUL {
+    position: absolute;
+    display: none;
+    flex-direction: column;
+    list-style: none;
+    padding-inline-start: 0px;
+    background: whitesmoke;
+}
+.subMenuCatUL > li {
+    padding: 10px;
+    font-style: italic;
+}
+.subMenuCatUL > li:hover {
+    background: orange;
+    cursor: pointer;
+}
+.ulParent:hover > .subMenuCatUL {
+    display: flex;
+}
+/* end index page */
+
+/* global rules */
+ a {
+     color: orange;
+ }
+ button {
+     cursor: pointer;
+     background: orange;
+     color: white;
+     font-weight: bold;
+     border: unset;
+     padding: 8px;
+     border-radius: 5px;
+     transition: all .2s cubic-bezier(0.215, 0.610, 0.355, 1);
+ }
+ button:hover{
+    transform: scale(1.09);
+    background: white;
+    color: orange;
+    border: 1px solid orange;
+ }
+ h1 {
+     color: rgb(0, 0, 0);
+     text-shadow: 2px 2px orange;
+ }
+/* end global */
