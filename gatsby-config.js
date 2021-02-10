@@ -1,3 +1,6 @@
+require("dotenv").config({
+  path: `.env.${process.env.NODE_ENV}`,
+})
 module.exports = {
   flags: {
     DEV_SSR: false,
@@ -19,7 +22,7 @@ module.exports = {
     {
       resolve: 'gatsby-source-mongodb',
       options: {
-        connectionString : `mongodb+srv://adminMongoDB:C8z6YUwD791TWJtf@main.pwpqm.mongodb.net/<dbname>?retryWrites=true&w=majority`,
+        connectionString : process.env.db_connection,
         dbName: 'gatsby',
         collection: [`books`, `main_menu`, `menu_user`, `category`],
       },
