@@ -5,7 +5,7 @@ import Layout from '../components/layout';
 const Business = () => {
     return (
         <Layout>
-            <div>
+            <div className="businessPageCont">
                 <h1>Business Page</h1>
                 <h1>TODO</h1>
             </div>

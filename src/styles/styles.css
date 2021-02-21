@@ -1,6 +1,39 @@
+/* cheatsheet GATSBY */
+/* gatsby img fragments */
+/* GatsbyImageSharpFixed
+GatsbyImageSharpFixed_noBase64
+GatsbyImageSharpFixed_tracedSVG
+GatsbyImageSharpFixed_withWebp
+GatsbyImageSharpFixed_withWebp_noBase64
+GatsbyImageSharpFixed_withWebp_tracedSVG
+GatsbyImageSharpFluid
+GatsbyImageSharpFluid_noBase64
+GatsbyImageSharpFluid_tracedSVG
+GatsbyImageSharpFluid_withWebp
+GatsbyImageSharpFluid_withWebp_noBase64
+GatsbyImageSharpFluid_withWebp_tracedSVG */
+
+/* [url=https://imgbb.com/][img]https://i.ibb.co/dGKfQ8N/graphic-design.jpg[/img][/url]
+[url=https://imgbb.com/][img]https://i.ibb.co/4YJnHPv/lifestyle.jpg[/img][/url]
+[url=https://imgbb.com/][img]https://i.ibb.co/pZrSPWf/music.jpg[/img][/url]
+[url=https://imgbb.com/][img]https://i.ibb.co/kxtcBMj/programming.png[/img][/url]
+[url=https://imgbb.com/][img]https://i.ibb.co/2vftwSJ/tech.jpg[/img][/url]
+[url=https://imgbb.com/][img]https://i.ibb.co/FwM05Dy/vide.jpg[/img][/url] */
+
+/* credits */
+/* https://reactcommunity.org/react-tabs/ */
+/* Photo by Jake Ryan from Pexels - https://www.pexels.com/photo/smiling-black-dressmaker-working-on-sewing-machine-4358401/ */
+/* Photo by Kateryna Babaieva from Pexels - https://www.pexels.com/photo/man-standing-near-fire-3361235/ */
+/* https://www.pexels.com/photo/black-man-in-elegant-suit-opening-door-of-yellow-taxi-5647625/ */
+/* https://www.npmjs.com/package/react-carousel-responsive */
+/* end credits */
+
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;500;600;700&display=swap');
 /* TODO */
 /* root variables */
+:root {
+    --marginBewteen-Objects: 15px;
+}
 
 html, body {
     padding: 0px;
@@ -8,7 +41,29 @@ html, body {
 }
 body {
     font-family: 'Poppins', sans-serif;
+    -webkit-font-smoothing: antialiased;
 }
+/* body::-webkit-scrollbar-track {
+    background: whitesmoke;
+}
+body::-webkit-scrollbar-thumb {
+    border-radius: 6px;
+    border: 2px solid orange;
+}  */
+
+/* testing test components */
+.loginLogicCont {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+}
+.loginLogicCont > input {
+    margin: 10px;
+}
+/* end testing components */
 
 /* layout component */
 #mainMenu {
@@ -44,10 +99,12 @@ body {
     display: flex;
     flex-direction: column;
     width: 320px;
-    height: 200px;
+    min-height: 200px;
     justify-content: center;
     align-items: center;
     background: wheat;
+    border: 2px solid orange;
+    border-radius: 10px;
 }
 .logoSVGCont {
     display: block;
@@ -61,6 +118,19 @@ body {
 }
 /* end layout */
 
+/* TODO rearrange all classes and make good groups */
+.loaderImgCont {
+    /* it needs to be set inside another div so it can take available with/height */
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+.loaderImgGif {
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+}
+
 /* main section - content */
 main {
     margin-left: 30px;
@@ -68,13 +138,54 @@ main {
 }
 /* end main section content */
 
+/* main background carousel */
+.mainCarouselExtCont {
+    margin-left: -30px;
+    margin-right: -30px;
+}
+.slideContBgMainCar {
+    display: block;
+    position: relative;
+}
+.imgBGMainCarousel {
+    height: 80vh;
+    width: auto;
+}
+.divBGContentMainCarousel {
+    position: absolute;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+}
+.HeadingMainCarousel {
+    color: white;
+    text-shadow: 2px 2px orange;
+    margin-bottom: calc(3*var(--marginBewteen-Objects));
+    font-size: 2.1em;
+    /* position: absolute;
+    top: calc(var(--marginBewteen-Objects)*16);
+    left: calc(var(--marginBewteen-Objects)*5); */
+}
+/* end background carousel */
+
 /* nav section */
 nav {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     width: 100%;
     height: auto;
     align-items: center;
+    /* justify-content: space-around; */
+}
+.navbarRow {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    width: 100%;
 }
 .profilePicCont {
     display: flex;
@@ -94,6 +205,9 @@ nav {
     cursor: pointer;
 }
 .userMenu {
+    position: relative;
+    /* higher so far */
+    z-index: 10090; 
     padding-inline-start: 0px;
     background: whitesmoke;
     top: 100px;
@@ -116,21 +230,35 @@ nav {
     display: flex;
     flex-direction: row;
     overflow: auto;
-    width: 99%;
-    border: 1px solid rgba(0, 0, 0, 0.301);
+    width: 100%;
+    /* border-radius: 8px; */
+    /* border: 1px solid rgba(255, 166, 0, 0.788); */
+    border-top: 1px solid rgba(255, 166, 0, 0.788);
+    border-bottom: 1px solid rgba(255, 166, 0, 0.788);
     margin: 0 auto;
+    justify-content: center;
+    transition: all .2s cubic-bezier(0.39, 0.575, 0.565, 1);
+}
+.menuBottomNav:hover {
+    color: white;
+    background: rgba(255, 166, 0, 0.822);
 }
 .menuBottomNavUl {
+    width: 100%;
     display: flex;
     flex-direction: row;
+    justify-content: space-evenly;
     list-style: none;
-    /* padding-inline-start: 0px; */
+    padding-inline-start: 0px;
+    margin-block-start: 0px;
+    margin-block-end: 0px;
     height: auto;
 }
 .menuBottomNavUl > li {
     float: inherit;
     padding: 8px;
     cursor: pointer;
+    color: black;
 }
 .subMenuCat {
     display: none;
@@ -140,25 +268,117 @@ nav {
     list-style: none;
     padding-inline-start: 0px;
 }
+#btnLogin {
+    margin: 10px;
+}
 /* end nav section */
+
+/* footer component */
+footer {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+    justify-content: center;
+    align-items: center;
+    background: orange;
+}
+.footerAddings {
+    border: 1px solid #EA3546;
+    background: white;
+    border-radius: 8px;
+    margin-top: var(--marginBewteen-Objects);
+}
+.footerAddings:hover{
+    /* border: 2px solid #EA3546; */
+    box-shadow: 2px 2px 4px #EA3546;
+}
+.ulFooterMenu {
+    display: flex;
+    flex-direction: row;
+    list-style: none;
+    color: white;
+    font-weight: bold;
+    padding-inline-start: 0px;
+}
+.ulFooterMenu > li {
+    padding: 5px;
+    margin-right: 10px;
+}
+.ulFooterMenu > li > a {
+    color: white;
+}
+.ulFooterMenu > li > a:hover {
+    color: #EA3546;
+}
+.poweredByULFooter {
+    color: #214E34;
+    display: flex;
+    flex-direction: row;
+    list-style: none;
+    padding-inline-start: 0px;
+}
+.poweredByULFooter > li {
+    padding: 5px;
+    margin-right: 10px;
+}
+.textFooter {
+    color: #214E34;
+    margin-top: 0px;
+    text-align: center;
+    font-weight: bold;
+}
+.devInfoFooter {
+    color: #214E34;
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+}
+.loveIconSatmano {
+    margin-left: 5px;
+    margin-right: 5px;
+    width: 32px;
+    height: 32px;
+}
+/* end footer */
 
 /* index page */
 .catBigUl {
+    padding-top: var(--marginBewteen-Objects);
+    padding-bottom: var(--marginBewteen-Objects);
     list-style: none;
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
-    overflow-x: auto;
+    overflow-x: scroll;
     padding-inline-start: 0px;
 }
+  /* scrollbar */
+  .catBigUl::-webkit-scrollbar {
+    width: 1px;
+    height: 5px;
+  }
+  .catBigUl::-webkit-scrollbar-track {
+    background: white;
+  }
+  .catBigUl::-webkit-scrollbar-thumb {
+    /* background-color: var(--scrollbarBG); */
+    border-radius: 6px;
+    border: 1px solid orange;
+  }
+  /* end scrollbar */
 .imgContCat {
-    width: 300px;
+    width: 275px;
+    height: 134px;
     position: relative;
 }
 .catItemCont {
     cursor: pointer;
     width: 300px;
     transition: all .2s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+    background: orange;
 }
 .catItemCont:hover{
     position: relative;
@@ -169,28 +389,35 @@ nav {
     width: 100%;
     height: 100%;
 }
-.imgContCat > h2 {
+.imgContCat > h3 {
     position: absolute;
     bottom: 0px;
+    left: 8px;
     color: white;
-    text-shadow: 2px 2px orange;
-    left: 5px;
+    text-shadow: 3px 3px 3px orange;
+    margin: 0 auto;
 }
 .content {
     margin-left: 10px;
     margin-right: 10px;
+    font-size: small;
+    color: white;
+    text-shadow: 0px 1px 3px rgba(0, 0, 0, 0.651);
 }
 .subMenuCatUL {
+    z-index: 10001;
     position: absolute;
+    margin-top: 8px;
     display: none;
     flex-direction: column;
     list-style: none;
     padding-inline-start: 0px;
-    background: whitesmoke;
+    background: white;
+    border: 1px solid orange;
+    border-radius: 8px;
 }
 .subMenuCatUL > li {
     padding: 10px;
-    font-style: italic;
 }
 .subMenuCatUL > li:hover {
     background: orange;
@@ -198,8 +425,187 @@ nav {
 }
 .ulParent:hover > .subMenuCatUL {
     display: flex;
+    font-weight: normal;
+}
+.ulParent:hover {
+    font-weight: bold;
 }
 /* end index page */
+
+/* profile user page */
+.profileCont {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+#profileUserForm {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+}
+.userProfilePicCont {
+    display: block;
+    width: 310px;
+    height: 310px;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+    border: 1px solid rgb(161, 106, 2);
+}
+.userProfilePic {
+    width: 100%;
+    height: auto;
+}
+.lblProfileUser {
+    width: 100%;
+}
+.inputFormProfileUSer {
+    width: 100%;
+    height: auto;
+}
+#bioInputProfile {
+    min-height: 80px;
+}
+.btnActionsProfileCont {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+}
+.btnActProfile {
+    padding: 8px;
+    margin: 10px;
+}
+/* end profile user page */
+
+/* beeChat instance container */
+.beeChatInstanceContainer {
+    border: 1px solid orange;
+    display: flex;
+    flex-direction: column;
+    z-index: 10000;
+    position: fixed;
+    bottom: 0px;
+    left: 10px;
+    width: 120px;
+    height: 60px;
+    background: #FFFFEA;
+    transition: all .3s cubic-bezier(0.95, 0.05, 0.795, 0.035);
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+}
+.openBeeChat {
+    width: 620px;
+    height: 320px;
+}
+.hideBeeChat {
+    width: 80px;
+    height: 40px;
+}
+.btnChatOpened {
+    margin: 5px;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+}
+.btnChat {
+    width: 100px !important;
+}
+/* end beeChat instance container */
+
+/* beeChat component */
+.beeChatCont {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 600px;
+    margin: 0 auto;
+}
+.actionsMenuBeeChat {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    height: auto;
+    list-style: none;
+    padding-inline-start: 0px;
+}
+.actionsMenuBeeChat > li {
+    margin-right: 10px;
+}
+/* end beeChat component */
+
+/* tabulator component */
+.tabContainer {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 150px;
+    background: wheat;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+    border-radius: 8px;
+}
+/* end tabulator */
+
+/* notifications component */
+.notificationsCont {
+    display: flex;
+    flex-direction: column;
+    width: 120px;
+    padding: 10px;
+    position: relative;
+}
+.ulNotifications {
+    position: absolute;
+    display: flex;
+    left: 160px;
+    top: -10px;
+    flex-direction: row;
+    list-style: none;
+    padding-inline-start: 0px;
+    width: max-content;
+    height: 40px;
+    align-items: center;
+}
+.ulNotifications > li {
+    float: inherit;
+    margin-right: 30px;
+    background: whitesmoke;
+    font-size: small;
+    cursor: pointer;
+}
+.notificationContentCont {
+    cursor: initial;
+    display: flex;
+    flex-direction: column;
+    background: whitesmoke;
+    width: 0px;
+    height: 0px;
+    transition: all 0.4s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+    overflow: hidden;
+    position: absolute;
+}
+.notificationParent:hover > .notificationContentCont {
+    position: absolute;
+    width: 300px;
+    height: auto;
+    padding: 10px;
+}
+.iconNoti {
+    cursor: pointer;
+    margin-right: 20px;
+    padding: 5px;
+    transition: all 0.1s cubic-bezier(0.215, 0.610, 0.355, 1);
+}
+.iconNoti:hover{
+    box-shadow: 2px 3px 6px 1px rgba(255, 166, 0, 0.81);
+}
+/* end noti component */
 
 /* global rules */
  a {

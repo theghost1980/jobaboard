@@ -1,39 +1,20 @@
-//hiveio/keychain
-import {keychain, isKeychainInstalled, hasKeychainBeenUsed} from '@hiveio/keychain';
-
 export const isBrowser = () => typeof window !== "undefined";
 
-export const isKeychainInstalled;
-
-export const hasKeychainBeenUsed;
-
-export const getUser = () =>
-  isBrowser() && window.localStorage.getItem("gatsbyUser")
-    ? JSON.parse(window.localStorage.getItem("gatsbyUser"))
-    : {}
-
-const setUser = user =>
-  window.localStorage.setItem("gatsbyUser", JSON.stringify(user))
-
-export const handleLogin = ({ username, password }) => {
-  if (username === `john` && password === `pass`) {
-    return setUser({
-      username: `john`,
-      name: `Johnny`,
-      email: `johnny@example.org`,
-    })
-  }
-
-  return false
+////////////////////////////////////
+//user data global
+//status: null, online.
+export let userdataG = {
+  userName: '',
+  profilePicUrl: '',
+  userType: null,
+  logginIn: false,
+  logged: false,
+  localItem: '_NoneOfYourBusiness',
+  token: null,
+};
+//testing to update just the selected field. keeping old data
+export function updateDataUser(name,value){
+  return {...userdataG, [name]: value}
 }
-
-export const isLoggedIn = () => {
-  const user = getUser()
-
-  return !!user.username
-}
-
-export const logout = callback => {
-  setUser({})
-  callback()
-}
+////////////////////////////////////
+//END user data global

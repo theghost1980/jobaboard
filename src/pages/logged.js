@@ -2,9 +2,7 @@ import React from 'react';
 //components
 import Layout from '../components/layout';
 
-const Logged = (props) => {
-    console.log('Data received as props when loading logged page');
-    console.log(props);
+const Logged = () => {
     return (
         <Layout>
             <div>

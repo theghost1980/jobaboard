@@ -1,75 +1,145 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 //hiveio/keychain
 import {keychain, isKeychainInstalled, hasKeychainBeenUsed} from '@hiveio/keychain';
+//HOC
+// import { AuthContext } from '../components/HOC/authProvider';
+//components/wrappers
+import onClickOutside from 'react-onclickoutside';
+import Loader from './loader';
+import { cryptoUtils } from '@hiveio/dhive';
+//utils
+import { encode } from '../utils/helpers';
+//constants
+const starWars = process.env.GATSBY_starWars;
+const authEP = process.env.GATSBY_authEP;
+//end constants
 
-const Login = () => {
-    const [hivekeychain, sethivekeychain] = useState(false);
-    const [accountName, setAccountName] = useState(null);
 
-    //initial test for hiveio/keychain to see if installed
-    useEffect(() => {
-        //initial test to see if hiveio/keychain installed on browser
-        if(isKeychainInstalled){
-            sethivekeychain(true);
-            console.log('Hiveio/keychain is installed');
-        }else{
-            sethivekeychain(false);
-            console.log('Hiveio/keychain Not installed');
+
+const Login = (props) => {
+    //props from parents
+    const { cancelOnClick, 
+            successfulLogin } = props;
+    //end props from parents
+
+    // const { setData } = useContext(AuthContext);
+
+    //state constants
+    const [account, setAccount] = useState("");
+    const [logginIn, setLogginIn] = useState(false);
+
+    //functions, callbacks
+    Login.handleClickOutside = () => {
+        // console.log('Clicked out side me');
+        cancelOnClick(false);
+    };
+    ////////Fetching POST request to backend
+    async function postData(url = '', account, signature) {
+        const response = await fetch(url, {
+        method: 'POST', // *GET, POST, PUT, DELETE, etc.
+        mode: 'cors', // no-cors, *cors, same-origin
+        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+        //   credentials: 'same-origin', // include, *same-origin, omit
+        headers: {
+            // 'Content-Type': 'application/json'
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Accept': 'application/json',
+        },
+        //   redirect: 'follow', // manual, *follow, error
+        //   referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+        body: new URLSearchParams({
+                'account': account,
+                'signature': signature,
+            }),
+        });
+        return response; 
+    };
+    ////////END Fecthing POST to BE
+    ////////async login function
+    async function loginUser(){
+        const keyChain = await keychain(window, 'requestSignBuffer', account, starWars, 'Posting');
+        const {data, success, msg, cancel, notActive} = keyChain;
+        if(success){ 
+            // console.log('Message signed!');
+            // console.log(keyChain);
+            //now for testing the server back-end
+            const dataUsername = data.username;
+            postData(`${authEP}checkGatsbySig`, dataUsername, msg)
+            .then(data => {
+                console.log(data);
+                data.json()
+                .then(msg => {
+                    console.log(msg);
+                    const { profile_PicURL, token, usertype} = msg;
+                    //set all upcomming data.
+                    const profile = {
+                        profilePicUrl:  encode(profile_PicURL),
+                        token:  encode(token),
+                        logged:  encode(true),
+                        logginIn:  encode(false),
+                        username:  encode(dataUsername),
+                        usertype:  encode(usertype)
+                    };
+                    const JSONprofile = JSON.stringify(profile);
+                    localStorage.setItem("_NoneOfYourBusiness",JSONprofile);
+                    successfulLogin();
+                    // setData();
+                    //From this point on, we can check:
+                    // - if token present on localStorage.
+                    // - ask for a check to see if it is valid sending it as requested var[x-access-token]
+                    // - ask for a check on important actions.
+                })
+            })
+            .catch(error => {
+                console.log('Error while logging to API.');
+                console.log(error);
+                setLogginIn(false);
+            });
+            //end back-end
+        }else if(!cancel) {
+            if(notActive) {
+                alert('Please allow Keychain to access this website');
+                setLogginIn(false);
+            } else {
+                setLogginIn(false);
+                console.log(msg);
+                console.log(keyChain);
+            }
+        }else if (cancel){
+            //user cancelled so...
+            setLogginIn(false);
         }
-    },[]);
-
-    const logginHiveKeyChain = async (event) => {
-        event.preventDefault();
-
-        if (accountName === null || accountName === ""){ return console.log("Input @username account please!")};
-
-        const keyChain = await keychain(window, 'requestSignBuffer', accountName, 'test Saturnoman.com signbuffer hiveIO/keychain', 'Posting');
-
-        const {data, success, msg, cancel, notInstalled, notActive} = keyChain;
-        // All good
-        if(success) {
-            // do your thing
-            // console.log(msg);
-            console.log(keyChain);
-            alert(`Welcome ${data.username}`);
-            //now we could ask for this user's data and present it as:
-            // - accountName, reputation, profileUrl on screen
-            // and
-            // - pass variables as context to the next page which is the postEditor.js
-        }
-        // User didn't cancel, so something must have happened
-        else if(!cancel) {
-          if(notActive) {
-            alert('Please allow Keychain to access this website')
-          } else if(notInstalled) {
-            alert('Please install Keychain')
-          } else {
-            // error happened - check msg
-            console.log(msg);
-          }
-        }
-        
+    };
+    ////////end asyn login function
+    const loginByClick = () => {
+        //validation
+        if(!account || account === null || account === '') return console.log('No input. No sauce for you!');
+        //call async login function
+        setLogginIn(true);
+        loginUser();
     };
 
     return (
-        <div>
-            <h1>Login</h1>
-            {
-                <div className="hiveKeyChainCont">
-                    {
-                        hivekeychain &&
-                        <form onSubmit={logginHiveKeyChain} className="formLogin">
-                            <input type="text" id="username" placeholder="@username here please" required 
-                                onChange={(event) => setAccountName(event.target.value)}
+        <div className="loginCont" id="loginContainer">
+                {
+                    !logginIn &&
+                        <div>
+                            <p>Log in Using @hive-keychain</p>
+                            <input type="text" id="username" placeholder="@username here please"
+                            onChange={(event) => setAccount(event.target.value)}
                             />
-                            <button type='submit' id="btnLogin">Login with HiveIO/Keychain</button>
-                            <p>Or</p>
-                        </form>
-                    }
-                </div>
-            }
+                            <button type='submit' id="btnLogin" onClick={loginByClick}>Login</button>
+                        </div>
+                }
+                {
+                    logginIn && <Loader logginIn={logginIn} />
+                }
         </div>
     )
-}
+};
 
-export default Login;
+const clickOutsideConfig = {
+    handleClickOutside: () => Login.handleClickOutside
+};
+
+export default onClickOutside(Login, clickOutsideConfig);

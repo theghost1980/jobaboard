@@ -10,6 +10,7 @@
     "@reach/router": "^1.3.4",
     "gatsby": "^2.32.3",
     "gatsby-image": "^2.11.0",
+    "gatsby-plugin-create-client-paths": "^2.10.0",
     "gatsby-plugin-manifest": "^2.12.0",
     "gatsby-plugin-offline": "^3.10.0",
     "gatsby-plugin-react-helmet": "^3.10.0",
@@ -18,10 +19,14 @@
     "gatsby-source-mongodb": "^2.10.0",
     "gatsby-transformer-sharp": "^2.12.0",
     "hivesigner": "^3.2.1",
+    "jsonwebtoken": "^8.5.1",
     "prop-types": "^15.7.2",
     "react": "^16.12.0",
+    "react-carousel-responsive": "0.0.29",
     "react-dom": "^16.12.0",
-    "react-helmet": "^6.1.0"
+    "react-helmet": "^6.1.0",
+    "react-onclickoutside": "^6.10.0",
+    "react-tabs": "^3.2.0"
   },
   "devDependencies": {
     "prettier": "2.2.1"

@@ -5,9 +5,9 @@ import React, { useState, useContext, useEffect } from 'react';
 //HOC components
 // import { AuthContext } from '../../components/HOC/authProvider';
 //components
-import Layout from '../../components/layout';
+import Layout from '../components/layout';
 
-const Settings = (props) => {
+const UserLogin = (props) => {
     // const userdata = useContext(AuthContext);
 
     // const { userState } = props.location.state || false;
@@ -37,13 +37,11 @@ const Settings = (props) => {
     /////////////////////////
 
     return (
-        <Layout>
             <div>
-                <h1>Settings Page - protected route</h1>
+                <h1>User-Login Page - protected route callback</h1>
                 <h2>TODO</h2>
             </div>
-        </Layout>
     )
 }
 
-export default Settings;
+export default UserLogin;
