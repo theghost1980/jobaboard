@@ -6,9 +6,6 @@ import Tabulator from '../tabulator';
 import {keychain, isKeychainInstalled, hasKeychainBeenUsed} from '@hiveio/keychain';
 //constants
 const beechatEP = "https://beechat.hive-engine.com/api/";
-const username = 'theghost1980';
-const timestamp = Date.now();
-
 // TODO:
 // Note: The main idea is to get the chat as "independent as possible" like the facebook chat, draggeable, so you can place it anywhere and use it at will
 // To do that, when user log in:
@@ -26,7 +23,7 @@ const BeeChat = () => {
         { id: 'jobaboard-hive-tab-x5', name: 'settings', title: 'Settings', data: {}}
     ];
     const [beeDataUser, setBeeDataUser] = useState(iniStateBeeDataUser);
-
+    const timestamp = Date.now();
     const initialState = {
         username: '',
         token: '',
@@ -96,14 +93,17 @@ const BeeChat = () => {
     }
 
     async function initBeeSession(){
+        if(beeUser.username === "" || beeUser.username === null){
+            return console.log('No input, no sauce for you!');
+        }
         setConnecting(true);
         localStorage.setItem('_GOfUb',timestamp);
-        await signMessage(username,timestamp)
+        await signMessage(beeUser.username,timestamp)
         .then(data => {
             if(data.result){
                 //call get friend list fecthing
                 const ts = localStorage.getItem('_GOfUb');
-                const urlGet = beechatEP + "users/login?" + `username=${username}&ts=${ts}&sig=${data.message}`;
+                const urlGet = beechatEP + "users/login?" + `username=${beeUser.username}&ts=${ts}&sig=${data.message}`;
                 getDataWT(urlGet,beeUser.token)
                 .then(result => {
                     console.log(result);
@@ -153,13 +153,13 @@ const BeeChat = () => {
         //call async function to sign message.
         //save timestamp into locastorage
         localStorage.setItem('_GOfUb',timestamp);
-        await signMessage(username,timestamp)
+        await signMessage(beeUser.username,timestamp)
         .then(data =>{
             // console.log(data);
             if(data.result){
                 //now call the GET request
                 const ts = localStorage.getItem('_GOfUb');
-                const urlGet = beechatEP + "users/login?" + `username=${username}&ts=${ts}&sig=${data.message}`;
+                const urlGet = beechatEP + "users/login?" + `username=${beeUser.username}&ts=${ts}&sig=${data.message}`;
                 getData(urlGet)
                 .then(result => {
                     console.log(result);
@@ -319,9 +319,16 @@ const BeeChat = () => {
                                     <Tabulator datatabs={beeDataUser} />
                                     <button onClick={logOut}>Log Out</button>
                                 </div> 
-                            :   <button onClick={initBeeSession}>
-                                    {connecting ? 'Connecting' : 'Connect to BeeChat'}
-                                </button>
+                            :   
+                                <div className="divLogBeeChat">
+                                    <input type="text" name="username" 
+                                        required className="inpBeeChatUser"
+                                        onChange={(event) => updateState(event.target.name,event.target.value)}
+                                    />
+                                    <button onClick={initBeeSession}>
+                                        {connecting ? 'Connecting' : 'Connect to BeeChat'}
+                                    </button>
+                                </div>
             }
             {
                 connecting && <Loader logginIn={true} typegif="dots" />

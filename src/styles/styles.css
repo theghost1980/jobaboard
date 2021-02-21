@@ -536,6 +536,16 @@ footer {
 .actionsMenuBeeChat > li {
     margin-right: 10px;
 }
+.divLogBeeChat {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+}
+.inpBeeChatUser {
+    margin: 10px;
+}
 /* end beeChat component */
 
 /* tabulator component */
