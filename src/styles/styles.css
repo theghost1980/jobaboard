@@ -351,9 +351,9 @@ footer {
     list-style: none;
     display: flex;
     flex-direction: row;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     overflow-x: scroll;
-    padding-inline-start: 0px;
+    /* padding-inline-start: 0px; */
 }
   /* scrollbar */
   .catBigUl::-webkit-scrollbar {
@@ -376,7 +376,7 @@ footer {
 }
 .catItemCont {
     cursor: pointer;
-    width: 300px;
+    width: 275px;
     transition: all .2s cubic-bezier(0.785, 0.135, 0.15, 0.86);
     background: orange;
 }
@@ -429,6 +429,13 @@ footer {
 }
 .ulParent:hover {
     font-weight: bold;
+}
+.subCatLink {
+    color: black;
+    text-decoration: none;
+}
+.subCatLink:hover{
+    color: white;
 }
 /* end index page */
 

@@ -1,5 +1,5 @@
 import React from "react";
-import { graphql, useStaticQuery } from "gatsby"
+import { graphql, useStaticQuery, Link } from "gatsby"
 
 import Layout from "../components/layout"
 // import SEO from "../components/seo"
@@ -42,10 +42,12 @@ const Index = () => {
             data.append_menu.edges.map(({ node: item}) => {
               return (
                 <li key={item.id} className="catItemCont">
-                  <div className="imgContCat">
-                    <img src={item.image} className="imgCat" />
-                    <h3>{item.name}</h3>
-                  </div>
+                  <Link to={`/explore?${item.query}`}>
+                    <div className="imgContCat">
+                      <img src={item.image} className="imgCat" />
+                      <h3>{item.name}</h3>
+                    </div>
+                  </Link>
                   {/* <p className="content">{item.title}</p>
                   <p className="content">{item.subtitle}</p> */}
                 </li>

@@ -248,7 +248,11 @@ const Navbar = () => {
                                 {
                                     itemM.sub.map(subItem => {
                                     return (
-                                        <li key={`${itemM.id}-${subItem}`}>{subItem}</li>
+                                        <li key={`${itemM.id}-${subItem}`}>
+                                            <Link to={`/explore?subcat=${subItem}`} className="subCatLink">
+                                                {subItem}
+                                            </Link>
+                                        </li>
                                     )
                                     })
                                 }
