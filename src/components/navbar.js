@@ -4,13 +4,19 @@ import { useStaticQuery, graphql, Link, navigate } from "gatsby"
 import Img from 'gatsby-image';
 import Login from './login';
 import Absscreenwrapper from './absscreenwrapper';
+import Coinprices from './coinsprices';
 //context - HOC
 // import { AuthContext } from '../components/HOC/authProvider';
 //helpers
 import { check } from '../utils/helpers';
+import UserMenu from './User/usermenu';
+//hivesigner SDK + init
+var hivesigner = require('hivesigner');
 
 //constants
 const secret = process.env.GATSBY_SECRET;
+const callbackURL = process.env.GATSBY_callbackURL;
+//end constants
 
 const Navbar = () => {
     //graphql queries
@@ -56,6 +62,13 @@ const Navbar = () => {
                 }
             }
         }
+        searchIcon: file(relativePath: {eq: "search.png"}) {
+            childImageSharp {
+                fixed(width: 30) {
+                    ...GatsbyImageSharpFixed_withWebp
+                }
+            }
+        }
     }
     `);
     //end grapqhql queries
@@ -64,6 +77,12 @@ const Navbar = () => {
     //TODO
     // const { state: userdata, setData }  = useContext(AuthContext);
     const userdata = check();
+
+    // TODO move this as a nice annoying message on bellow the logo as warning
+    // + limit features adding the banned param inside the private routers
+    if(userdata.banned === true){
+        alert('You have been Banned. Please Contact the admins as you only have some limited features on this platform.!\nTODO: Show this more nicely in a component bellow logo.');
+    }
 
     // console.log(userdata);
     //state constants/vars
@@ -86,9 +105,29 @@ const Navbar = () => {
     const logUserOut = () => {
         // updateDataParent('logged',false);
         // setData();
-        localStorage.clear();
-        navigate("/");
-        console.log('User Logged OUT!');
+        //check what type of log has been used
+        if(userdata.loginmethod === "KCH"){
+            localStorage.clear();
+            navigate("/");
+            console.log('User Logged OUT!');
+        }else if(userdata.loginmethod === "HS"){
+            const client = new hivesigner.Client({
+                app: 'jobaboard',
+                callbackURL: callbackURL,
+                scope: ['vote', 'comment'],
+                accessToken: userdata.access_token,
+            });
+            client.revokeToken(function (err, res) {
+                console.log(err, res);
+                if(err) return console.log(`Error trying to log HS user Out, err:${err}`);
+                localStorage.clear();
+                navigate("/");
+                console.log('User Logged OUT!');
+            });
+        }else{
+            //fatal error, no loginmethod assigned, something happend
+            return console.log('No method finded. Call the crypto-police!!!');
+        }
     }
     // end functions on this component
 
@@ -103,6 +142,11 @@ const Navbar = () => {
         //this one could be taking the user to dashboard or any other page
         navigate("/app/profile");
     };
+
+    // TODO
+    //add event to detect if user scroll down to fixed on top the first part of nav bar
+    // and
+
     //handle user's State / userData
     // const updateDataParent = (name,value) => {
     //     setUserdata(prevState => {
@@ -175,6 +219,34 @@ const Navbar = () => {
 
     return (
             <nav>
+
+<div className={`menuBottomNav`}>
+                    <ul className="menuBottomNavUl">
+                        {
+                        data.append_menu.edges.map(({ node: itemM}) => {
+                            return (
+                            <li key={itemM.id} className="ulParent">
+                                <div>{itemM.name}</div>
+                                <ul className="subMenuCatUL">
+                                {
+                                    itemM.sub.map(subItem => {
+                                    return (
+                                        <li key={`${itemM.id}-${subItem}`}>
+                                            <Link to={`/explore?subcat=${subItem}`} className="subCatLink">
+                                                {subItem}
+                                            </Link>
+                                        </li>
+                                    )
+                                    })
+                                }
+                                </ul>
+                            </li>
+                            )
+                        })
+                        }
+                    </ul>
+                </div>
+
                 <div className="navbarRow">
                     <Link to="/">
                         <div className="logoSVGCont">
@@ -186,7 +258,7 @@ const Navbar = () => {
                     {
                         data.main_menu.edges.map(({ node: menuItem }) => {
                         return (
-                            <li key={`${menuItem.id}`} className={`${menuItem.hideOnLoggin && userdata.logged ? 'hideOnLoggin': null}`}>
+                            <li key={`${menuItem.id}`} className={`${(menuItem.hideOnLoggin && userdata.logged) ? 'hideOnLoggin': null}`}>
                             {
                                 menuItem.link ?
                                 <Link to={`${menuItem.inner_link}`}>{menuItem.title}</Link>
@@ -207,6 +279,12 @@ const Navbar = () => {
                                                             </li>
                                                         )
                                                         })
+                                                    }
+                                                    {
+                                                        userdata.usertype === "admin" ? <li key="adminPanelOnly-1">
+                                                                                            <Link to="/app/adminpanel" className="adminPanelLink">Admin Panel</Link>
+                                                                                        </li> 
+                                                                                        : null
                                                     }
                                                     <li key="userMenuBtnLogOut-1">
                                                         <button onClick={logUserOut}>Log Out</button>
@@ -236,33 +314,19 @@ const Navbar = () => {
                         })
                     }
                     </ul>
+                    <div>
+                        <Coinprices />
+                        {/* TODO: must a component apart */}
+                        <div className="searchContainer">
+                            <input type="text" className="searchInput" placeholder="find your next job" />
+                            <Img fixed={data.searchIcon.childImageSharp.fixed} className="imgSearch" />
+                        </div>
+                    </div>
                 </div>
-                <div className="menuBottomNav">
-                    <ul className="menuBottomNavUl">
-                        {
-                        data.append_menu.edges.map(({ node: itemM}) => {
-                            return (
-                            <li key={itemM.id} className="ulParent">
-                                <div>{itemM.name}</div>
-                                <ul className="subMenuCatUL">
-                                {
-                                    itemM.sub.map(subItem => {
-                                    return (
-                                        <li key={`${itemM.id}-${subItem}`}>
-                                            <Link to={`/explore?subcat=${subItem}`} className="subCatLink">
-                                                {subItem}
-                                            </Link>
-                                        </li>
-                                    )
-                                    })
-                                }
-                                </ul>
-                            </li>
-                            )
-                        })
-                        }
-                    </ul>
-                </div>
+                
+                {
+                    userdata.logged && <UserMenu />
+                }
                 {
                     showLogin 
                     && 

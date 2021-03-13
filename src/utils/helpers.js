@@ -35,7 +35,10 @@ export function checkIt(){
         profilePicUrl: "",
         usertype: "",
         logginIn: false,
-        token: ""
+        token: "",
+        loginmethod: "",
+        access_token: "",
+        banned: false,
     }
     if(typeof window !== "undefined"){
         if(isKeychainInstalled && hasKeychainBeenUsed){
@@ -43,7 +46,9 @@ export function checkIt(){
             if(data && data !== null && data !== ""){
                 try {
                     const dataJson = JSON.parse(data);
+                    // console.log(dataJson);
                     const dataJsonDeco = iterateEntries(dataJson);
+                    // console.log(dataJsonDeco);
                     if(dataJsonDeco.token && dataJsonDeco.token !== null && dataJsonDeco.token !== ""){
                         jwt.verify(dataJsonDeco.token, secret, function(err, decoded){
                             if(err){
@@ -57,13 +62,19 @@ export function checkIt(){
                                 console.log('userdata Removed from local storage!!!!');
                                 //force auto-login
                             }else if(decoded){
+                                // TODO: depending on which loginmethod, fill data
+                                // or maybe just iterate and assign???
+                                // TODO: -> use the banned param comming from server to allow or deny logs in
                                 userdata = {
                                     logged: true,
                                     username: dataJsonDeco.username,
                                     profilePicUrl: dataJsonDeco.profilePicUrl,
                                     usertype: dataJsonDeco.usertype,
                                     logginIn: false,
-                                    token: dataJsonDeco.token
+                                    token: dataJsonDeco.token,
+                                    loginmethod: dataJsonDeco.loginmethod,
+                                    access_token: dataJsonDeco.access_token,
+                                    banned: dataJsonDeco.banned,
                                 }
                                 console.log('Still valid, used data on localstorage.');
                             }

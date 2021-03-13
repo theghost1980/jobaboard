@@ -3,19 +3,29 @@ import { useStaticQuery, graphql } from "gatsby";
 
 const Loader = (props) => {
     const { logginIn, typegif } = props;
-
     //graphql queries
     const data = useStaticQuery(graphql`
         query {
-            loader: file(relativePath: {eq: "loading.gif"}) {
+            spin: file(relativePath: {eq: "loading.gif"}) {
                 publicURL
             }
             dots: file(relativePath: {eq: "dots.gif"}) {
                 publicURL
             }
+            blocks: file(relativePath: {eq: "blocks.gif"}) {
+                publicURL
+            }
         }
     `);
+    var source = data.spin.publicURL; //as default
     //end grapqhql queries
+    if(typegif === "spin"){
+        source = data.spin.publicURL;
+    }else if(typegif === "dots"){
+        source = data.dots.publicURL;
+    }else{
+        source = data.blocks.publicURL;
+    }
 
     return (
         <div>
@@ -23,7 +33,7 @@ const Loader = (props) => {
             logginIn &&
                 <div className="loaderImgCont">
                     <img 
-                        src={(typegif === 'dots') ? data.dots.publicURL : data.loader.publicURL} 
+                        src={source} 
                         className="loaderImgGif" 
                         alt="loading amazing info from jobaboard" 
                     />

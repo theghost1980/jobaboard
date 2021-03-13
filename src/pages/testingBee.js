@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import BeeChat from '../components/BeeChat/mainBeeChat';
+import Blockchainobserver from '../components/blockchainobserver';
+// import BeeChat from '../components/BeeChat/mainBeeChat';
 
 const TestBee = () => {
-    const [opened, setOpened] = useState(false);
+    // const [opened, setOpened] = useState(false);
+
     return (
         // <div className={`beeChatInstanceContainer ${opened ? `openBeeChat` : `hideBeeChat`}`}>
         //     {
@@ -14,6 +16,7 @@ const TestBee = () => {
         // </div>
         <div>
             <p>Hi :D</p>
+            <Blockchainobserver />
         </div>
     )
 }

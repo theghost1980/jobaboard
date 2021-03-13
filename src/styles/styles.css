@@ -26,6 +26,7 @@ GatsbyImageSharpFluid_withWebp_tracedSVG */
 /* Photo by Kateryna Babaieva from Pexels - https://www.pexels.com/photo/man-standing-near-fire-3361235/ */
 /* https://www.pexels.com/photo/black-man-in-elegant-suit-opening-door-of-yellow-taxi-5647625/ */
 /* https://www.npmjs.com/package/react-carousel-responsive */
+/* Photo by Andrea Piacquadio from Pexels https://www.pexels.com/photo/reception-desk-with-antique-hotel-bell-3771110/ */
 /* end credits */
 
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;500;600;700&display=swap');
@@ -87,10 +88,11 @@ body::-webkit-scrollbar-thumb {
     position: fixed;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
     width: 100%;
     height: 100%;
+    overflow: auto;
     background: rgba(0, 0, 0, 0.596);
 }
 .loginCont {
@@ -101,10 +103,17 @@ body::-webkit-scrollbar-thumb {
     width: 320px;
     min-height: 200px;
     justify-content: center;
+    text-align: center;
     align-items: center;
     background: wheat;
     border: 2px solid orange;
     border-radius: 10px;
+}
+#username {
+    width: 200px;
+    height: 35px;
+    border-radius: 8px;
+    border: 2px solid orange;
 }
 .logoSVGCont {
     display: block;
@@ -116,9 +125,1040 @@ body::-webkit-scrollbar-thumb {
     width: 100%;
     height: 100%;
 }
+.hsImgLogo {
+    cursor: pointer;
+    display: block;
+    border-radius: 8px;
+    box-shadow: 2px 2px 4px 1px #EA3546;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    transition: all .2s cubic-bezier(0.19, 1, 0.22, 1);
+}
+.hsImgLogo:hover {
+    box-shadow: 3px 3px 2px 2px #EA3546;
+    border: 1px solid #EA3546;
+}
 /* end layout */
 
+.standardDiv70Auto {
+    display: flex;
+    flex-direction: column;
+    width: 70%;
+    height: auto;
+    margin: var(--marginBewteen-Objects);
+    border: 1px solid #EA3546;
+    border-radius: 10px;
+    position: relative;
+}
+
+/* shared classes */
+.standardFlexFixed {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 30%;
+    left: 10px;
+    border: 1px solid orange;
+    border-radius: 8px;
+}
+.standardUlColThin {
+    display: flex;
+    flex-direction: column;
+    width: 50px;
+    height: auto;
+    list-style: none;
+    padding-inline-start: 0px;
+    align-items: center;
+    justify-content: center;
+}
+.whiteBack {
+    background: white;
+}
+.absDivRow {
+    display: flex;
+    flex-direction: row;
+    position: absolute;
+    right: -1px;
+    top: 0px;
+    justify-content: center;
+    align-content: center;
+    border-top-right-radius: 6px;
+    opacity: 0.5;
+}
+.bolder {
+    font-weight: bolder;
+}
+.biggerText {
+    font-size: large;
+}
+.absDivRow2 {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-content: center;
+    height: 40px;
+    border-top-right-radius: 6px;
+}
+.hoveredOpaacity {
+    transition: all 0.2s cubic-bezier(0.47, 0, 0.745, 0.715);
+}
+.scaleHovered {
+    transition: all .2s cubic-bezier(0.77, 0, 0.175, 1);
+    cursor: pointer;
+}
+.scaleHovered:hover {
+    transform: scale(1.1);
+}
+.hoveredOpaacity:hover{
+    opacity: 1;
+    cursor: crosshair;
+}
+.miniImg {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+}
+.coloredContrast3Soft {
+    background: rgba(51, 124, 160, 0.1);
+}
+.miniDiv {
+    display: flex;
+    flex-direction: column;
+    width: 300px;
+    height: 320px;
+    margin: var(--marginBewteen-Objects);
+}
+.miniDiv2{
+    display: flex;
+    flex-direction: column;
+    width: 300px;
+    min-height: 320px;
+    margin: var(--marginBewteen-Objects);
+}
+.jobImgContainer {
+    display: block;
+    width: 100%;
+    height: 300px;
+    overflow: hidden;
+}
+.standardBlockMaxW80p {
+    display: block;
+    max-width: 80%;
+    height: auto;
+    margin: 0 auto;
+}
+.fadeInLonger {
+    animation: fadeLonger 1s cubic-bezier(0.55, 0.055, 0.675, 0.19) 1;
+}
+@keyframes fadeLonger{
+    from{opacity: 0;}
+    to{opacity: 1;}
+}
+.standardFlexCol95H300 {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-height: 300px;
+    overflow: auto;
+}
+.coloredContrast1 {
+    /* TODO add contrast vars as 1 - 2..so on */
+    background: #E9F9F0;
+}
+.coloredContrast2 {
+    background: #214E34;
+}
+.bordersRounded {
+    border: 1px solid orange;
+    border-radius: 10px;
+}
+.justRounded {
+    border-radius: 10px;
+}
+.marginTopRigthMin {
+    margin-top: 4px;
+    margin-right: 4px;
+}
+.marginTop {
+    margin-top: var(--marginBewteen-Objects);
+}
+.borderBottom {
+    border-bottom: 1px solid #214E34;
+}
+
+.logsListUsers {
+    display: flex;
+    flex-direction: column;
+    width: 300px;
+    height: auto;
+    position: relative;
+    border: 1px solid orange;
+    border-radius: 8px;
+}
+.standardUlHorSmall {
+    display: flex;
+    flex-direction: column;
+    width: 95%;
+    border: 1px solid orange;
+    margin-top: var(--marginBewteen-Objects);
+    margin-bottom: var(--marginBewteen-Objects);
+    max-height: 120px;
+    overflow-y: scroll;
+    font-size: small;
+    list-style: none;
+    padding-inline-start: 0px;
+}
+.fontSmall {
+    font-size: x-small;
+}
+.wrapDiv{
+    flex-wrap: wrap;
+}
+.blockImgMini {
+    width: 150px;
+    height: auto;
+}
+.standardUlHorSmall > li {
+    float: left;
+    margin-bottom: 5px;
+}
+.addAutoW {
+    width: auto;
+}
+.standardLiHovered {
+    transition: all .2s cubic-bezier(0.455, 0.03, 0.515, 0.955);
+    cursor: pointer;
+}
+.btnMiniTextRed {
+    font-size: x-small;
+    background: #EA3546 !important;
+}
+.btnMini {
+    font-size: xx-small !important;
+    margin-left: 8px;
+}
+.textShadowBasic{
+    /* text-shadow: 1px 1px 2px #214E34 !important; */
+    text-shadow: 1px 2px 4px #214E34;
+}
+.border1pxRounded {
+    border: 2px solid orange;
+    border-radius: 10px;
+}
+.border1pxContrast {
+    border: 2px solid #214E34;
+    border-radius: 8px;
+}
+.miniAvatar {
+    display: block;
+    width: 80px;
+    height: auto;
+}
+.standardFlexCol95 {
+    display: flex;
+    flex-direction: column;
+    width: 95%;
+    height: auto;
+    margin: 0 auto;
+}
+.standardFlexCol100w {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    color: white;
+    height: auto;
+    margin: 0 auto;
+}
+.standardUlHorMini {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: auto;
+    list-style: none;
+    justify-content: center;
+    padding-inline-start: 0px;
+}
+.standardULImagesRow {
+    display: flex;
+    flex-direction: row;
+    width: 90%;
+    height: auto;
+    list-style: none;
+    padding-inline-start: 0px;
+}
+.backGBaseColor{
+    background: orange;
+}
+.imgSwitch {
+    display: block;
+    cursor: pointer;
+    background-color: white;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    transition: all .2s cubic-bezier(0.215, 0.610, 0.355, 1);
+    left: 0px;
+}
+.addLeft {
+    margin-left: 0px;
+}
+.addRight {
+    margin-left: 34px;
+}
+.btnSwitch {
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+    width: 60px;
+    height: 26px;
+    border: 1px solid #214E34;
+    background: orange;
+    border-radius: 8px;
+    margin-left: var(--marginBewteen-Objects);
+}
+.addOFFSwitch {
+    opacity: 0.7;
+}
+.formVertFlex {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+    margin-bottom: var(--marginBewteen-Objects);
+    background: whitesmoke;
+    color: #214E34;
+}
+.marginLeft{
+    margin-left: var(--marginBewteen-Objects);
+}
+.standardLiHovered:hover{
+    background: orange;
+    color: white;
+    cursor: pointer;
+}
+.divRightAlig {
+    margin: auto !important;
+}
+.standardUlHor {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    width: 100%;
+    height: auto;
+    font-size: medium;
+    padding-inline-start: 0px;
+    list-style: none;
+}
+.standardUlVerSmall {
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+    width: 100%;
+    height: auto;
+    font-size: small;
+    padding-inline-start: 0px;
+}
+.standardUlVerSmall > li {
+    width: 95%;
+    float: left;
+    cursor: pointer;
+    margin-bottom: var(--marginBewteen-Objects);
+}
+.overflowXscroll{
+    overflow-x: scroll;
+}
+.centeredDiv {
+    margin: 0 auto;
+}
+.boxShadowContrast1 {
+    box-shadow: 1px 1px 2px 1px #E9F9F0;
+}
+.boxShadowBottom {
+    box-shadow: 0px 3px 1px 0px rgba(33, 78, 52, 0.637);
+}
+.allMargins{
+    margin: var(--marginBewteen-Objects);
+}
+.standardLink {
+    transition: all .1s cubic-bezier(0.95, 0.05, 0.795, 0.035);
+}
+.standardLink:hover{
+    color: #214E34;
+    text-decoration: underline;
+}
+.activeInnerMenu {
+    border: 1px solid orange;
+    border-radius: 8px;
+    background: orange;
+    color: white;
+}
+.greenLink {
+    color: #214E34;
+}
+.colorX{
+    color: #214E34;
+}
+.standardContentMargin {
+    margin: var(--marginBewteen-Objects);
+}
+.xSmalltext {
+    font-size: xx-small;
+    color: #214E34;
+}
+.standardContentMarginMini {
+    margin: 5px;
+}
+.gralLink {
+    margin-left: var(--marginBewteen-Objects);
+    height: auto;
+}
+.alignJustCentered {
+    justify-content: center;
+    align-items: center;
+}
+.whiteBack {
+    background: white;
+}
+.inputSmall {
+    width: 100px;
+}
+.darkText {
+    color: #214E34;
+}
+.hSmall {
+    height: 20px !important;
+    align-items: center;
+}
+.standardDivRowFullW {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: auto;
+}
+.backGroundDed {
+    background: white;
+}
+.standardDivColHalfW {
+    display: flex;
+    flex-direction: column;
+    width: 90%;
+    height: auto;
+}
+.justiAlig {
+    justify-content: center;
+    align-items: center;
+}
+.standardFlex100AutoH {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+}
+.standardFlex200 {
+    display: flex;
+    flex-direction: column;
+    width: 200px;
+    height: auto;
+}
+.standardDiv60Percent {
+    display: flex;
+    flex-direction: column;
+    width: 60%;
+    height: auto;
+}
+.standardDiv30Percent {
+    display: flex;
+    flex-direction: column;
+    width: 30%;
+    height: auto;
+}
+.standardBlock25px {
+    display: inline-block;
+    width: 25px;
+    height: 25px;
+    margin: 0 auto;
+}
+.standardBlock150px {
+    display: inline-block;
+    width: 150px;
+    height: 150px;
+    margin: 0 auto;
+}
+.standardDivRowFlex {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 40px;
+}
+.standardDivRowFlex100pX100pCentered {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100px;
+    height: 100px;
+    margin: 0 auto;
+}
+.standardUlRowFlexAuto {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    height: auto;
+    /* padding-inline-start: 0px; */
+    list-style: none;
+}
+.standardUlRowFlexAuto > li {
+    margin-right: var(--marginBewteen-Objects);
+}
+.importantUserBalanceCont {
+    display: flex;
+    flex-direction: column;
+    max-width: 220px;
+    height: auto;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid orange;
+    border-radius: 8px;
+    background: #337CA0;
+    color: white;
+}
+.warningMatchedFoundCont {
+    display: flex;
+    flex-direction: column;
+    width: 200px;
+    height: 40px;
+    position: absolute;
+    top: 0px;
+    left: 430px;
+    font-size: small;
+    color: #EA3546;
+}
+.topRight {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    cursor: pointer;
+}
+.relativeDiv {
+    position: relative;
+}
+.standardRowDiv {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: auto;
+    justify-content: center;
+    align-items: center;
+}
+.spaceEvenly {
+    justify-content: space-evenly;
+}
+.miniImageJobs {
+    display: block;
+    width: 60px;
+    height: auto;
+}
+.imgUploadedCont {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: auto;
+    height: 80px;
+    position: relative;
+    border: 1px solid orange;
+    font-size: smaller;
+}
+.closeBtnAbs {
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 30px;
+    height: 30px;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+}
+.imageUploaderCont {
+    margin-top: var(--marginBewteen-Objects);
+    margin-bottom: var(--marginBewteen-Objects);
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+    border: 1px dotted orange;
+}
+.ulImageUploader {
+    display: flex;
+    flex-direction: row;
+    list-style: none;
+    padding-inline-start: 0px;
+    flex-wrap: wrap;
+}
+.ulImageUploader > li {
+    margin: var(--marginBewteen-Objects);
+}
+.standarBtnCont120x50Margin{
+    display: flex;
+    flex-direction: column;
+    width: 120px;
+    height: 50px;
+    padding: var(--marginBewteen-Objects);
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+}
+.miniSpan {
+    font-size: x-small;
+}
+.alertSpan {
+    color: #EA3546;
+}
+.userBanned {
+    color: #EA3546;
+}
+.standardHr {
+    width: 100%;
+    border-top: 1px dotted orange;
+}
+.standarDiv320x200h {
+    display: flex;
+    flex-direction: column;
+    width: 320px;
+    height: 200px;
+    margin: 0 auto;
+    justify-content: center;
+}
+.standarDiv400h {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 400px;
+    justify-content: center;
+}
+.superText {
+    font-size: 3.5em;
+    text-decoration: none;
+    text-shadow: 0px 0px 0 rgb(240,151,0),
+                 1px 1px 0 rgb(225,136,0),
+                 2px 2px 0 rgb(210,121,0),
+                 3px 3px 0 rgb(194,105,0),
+                 4px 4px 0 rgb(179,90,0),
+                 5px 5px 0 rgb(164,75,0),
+                 6px 6px  0 rgb(149,60,0),
+                 7px 7px 6px rgba(0,0,0,0.37),
+                 7px 7px 1px rgba(0,0,0,0.5),
+                 0px 0px 6px rgba(0,0,0,.2);
+    transition: all .1s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+.inputValueNum {
+    width: 80px;
+    margin: var(--marginBewteen-Objects);
+}
+.superText:hover{
+    color: white;
+    font-size: 3.6em;
+    text-decoration: underline;
+}
+.warningTextSmall {
+    font-size: small;
+    color: #EA3546;
+}
+.normalTextSmall {
+    font-size: small;
+}
+.standardFormHor {
+    display: flex;
+    flex-direction: row;
+    background: whitesmoke;
+    align-items: center;
+    justify-content: space-between;
+    height: 30px;
+}
+.centered {
+    text-align: center;
+}
+.divCalltoAction {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 250px;
+    justify-content: center;
+    align-items: center;
+    border: 3px solid orange;
+    border-radius: 10px;
+    background: #E9F9F0;
+    margin-top: calc(2*var(--marginBewteen-Objects));
+    margin-bottom: calc(2*var(--marginBewteen-Objects));
+}
+.rowContainer {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: auto;
+}
+.miniText {
+    font-size: x-small;
+}
+.paddings {
+    padding: var(--marginBewteen-Objects);
+}
+.margins {
+    margin-right: var(--marginBewteen-Objects);
+    margin-bottom: var(--marginBewteen-Objects);
+}
+.animBlocksIcon{
+    animation-name: BlocksMovingAbit;
+    animation-iteration-count: infinite;
+    animation-duration: 4s;
+    animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+@keyframes BlocksMovingAbit {
+    from {
+        opacity: .05;
+        transform: scale(0.5);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+.walletTokenCont {
+    display: inline-flex;
+    align-items: center;
+    margin-left: var(--marginBewteen-Objects);
+}
+.iconToken {
+    display: block;
+    width: 45px;
+    height: 45px;
+    margin-right: var(--marginBewteen-Objects);
+}
+.ulTokenWallet {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    list-style: none;
+    flex-wrap: wrap;
+    width: 70%;
+    height: 300px;
+    padding-inline-start: 0px;
+    margin-top: calc(3*var(--marginBewteen-Objects));
+    margin-bottom: calc(3*var(--marginBewteen-Objects));
+}
+.walletUserAmount {
+    font-weight: bold;
+    background:whitesmoke;
+}
+.warnSpan {
+    color: #EA3546;
+    font-weight: bold;
+}
+.contrasted {
+    background: #337CA0;
+    border-radius: 8px;
+    color: white;
+}
+.messageOnAbsScreenCont {
+    display: flex;
+    flex-direction: column;
+    background: white;
+    border: 1px solid #EA3546;
+    border-radius: 10px;
+    margin: 0 auto;
+    color: #EA3546;
+    font-size: small;
+}
+.contNFTworker {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 1000px;
+}
+.animSpan {
+    color: #214E34;
+    animation: blink 0.5s cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite;
+}
+@keyframes blink {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+.fixedUlTopstate {
+    position: fixed;
+    bottom: 0px;
+    left: 0px;
+    /* TODO: organise the zindexes. Now this is TOPTOP */
+    z-index: 10300;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+    background: orange;
+    color: white;
+    justify-content: space-around;
+    list-style: none;
+    font-size: large;
+    margin-block-end: 0px;
+    padding-inline-start: 0px;
+}
+.fixedUlTopstate > li:first-child {
+    text-align: center;
+    margin-left: unset;
+    margin-bottom: 0px;
+}
+.fixedUlTopstate > li {
+    margin-left: var(--marginBewteen-Objects);
+    margin-bottom: var(--marginBewteen-Objects);
+}
+    /* for disabling DIVs */
+    .disableDiv
+    {
+        pointer-events: none;
+        opacity: 0.7;
+        border: 1px solid #EA3546;
+        border-radius: 10px;
+    }
+.justTopMargin {
+    margin-top: var(--marginBewteen-Objects);
+}
+.alertInput {
+    border-color: #EA3546;
+}
+.specialText {
+    color: #337CA0;
+}
+.spanAbs {
+    position: absolute;
+    bottom: -20px;
+    color: #EA3546;
+}
+.miniDivAbs150{
+    display: flex;
+    width: 150px;
+    height: auto;
+    position: absolute;
+    top: 10px;
+    right: 80px;
+}
+.dialogsText {
+    font-size: x-small;
+    color: #214E34;
+}
+.dialogCont {
+    position: absolute;
+    top: 5px;
+    width: 150px;
+    height: auto;
+    background: white;
+    border: 1px solid orange;
+    border-radius: 8px;
+    justify-content: center;
+    align-items: center;
+}
+.animFade {
+    animation: fadeIn 0.5s cubic-bezier(0.645, 0.045, 0.355, 1) 1;
+}
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+.miniGifABS {
+    width: 100%;
+    position: relative;
+}
+.shadowBottom {
+    position: absolute;
+    box-shadow: 0px 4px 8px -1px rgb(87, 21, 27);
+    top: 140px;
+    left: 44px;
+    width: 68px;
+    height: 5px;
+    
+}
+.pointer {
+    cursor: pointer;
+}
+/* emd shared classes */
+
+/* preview job component */
+.previewJobCont {
+    position: relative;
+    margin-bottom: calc(2*var(--marginBewteen-Objects));
+}
+.coverImgJobs {
+    width: 100%;
+    height: auto;
+}
+.borderedFlexShadowFullW {
+    display: flex;
+    flex-direction: column;
+    width: auto;
+    height: auto;
+    border: 1px solid orange;
+    border-radius: 10px;
+    margin: var(--marginBewteen-Objects);
+    box-shadow: 2px 2px 5px 2px orange;
+}
+/* end preview job component */
+
+/* messagerTopContainer mesagger component */
+.messagerTopContainer {
+    z-index: 11000;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: auto;
+    background: orange;
+    color: white;
+    border: 2px solid #EA3546;
+    justify-content: center;
+    align-items: center;
+}
+/* END mesagger component */
+
+/* explore page/component */
+.exploreContainer {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 400px;
+}
+/* END explore */
+
+/* unparent classes TODO fix later on */
+.walletCont {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+    justify-content: center;
+    align-items: center;
+}
+.absInfoCont {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 5px;
+    right: 3px;
+    cursor: pointer;
+    transition: all .1s ease-in-out;
+}
+.absInfoCont:hover{
+    transform: scale(1.15);
+    border: 1px solid #337CA0;
+    border-radius: 8px;
+}
+.absInfoCont:hover > .displayInfo {
+    display: flex;
+}
+.displayInfo {
+    display: none;
+    flex-direction: column;
+    width: 250px;
+    height: auto;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    background: #E9F9F0;
+    border: 1px solid black;
+    border-radius: 10px;
+}
+.xtraSmall {
+    font-size: xx-small;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+.xsmallMargin {
+    margin-left: 10px;
+    margin-right: 10px;
+    font-size: x-small;
+}
+.ulActionsWallet {
+    display: flex;
+    flex-direction: row;
+    width: 350px;
+    flex-wrap: wrap;
+    list-style: none;
+    padding-inline-start: 0px;
+    justify-content: center;
+    border: 2px solid orange;
+    margin-top: var(--marginBewteen-Objects);
+    border-radius: 8px;
+    position: relative;
+}
+.ulActionsWallet > li {
+    display: flex;
+    flex-direction: row;
+    height: auto;
+    align-items: center;
+    justify-content: center;
+    margin-left: var(--marginBewteen-Objects);
+}
+.iconWalletAction {
+    margin: 8px;
+}
+.actionContainer {
+    display: flex;
+    flex-direction: column;
+    width: 350px;
+    height: auto;
+    border: 2px solid orange;
+    border-radius: 8px;
+}
+.marginBottom {
+    margin-bottom: var(--marginBewteen-Objects);
+}
+/* end unparent classes */
+
+/* user tokens component */
+.userTokensContainer {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 600px;
+
+}
+.createTokenContainer {
+    position: relative;
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    min-height: 300px;
+    margin-top: var(--marginBewteen-Objects);
+    margin-bottom: calc(2*var(--marginBewteen-Objects));
+}
+.showCT {
+    display: flex;
+}
+/* end user tokens component */
+
 /* TODO rearrange all classes and make good groups */
+.loaderMini {
+    display: 'flex'; 
+    flex-direction: 'column'; 
+    width: 100px; 
+    height: 100px; 
+    margin: 0 auto;
+}
 .loaderImgCont {
     /* it needs to be set inside another div so it can take available with/height */
     display: block;
@@ -137,6 +1177,23 @@ main {
     margin-right: 30px;
 }
 /* end main section content */
+
+/* userlogin component */
+.userLoginCompoCont {
+    flex-direction: row !important;
+    justify-content: space-evenly !important;
+}
+.imgloginCont {
+    display: block;
+    width: 600px;
+    height: auto;
+}
+.userLoginImg {
+    border-radius: 10px;
+    width: 100%;
+    height: 100%;
+}
+/* emd userlogin component */
 
 /* main background carousel */
 .mainCarouselExtCont {
@@ -172,6 +1229,272 @@ main {
 }
 /* end background carousel */
 
+/* menu option user */
+.userMenuContainer {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+}
+.ulMenuOptionUser {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: auto;
+    justify-content: center;
+    align-items: center;
+    list-style: none;
+    padding-inline-start: 0px;
+    position: relative;
+}
+.makeFixeduserMenu {
+    /* z-index TOP for now */
+    z-index: 10100; 
+    position: fixed;
+    height: 50px;
+    top: 0px;
+    left: 0px;
+    /* background: rgba(255, 255, 255, 0.9); */
+    background: #337CA0;
+    margin-block-end: 0px;
+    margin-block-start: 0px;
+    border-bottom: 1px solid orange;
+    justify-content: flex-start;
+}
+/* .makeFixeduserMenu > li:first-child {
+    margin-left: var(--marginBewteen-Objects);
+} */
+.menuOptionLi {
+    float: inherit;
+    /* margin-right: calc(2*var(--marginBewteen-Objects)); */
+}
+.imgOptionsUser {
+    cursor: pointer;
+    box-shadow: -1px 1px 1px 0px #EA3546;
+    transition: all .1s cubic-bezier(0.175, 0.9, 0.32, 1.275);
+    background: white;
+    border-radius: 5px;
+}
+.imgOptionsUser:hover {
+    box-shadow: -1px 2px 3px 2px #EA3546;
+}
+.makeMeFixed60px {
+    position: fixed;
+    left: 0px;
+    top: 50px;
+    z-index: 10020;
+}
+.openNoti {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 200px;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+.closedNoti {
+    display: none;
+}
+.menuOptionNotificationsCont {
+    width: 100%;
+    height: auto;
+}
+/* end menu option user */
+
+/* job component */
+.jobsContainer {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 400px;
+    justify-content: center;
+}
+.formNewJob {
+    /* testing this to see if there is no conflict later on */
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+    margin: var(--marginBewteen-Objects);
+}
+.errorValidation {
+    color: #EA3546;
+}
+/* end job component */
+
+/* manage jobs component */
+.manageJobsContainer {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 400px;
+}
+/* end manage jobs component */
+
+/* managePortfolio component */
+.managePortfolioContainer {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 400px;
+}
+/* end managePortfolio component */
+
+/* jobix/jobito component */
+.jobito {
+    display: block;
+    width: 300px;
+    height: auto;
+    position: relative;
+}
+.divRowJobix {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: auto;
+}
+.supportMenuCont {
+    position: fixed;
+    width: 70px;
+    height: 180px;
+    bottom: 0px;
+    right: 0px;
+}
+.ulSupportMenu {
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+    padding-inline-start: 0px;
+    margin-block-end: 0px;
+    margin-inline-start: 0px;
+}
+.ulSupportMenu > li {
+    margin: var(--marginBewteen-Objects);
+}
+.noMargins {
+    margin: 0px;
+}
+.noMarginSmall {
+    margin: 0px;
+    font-size: small;
+    font-weight: bold;
+}
+.noMargintop{
+    margin-top: 0px;
+}
+.imgSupport {
+    border: 1px solid white;
+    border-radius: 8px;
+}
+.imgSupport:hover{
+    cursor: pointer;
+    background: white;
+    border: 2px solid #EA3546;
+}
+/* end jobix/jobito component */
+
+/* menu jobs user component */
+.menuJobsContainer {
+    position: relative;
+    top: 0px;
+    left: 0px;
+}
+.ulJobMenu {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    height: auto;
+    list-style: none;
+    margin-block-end: 0px;
+    margin-block-start: 0px;
+    justify-content: space-evenly;
+    padding-inline-start: 0px;
+}
+.ulJobMenu > li {
+    text-decoration: underline;
+    cursor: pointer;
+}
+/* end menu jobs user component */
+
+/* signup page component */
+.signUpContainer {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+}
+.divRowSignUp {
+    display: flex;
+    flex-direction: row;
+    margin-top: calc(2*var(--marginBewteen-Objects));
+    margin-bottom: calc(2*var(--marginBewteen-Objects));
+    background: rgba(255, 255, 234, 0.603);
+    width: 100%;
+}
+.contentDivSignUp {
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+    height: 100%;
+}
+.signImgCont {
+    display: block;
+    width: 50%;
+    height: auto;
+}
+.svgSignUpImage {
+    width: 100%;
+}
+.ulBenefits {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    list-style: none;
+    justify-content: center;
+    align-items: center;
+    padding-inline-start: 0px;
+}
+.cardBenefit {
+    display: flex;
+    flex-direction: column;
+    width: 320px;
+    height: 400px;
+    background: #E9F9F0;
+    margin-bottom: calc(2*var(--marginBewteen-Objects));
+    margin-left: calc(2*var(--marginBewteen-Objects));
+    justify-content: center;
+    align-items: center;
+    padding: var(--marginBewteen-Objects);
+    position: relative;
+}
+.cardImgCont {
+    display: block;
+    width: 128px;
+    height: auto;
+    margin: 0 auto;
+}
+.imgBenefitSVG {
+    width: 100%;
+    height: auto;
+}
+.blockChainObserver {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 200px;
+    border: 1px solid orange;
+    border-radius: 10px;
+    background: #E9F9F0;
+}
+/* end signup page/component */
+
 /* nav section */
 nav {
     display: flex;
@@ -186,8 +1509,10 @@ nav {
     flex-direction: row;
     justify-content: flex-start;
     width: 100%;
+    flex-wrap: wrap;
 }
 .profilePicCont {
+    position: relative;
     display: flex;
     width: 60px;
     height: 60px;
@@ -210,7 +1535,7 @@ nav {
     z-index: 10090; 
     padding-inline-start: 0px;
     background: whitesmoke;
-    top: 100px;
+    top: 60px;
     position: absolute;
     display: none;
     flex-direction: column;
@@ -218,10 +1543,16 @@ nav {
     height: auto;
     list-style: none;
     align-items: center;
+    border: 1px solid orange;
+    border-radius: 8px;
 }
 .userMenu > li {
     float: inherit;
     padding: 8px;
+}
+.adminPanelLink {
+    font-size: small;
+    margin: 0 auto;
 }
 .showUserMenu {
     display: flex;
@@ -268,10 +1599,126 @@ nav {
     list-style: none;
     padding-inline-start: 0px;
 }
-#btnLogin {
+.keyChainImg {
+    cursor: pointer;
+    display: block;
+    background: #337CA0;
+    /* border-radius: 8px; */
+    box-shadow: 2px 2px 4px 1px #EA3546;
     margin: 10px;
+    transition: all .2s cubic-bezier(0.19, 1, 0.22, 1);
+}
+.keyChainImg:hover {
+    box-shadow: 3px 3px 2px 2px #EA3546;
+    border: 1px solid #EA3546;
 }
 /* end nav section */
+
+/* admin panel component TODO: to organize LATER */
+.adminRenderContainer {
+    display: flex;
+    flex-direction: column;
+    width: 80%;
+    min-height: 400px;
+    background: #E9F9F0;
+    border: 1px solid #214E34;
+    border-radius: 10px;
+}
+.adminPanelCont {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    min-height: 80vh;
+    /* justify-content: center; */
+    /* align-items: center; */
+    position: relative;
+}
+.adminPanelMenu {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 20%;
+}
+.listUsersCont {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-width: 250px;
+}
+.adminPanelProfilePicUser {
+    width: 120px;
+    height: auto;
+    margin-top: var(--marginBewteen-Objects);
+}
+.ulListUserAdminPanel {
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+    background: rgb(185, 228, 250);
+    min-width: 300px;
+    min-height: 350px;
+    /* padding: var(--marginBewteen-Objects); */
+    border-radius: 8px;
+    padding-inline-start: 0px;
+    position: relative;
+    justify-content: space-evenly;
+}
+.ulListUserAdminPanel > li {
+    display: flex;
+    width: 100%;
+    height: auto;
+    align-items: center;
+    margin-left: var(--marginBewteen-Objects);
+    margin-right: var(--marginBewteen-Objects);
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+.actionMenuAbs {
+    display: flex;
+    flex-direction: column;
+    width: auto;
+    height: auto;
+    /* justify-content: center; */
+    /* align-items: center; */
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    font-size: x-small;
+    margin: 10px;
+}
+.actionIcon {
+    display: block;
+    box-shadow: 1px 2px 2px 1px orange;
+    margin-left: 10px;
+    background: white;
+}
+.actionIcon:hover{
+    box-shadow: 3px 5px 3px 2px orange;
+}
+.selectorUserList {
+    margin-top: var(--marginBewteen-Objects);
+    height: 30px;
+    width: 100%;
+    background: rgb(248, 207, 132);
+    font-weight: bold;
+    cursor: pointer;
+}
+    /* logs component */
+    .logResultContainer {
+        display: flex;
+        flex-direction: column;
+        width: 70%;
+        height: auto;
+        list-style: none;
+        padding-inline-start: 0px;
+    }
+    .logResultContainer > li {
+        margin-bottom: 10px;
+        background: rgb(253, 236, 205);
+    }
+    /* end log component */
+/* end admin panel component */
 
 /* footer component */
 footer {
@@ -448,21 +1895,32 @@ footer {
 #profileUserForm {
     display: flex;
     flex-direction: column;
+    width: 60%;
+    height: auto;
+}
+.rowRightPicContainer {
+    display: flex;
+    flex-direction: column;
+    width: 40%;
+    height: auto;
+}
+.profilePicSelector {
+    display: flex;
+    flex-direction: column;
     width: 100%;
     height: auto;
 }
 .userProfilePicCont {
-    display: block;
-    width: 310px;
-    height: 310px;
-    justify-content: center;
-    align-items: center;
-    margin: 0 auto;
-    border: 1px solid rgb(161, 106, 2);
-}
-.userProfilePic {
+    display: flex;
     width: 100%;
     height: auto;
+    justify-content: center;
+    margin-top: calc(3*var(--marginBewteen-Objects));
+}
+.userProfilePic {
+    width: 250px;
+    height: 250px;
+    margin: 0 auto;
 }
 .lblProfileUser {
     width: 100%;
@@ -486,6 +1944,138 @@ footer {
     margin: 10px;
 }
 /* end profile user page */
+
+/* userLogin component */
+.userLoginContainer {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 70vh;
+    justify-content: center;
+    align-items: center;
+}
+/* end userLogin component */
+
+/* search component */
+.searchContainer {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 50px;
+    align-items: center;
+    justify-content: center;
+}
+.searchInput {
+    width: 200px;
+    margin: 5px;
+    border-radius: 8px;
+    border: 1px solid orange;
+    padding: 5px;
+}
+input[type=text]:focus{
+    outline: none;
+    background: #E9F9F0;
+    border: 2px solid orange;
+}
+.imgSearch {
+    cursor: pointer;
+    transition: all .1s cubic-bezier(0.19, 1, 0.22, 1);
+}
+.imgSearch:hover{
+    transform: scale(1.05);
+}
+/* end search component */
+
+/* jobitoassistant component */
+.jobitoAssistantCont {
+    /* TODO: arrange all the zindexes for now this is top */
+    z-index: 10100;
+    bottom: 0px;
+    right: 0px;
+    position: fixed;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 400px;
+    height: auto;
+    border: 2px solid orange;
+    border-radius: 10px;
+    background: white;
+    animation: initAnimation 2s ease-in 1;
+}
+@keyframes initAnimation {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+.jobitoMini {
+    width: 130px;
+    height: auto;
+}
+.propSearch {
+    color: orange;
+    font-style: italic;
+}
+.absCloseCont {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    top: -5px;
+    right: -5px;
+}
+.closeImg {
+    cursor: pointer;
+    transition: all .1s cubic-bezier(0.55, 0.085, 0.68, 0.53);
+}
+.closeImg:hover{
+    transform: scale(1.08);
+}
+.divRowJobitoAssistant {
+    display: flex;
+    flex-direction: row;
+    width: 95%;
+    height: 95%;
+}
+/* END jobitoassistant component */
+
+/* coinprices component */
+.newsCoinsContainer {
+    display: flex;
+    flex-direction: column;
+    width: 480px;
+    height: 50px;
+    justify-content: center;
+    align-items: center;
+}
+.ulCoinList {
+    display: flex;
+    flex-direction: row;
+    list-style: none;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    height: auto;
+    padding-inline-start: 0px;
+    color: orange;
+    font-weight: bold;
+}
+.ulCoinList > li {
+    font-size: small;
+    margin-right: 8px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+/* end coinprices component */
 
 /* beeChat instance container */
 .beeChatInstanceContainer {
@@ -566,6 +2156,7 @@ footer {
     align-items: center;
     margin-bottom: 20px;
     border-radius: 8px;
+    overflow-y: scroll;
 }
 /* end tabulator */
 
@@ -573,46 +2164,41 @@ footer {
 .notificationsCont {
     display: flex;
     flex-direction: column;
-    width: 120px;
-    padding: 10px;
-    position: relative;
+    width: 100%;
+    height: auto;
+    background: #337CA0;
 }
 .ulNotifications {
-    position: absolute;
-    display: flex;
-    left: 160px;
-    top: -10px;
-    flex-direction: row;
-    list-style: none;
-    padding-inline-start: 0px;
-    width: max-content;
-    height: 40px;
-    align-items: center;
-}
-.ulNotifications > li {
-    float: inherit;
-    margin-right: 30px;
-    background: whitesmoke;
-    font-size: small;
-    cursor: pointer;
-}
-.notificationContentCont {
-    cursor: initial;
     display: flex;
     flex-direction: column;
-    background: whitesmoke;
-    width: 0px;
-    height: 0px;
-    transition: all 0.4s cubic-bezier(0.785, 0.135, 0.15, 0.86);
-    overflow: hidden;
-    position: absolute;
+    list-style: none;
+    padding-inline-start: 0px;
+    width: 40%;
+    height: 120px;
+    justify-content: flex-start;
+    overflow-y: auto;
 }
-.notificationParent:hover > .notificationContentCont {
-    position: absolute;
-    width: 300px;
+.ulNotifications::-webkit-scrollbar{
+    width: 4px;
+    background: orange;
+}
+.ulNotifications > li {
+    cursor: pointer;
+    margin-left: var(--marginBewteen-Objects);
+    font-size: small;
+}
+.ulNotifications > li:hover{
+    color: orange;
+    text-decoration: underline;
+}
+.notiSelectedCont {
+    display: flex;
+    flex-direction: column;
+    margin-left: var(--marginBewteen-Objects);
+    width: 45%;
     height: auto;
-    padding: 10px;
 }
+
 .iconNoti {
     cursor: pointer;
     margin-right: 20px;
@@ -622,7 +2208,40 @@ footer {
 .iconNoti:hover{
     box-shadow: 2px 3px 6px 1px rgba(255, 166, 0, 0.81);
 }
+.notifications {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+}
+.notiOpen {
+    border: 1px solid #214E34;
+    box-shadow: 2px 2px 2px 1px #214E34;
+}
+.notiCLosed {
+    border: none;
+    box-shadow: unset;
+}
+.notifications:hover {
+    box-shadow: 2px 2px 2px 1px #214E34;
+}
 /* end noti component */
+
+/* for component react-images-upload */
+.fileContainer .deleteImage {
+    background: orange;
+    font-size: 15px;
+}
+.fileContainer .chooseFileButton { 
+    background: #214E34;
+}
+.fileContainer .chooseFileButton:hover {
+	background: rgb(55, 126, 85);
+}
+/* end react-images-upload */
 
 /* global rules */
  a {
@@ -647,5 +2266,8 @@ footer {
  h1 {
      color: rgb(0, 0, 0);
      text-shadow: 2px 2px orange;
+ }
+ .shadowsTitles{
+    text-shadow: 2px 2px orange;
  }
 /* end global */

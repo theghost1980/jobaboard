@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import Img from 'gatsby-image';
-import { graphql, useStaticQuery, StaticQuery } from "gatsby"
+import { graphql, useStaticQuery } from "gatsby"
 
 //constants
 const notificationsEP = process.env.GATSBY_notiEP;
 
 function Notifications(props) {
-    const { username, token } = props;
+    const { username, token, fixedBellowUM } = props;
 
-    const [open, setOpen] = useState(false);
+    // const [open, setOpen] = useState(false);
     // const [notification, setNotification] = useState([{
     //     type: String,
     //     title: String,
@@ -18,6 +18,7 @@ function Notifications(props) {
     //     username: String = (username ? username : "")
     // }]);
     const [noti, setNoti] = useState([]);
+    const [notiSelected, setNotiSelected] = useState(null);
 
      /////////data fecthing PUT/GET////////
      ////////Fetching POST request to backend
@@ -87,36 +88,98 @@ function Notifications(props) {
                     }
                 }
             }
+            archive_icon: file(relativePath: {eq: "archive-white.png"}) {
+                childImageSharp {
+                    fixed(width: 32) {
+                        ...GatsbyImageSharpFixed_withWebp
+                    }
+                }
+            }
+            view_icon: file(relativePath: {eq: "view-white.png"}) {
+                childImageSharp {
+                    fixed(width: 25) {
+                        ...GatsbyImageSharpFixed_withWebp
+                    }
+                }
+            }
+            checked_icon: file(relativePath: {eq: "checked-white.png"}) {
+                childImageSharp {
+                    fixed(width: 32) {
+                        ...GatsbyImageSharpFixed_withWebp
+                    }
+                }
+            }
+            deleteAll_icon: file(relativePath: {eq: "delete-all.png"}) {
+                childImageSharp {
+                    fixed(width: 32) {
+                        ...GatsbyImageSharpFixed_withWebp
+                    }
+                }
+            }
+            # notifications_icon: file(relativePath: {eq: "notifications.png"}) {
+            #     childImageSharp {
+            #         fixed(width: 30) {
+            #             ...GatsbyImageSharpFixed_withWebp
+            #         }
+            #     }
+            # }
         }`
     );
     /////end graphql
 
     return (
-        <div className="notificationsCont">
-            <button onClick={() => setOpen(!open)}>Notifications {noti.length}</button>
-            {
-                open &&
-                    <ul className="ulNotifications">
-                        {
-                            noti.map(notification => {
-                                return (
-                                    <li key={notification._id} className="notificationParent">
-                                        {notification.title}
-                                        <div className="notificationContentCont">
-                                            <h3>{notification.title}</h3>
-                                            <p>{notification.createdAt}</p>
-                                            <p>{notification.content}</p>
-                                            <div>
-                                                <Img fixed={data.save_icon.childImageSharp.fixed} className="iconNoti" />
-                                                <Img fixed={data.delete_icon.childImageSharp.fixed} className="iconNoti"  />
-                                            </div>
+        <div className={`notificationsCont ${fixedBellowUM}`}>
+            <div className="standardDivRowFullW">
+                <ul className="ulNotifications">
+                    {
+                        noti.map(notification => {
+                            return (
+                                <li key={notification._id} onClick={() => setNotiSelected(notification)}>
+                                    <div className="standardDivRowFlex">
+                                        <p>{notification.title} - {notification.createdAt}</p>
+                                        <div className="standardBlock25px">
+                                            <Img fixed={data.view_icon.childImageSharp.fixed} />
                                         </div>
-                                    </li>
-                                )
-                            })
-                        }
-                    </ul>
-            }
+                                    </div>
+                                </li>
+                            )
+                        })
+                    }
+                    {/* <div>
+                        <Img fixed={data.save_icon.childImageSharp.fixed} className="iconNoti" />
+                        <Img fixed={data.delete_icon.childImageSharp.fixed} className="iconNoti"  />
+                    </div> */}
+                </ul>
+                {
+                    (notiSelected !== null) &&
+                        <div className={`notiSelectedCont`}>
+                            <p className="normalTextSmall">{notiSelected.title}</p>
+                            <p className="normalTextSmall">By {notiSelected.type}</p>
+                            <p className="normalTextSmall">{notiSelected.content}</p>
+                            <button className="normalTextSmall" onClick={() => setNotiSelected(null)}>close</button>
+                        </div>
+                }
+            </div>
+            {/* menu options for notifications - TO finish */}
+            <div className="menuOptionNotificationsCont">
+                <ul className="standardUlRowFlexAuto">
+                    <li>
+                        <div>
+                            <Img fixed={data.archive_icon.childImageSharp.fixed} />
+                        </div>
+                    </li>
+                    <li>
+                        <div>
+                            <Img fixed={data.checked_icon.childImageSharp.fixed} />
+                        </div>
+                    </li>
+                    <li>
+                        <div>
+                            <Img fixed={data.deleteAll_icon.childImageSharp.fixed} />
+                        </div>
+                    </li>
+                </ul>
+            </div>
         </div>
     )
 }

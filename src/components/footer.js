@@ -1,10 +1,12 @@
 import React from 'react';
-
 import { useStaticQuery, graphql, Link, navigate } from "gatsby"
 //components
 import Img from 'gatsby-image';
+//helpers
+import { check } from '../utils/helpers';
 
 const Footer = () => {
+    const userdata = check();
     //graphql queries
     const data = useStaticQuery(graphql`
         query{
@@ -47,8 +49,9 @@ const Footer = () => {
             <ul className="ulFooterMenu">
                 {
                     data.main_menu.edges.map(({ node:item }) => {
+                        // console.log(item)
                         return (
-                            <li key={item.id}>
+                            <li key={item.id} className={`${item.hideOnLoggin && userdata.logged ? 'hideOnLoggin': null}`}>
                                 <Link to={item.inner_link}>{item.title}</Link>
                             </li>
                         )

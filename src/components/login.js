@@ -1,14 +1,17 @@
 import React, { useEffect, useState, useContext } from 'react';
+import { useStaticQuery, graphql } from "gatsby"
+import Img from 'gatsby-image';
 //hiveio/keychain
 import {keychain, isKeychainInstalled, hasKeychainBeenUsed} from '@hiveio/keychain';
 //HOC
 // import { AuthContext } from '../components/HOC/authProvider';
 //components/wrappers
 import onClickOutside from 'react-onclickoutside';
+import LoginHS from './hivesigner/loginHS';
 import Loader from './loader';
-import { cryptoUtils } from '@hiveio/dhive';
 //utils
 import { encode } from '../utils/helpers';
+import { cryptoUtils } from '@hiveio/dhive';
 //constants
 const starWars = process.env.GATSBY_starWars;
 const authEP = process.env.GATSBY_authEP;
@@ -21,6 +24,20 @@ const Login = (props) => {
     const { cancelOnClick, 
             successfulLogin } = props;
     //end props from parents
+
+    //graphql queries
+    const data = useStaticQuery(graphql`
+        query {
+            keychainLogo: file(relativePath: {eq: "keychain_logo.png"}) {
+                childImageSharp {
+                    fixed(width: 200) {
+                        ...GatsbyImageSharpFixed_withWebp
+                    }
+                }
+            }
+        }
+    `);
+    //end grapqhql queries
 
     // const { setData } = useContext(AuthContext);
 
@@ -70,7 +87,11 @@ const Login = (props) => {
                 data.json()
                 .then(msg => {
                     console.log(msg);
-                    const { profile_PicURL, token, usertype} = msg;
+                    const { profile_PicURL, token, usertype, banned} = msg;
+                    // TODO -> Important
+                    // Get the settings under the > Setting table on MongoDB
+                    // btw we need to create that.
+                    // it will help us to: - set the chat as the user wants + other future options.
                     //set all upcomming data.
                     const profile = {
                         profilePicUrl:  encode(profile_PicURL),
@@ -78,11 +99,16 @@ const Login = (props) => {
                         logged:  encode(true),
                         logginIn:  encode(false),
                         username:  encode(dataUsername),
-                        usertype:  encode(usertype)
+                        usertype:  encode(usertype),
+                        loginmethod: encode('KCH'),
+                        banned: encode(banned),
                     };
                     const JSONprofile = JSON.stringify(profile);
                     localStorage.setItem("_NoneOfYourBusiness",JSONprofile);
                     successfulLogin();
+                    if(banned){
+                        alert('You have been Banned. Please Contact the admins as you only have some limited features on this platform.!');
+                    }
                     // setData();
                     //From this point on, we can check:
                     // - if token present on localStorage.
@@ -120,19 +146,24 @@ const Login = (props) => {
     };
 
     return (
-        <div className="loginCont" id="loginContainer">
-                {
-                    !logginIn &&
-                        <div>
-                            <p>Log in Using @hive-keychain</p>
-                            <input type="text" id="username" placeholder="@username here please"
-                            onChange={(event) => setAccount(event.target.value)}
-                            />
-                            <button type='submit' id="btnLogin" onClick={loginByClick}>Login</button>
-                        </div>
-                }
+        <div className={`loginCont ${logginIn ? 'addAutoW': null}`} id="loginContainer">
                 {
                     logginIn && <Loader logginIn={logginIn} />
+                }
+                {
+                    !logginIn &&
+                            <div>
+                                <h2>Log in Options</h2>
+                                <input type="text" id="username" placeholder="@username here please"
+                                onChange={(event) => setAccount(event.target.value)}
+                                />
+                                <div id="btnLogin" onClick={loginByClick}>
+                                    <Img fixed={data.keychainLogo.childImageSharp.fixed} className="keyChainImg" />
+                                </div>
+                            </div>
+                }
+                {
+                    !logginIn && <LoginHS username={account} />
                 }
         </div>
     )

@@ -16,11 +16,11 @@ const beechatEP = "https://beechat.hive-engine.com/api/";
 
 const BeeChat = () => {
     const iniStateBeeDataUser = [
-        { id: 'jobaboard-hive-tab-x1', name: 'friendlist', title: 'Friends', data: {}},
-        { id: 'jobaboard-hive-tab-x2', name: 'friendrequests', title: 'Requests', data: []},
-        { id: 'jobaboard-hive-tab-x3', name: 'channels', title: 'My Channels', data: []},
-        { id: 'jobaboard-hive-tab-x4', name: 'conversations', title: 'Chats', data: []},
-        { id: 'jobaboard-hive-tab-x5', name: 'settings', title: 'Settings', data: {}}
+        { id: 'jobaboard-hive-tab-x1', name: 'Friendlist', title: 'Friends', data: {}},
+        { id: 'jobaboard-hive-tab-x2', name: 'Friendrequests', title: 'Requests', data: []},
+        { id: 'jobaboard-hive-tab-x3', name: 'Channels', title: 'My Channels', data: []},
+        { id: 'jobaboard-hive-tab-x4', name: 'Conversations', title: 'Chats', data: []},
+        { id: 'jobaboard-hive-tab-x5', name: 'Settings', title: 'Settings', data: {}}
     ];
     const [beeDataUser, setBeeDataUser] = useState(iniStateBeeDataUser);
     const timestamp = Date.now();
@@ -48,6 +48,68 @@ const BeeChat = () => {
     const [connected, setConnected] = useState(false);
     const [connecting, setConnecting] = useState(false);
 
+    //to run on init of component, check if beeChat on LS
+    useEffect(() => {
+        //check for beeUSer/beeChatData data on LS
+        const databeeUser = localStorage.getItem('beeUser');
+        const beeChatData = localStorage.getItem('beeChat');
+        if(beeChatData && databeeUser){
+            //try to parse data and check
+            try {
+                const jsonData = JSON.parse(beeChatData);
+                const jsonDataBeeUser = JSON.parse(databeeUser);
+                //check for token and if it is still valid.
+                if(jsonDataBeeUser.token){
+                    getDataWT(beechatEP+"users/verify",jsonDataBeeUser.token)
+                    .then(response => {
+                        console.log(response);
+                        //if valid parse data
+                        if(response.username){
+                            //load all the data present on jsonData
+                            setBeeUser(jsonDataBeeUser);
+                            setBeeDataUser(jsonData);
+                            setConnected(true);
+                            //here we could connect to socket
+                            
+                        }else if(response.message === "Expired token" || response.err === "Unauthorized"){
+                            //token expired
+                            console.log('Token not valid anymore.');
+                            //delete data from LS so the user must login again.
+                            localStorage.removeItem('beeChat');
+                            localStorage.removeItem('beeUser');
+                            console.log('BeeChat LS data deleted');
+                        }else{
+                            //token not valid. try to refresh
+                            console.log(`beeChat says,\nerr:${response.error}\nmsg:${response.message}`);
+                            //try to refresh because we have valid data on LS
+                            // refreshToken(jsonDataBeeUser.token)
+                            // .then(response => {
+                            //     console.log('token Super-Fresh!');
+                            //     //here we can set data for beeuser
+                            //     setBeeUser(jsonDataBeeUser);
+                            //     setBeeDataUser(jsonData);
+                            //     setConnected(true);
+                            // })
+                            // .catch(err => {
+                            //     console.log('Error while trying to refresh token.',err);
+                            // });
+                        }
+                        //from here we could then try to parse the rest of data
+                        //if not valid, force login again.???
+                    })
+                    .catch(error => {
+                        console.log('Error trying to verify the token found on LS',error);
+                    });
+                }
+            } catch (error) {
+                console.log('Error trying to parse the beeChat data');
+                console.log(error);
+            }
+        }else{
+            console.log('One of the items is not present to validate the LS of beeCHat instance');
+        }
+    },[])
+    //////////////////
     useEffect(() => {
         setBeeDataUser(beeDataUser);
     },[beeDataUser])
@@ -72,6 +134,17 @@ const BeeChat = () => {
             },
         });
         return response.json(); 
+    };
+    async function getDataWTNoJsonR(url = '', _token) { 
+        const response = await fetch(url, {
+            method: 'GET',
+            mode: 'cors',
+            cache: 'no-cache',
+            headers: {
+                'Authorization': `Bearer ${_token}`
+            },
+        });
+        return response; 
     };
     //END get functions
     ///////////////////////
@@ -106,7 +179,7 @@ const BeeChat = () => {
                 const urlGet = beechatEP + "users/login?" + `username=${beeUser.username}&ts=${ts}&sig=${data.message}`;
                 getDataWT(urlGet,beeUser.token)
                 .then(result => {
-                    console.log(result);
+                    // console.log(result);
                     if(result.token && result.refresh_token){
                         //save it to localStorage
                         localStorage.setItem('_GOfUb_T', result.token);
@@ -116,13 +189,19 @@ const BeeChat = () => {
                         //now we call multiple fetch requests
                         getAllUrls(result.token)
                         .then(arrayPromises => {
-                            console.log(arrayPromises);
+                            // console.log(arrayPromises);
                             const DataBeeUser = iniStateBeeDataUser.map((item,index) => {
-                                console.log(arrayPromises[index]);
+                                // console.log(arrayPromises[index]);
                                 return { id: item.id ,name: item.name, title: item.title, data: arrayPromises[index]};
                             });
                             // console.log(DataBeeUser);
                             setBeeDataUser(DataBeeUser);
+                            //set data arrays into localstorage
+                            //todo encode
+                            localStorage.setItem('beeChat', JSON.stringify(DataBeeUser));
+                            //now save into locastorage the beeUser data
+                            localStorage.setItem('beeUser',JSON.stringify(result));
+                            // console.log('Data Saved into LS');
                         })
                         // console.log(responses);
                         setConnecting(false);
@@ -216,7 +295,7 @@ const BeeChat = () => {
                 //check if expired token to refresh token.
                 if(response.message === "Expired token"){
                     //call method to refresh-token
-                    refreshToken();
+                    refreshToken(beeUser.token);
                 }else{
                     console.log(response);
                 }
@@ -239,7 +318,7 @@ const BeeChat = () => {
                 //check if expired token to refresh token.
                 if(response.message === "Expired token"){
                     //call method to refresh-token
-                    refreshToken();
+                    refreshToken(beeUser.token);
                 }else{
                     console.log(response);
                 }
@@ -260,7 +339,7 @@ const BeeChat = () => {
                 //check if expired token to refresh token.
                 if(response.message === "Expired token"){
                     //call method to refresh-token
-                    refreshToken();
+                    refreshToken(beeUser.token);
                 }else{
                     console.log(response);
                 }
@@ -273,15 +352,25 @@ const BeeChat = () => {
     }
 
     const logOut = () => {
-        setBeeUser(initialState);
-        setConnected(false);
+        //send token as bearer & wait for response
+        getDataWTNoJsonR(beechatEP+"users/logout",beeUser.token)
+        .then(response => {
+            console.log(response);
+            setBeeUser(initialState);
+            setConnected(false);
+            localStorage.removeItem('beeChat');
+            localStorage.removeItem('beeUser');
+        })
+        .catch(err => {
+            console.log('Error trying to log user out from beeChat!',err);
+        })
     }
 
     //refresh-token
-    async function refreshToken(){
+    async function refreshToken(token){
         console.log('Refreshing Token......');
         const urlRT = beechatEP + "users/refresh-token";
-        getDataWT(urlRT, beeUser.refresh_token)
+        getDataWT(urlRT, token)
         .then(response => {
             console.log(response);
             if(response.token){
