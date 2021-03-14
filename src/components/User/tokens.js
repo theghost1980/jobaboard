@@ -13,13 +13,14 @@ import { Link } from 'gatsby';
 import Loader from '../loader';
 import Nftcreator from '../nfthandling/nftcreator';
 //testing SSCjs library
-const SSC = require('sscjs');
-const ssc = new SSC('http://185.130.45.130:5000/');
+// const SSC = require('sscjs');
+// const ssc = new SSC('http://185.130.45.130:5000/');
 //END testing
 //dhive to broadcast a custom json
 var dhive = require("@hiveio/dhive");
 var client = new dhive.Client(["https://api.hive.blog", "https://api.hivekings.com", "https://anyx.io", "https://api.openhive.network"]);
-
+//constants
+const nftEP = process.env.GATSBY_nftEP;
 
 const Tokensuser = () => {
     const userdata = check();
@@ -52,7 +53,7 @@ const Tokensuser = () => {
             console.log(result);
             if(result.length > 0 && result[0].balance){
                 const hives = Number(result[0].balance.split(' HIVE')[0]).toFixed(3);
-                if(hives > 10){
+                if(hives > 1){
                     setCanCreate(true);
                     setHive(hives);
                 }else{
@@ -65,16 +66,28 @@ const Tokensuser = () => {
 
         // show user's owned tokens if any
         // .properties.isPremium.authorizedEditingAccounts
-        ssc.find("nft", "nfts", { issuer: "jobaboard", "properties.isPremium.authorizedEditingAccounts": userdata.username } , null, 0, [], (err, result) => {
-            if(err) return console.log('Error asking state on New NFT Instance - SSCjs',err);
-            console.log(result);
-            if(result.length > 0){
-                setOwnedTokens(result);
+        // ssc.find("nft", "nfts", { issuer: "jobaboard", "properties.isPremium.authorizedEditingAccounts": userdata.username } , null, 0, [], (err, result) => {
+        //     if(err) return console.log('Error asking state on New NFT Instance - SSCjs',err);
+        //     console.log(result);
+        //     if(result.length > 0){
+        //         setOwnedTokens(result);
+        //     }else{
+        //         setNoowned(true);
+        //     }
+        //     setLoadingData(false);
+        // });
+        getSSCData(nftEP+"allNFTs",{ issuer: "jobaboard", "properties.isPremium.authorizedEditingAccounts": userdata.username })
+        .then(response =>{
+            if(response.result === 'error'){ 
+                console.log('Error from BE', response.error) 
+                setLoadingData(false);};
+            if(response.length > 0){
+                setOwnedTokens(response);
             }else{
                 setNoowned(true);
             }
             setLoadingData(false);
-        });
+        })
         // Bring NFTs list and set a state.
         // ssc.find('nft','nfts', { }, 1000, 0 , [], (err, result) => {
         //     if(err) return console.log('Error fetching on SSCjs - nft>nfts',err);
@@ -88,16 +101,28 @@ const Tokensuser = () => {
     },[])
 
     const refreshNfts = () => {
-        ssc.find("nft", "nfts", { issuer: "jobaboard", "properties.isPremium.authorizedEditingAccounts": userdata.username } , null, 0, [], (err, result) => {
-            if(err) return console.log('Error asking state on New NFT Instance - SSCjs',err);
-            console.log(result);
-            if(result.length > 0){
-                setOwnedTokens(result);
-            }else{
+        // ssc.find("nft", "nfts", { issuer: "jobaboard", "properties.isPremium.authorizedEditingAccounts": userdata.username } , null, 0, [], (err, result) => {
+        //     if(err) return console.log('Error asking state on New NFT Instance - SSCjs',err);
+        //     console.log(result);
+        //     if(result.length > 0){
+        //         setOwnedTokens(result);
+        //     }else{
+        //         setNoowned(true);
+        //     }
+        //     setLoadingData(false);
+        // });
+        getSSCData(nftEP+"allNFTs",{ issuer: "jobaboard", "properties.isPremium.authorizedEditingAccounts": userdata.username })
+        .then(response => {
+            if(response.error){ 
+                console.log('Error fetching data from BE',response.error);
+                setLoadingData(false);
+            }else if(response.length > 0){
+                setOwnedTokens(response);
+            }else if(response.length === 0){
                 setNoowned(true);
             }
             setLoadingData(false);
-        });
+        })
     }
 
     const closeMe = () => {
@@ -127,20 +152,32 @@ const Tokensuser = () => {
     const findInstances = (_nft) => {
         setSelectedNFT(null);
         setLoadingInstances(true);
-        ssc.find("nft", `${_nft.symbol}instances`, { account: userdata.username } , null, 0, [], (err, result) => {
-            if(err){
-                setLoadingInstances(false);
-                return console.log('Error asking state on User NFT Instance - SSCjs',err);
-            } 
-            // console.log(result);
-            if(result.length > 0){
-                setSelectedNFT(result);
-            }else{
-                //no issued yet, show user that and invite him to instantiate or sell the token.... Ideas..more ideas...
+        // ssc.find("nft", `${_nft.symbol}instances`, { account: userdata.username } , null, 0, [], (err, result) => {
+        //     if(err){
+        //         setLoadingInstances(false);
+        //         return console.log('Error asking state on User NFT Instance - SSCjs',err);
+        //     } 
+        //     // console.log(result);
+        //     if(result.length > 0){
+        //         setSelectedNFT(result);
+        //     }else{
+        //         //no issued yet, show user that and invite him to instantiate or sell the token.... Ideas..more ideas...
+        //         setnoInstancesOfNFT(true);
+        //     }
+        //     setLoadingInstances(false);
+        // });
+        console.log(_nft.symbol);
+        getSSCDataTable(nftEP+"allInstances",`${_nft.symbol}`,"instances",{ account: userdata.username })
+        .then(response => {
+            if(response.error){console.log('Error fetching data from BE',response.error);};
+            if(response.length > 0){
+                setSelectedNFT(response);
+            }else if(response.length === 0){
                 setnoInstancesOfNFT(true);
             }
             setLoadingInstances(false);
-        });
+        })
+        .catch(error => console.log('Error fetching Data',error));
     }
 
     const checkSymbolName = (nft) => {
@@ -165,6 +202,33 @@ const Tokensuser = () => {
             window.scrollTo(0, 900);
         }
     }
+
+    //////////data fecthing BE////////////
+    async function getSSCData(url = '',query = {}) {
+        const response = await fetch(url, {
+            method: 'GET', // *GET, POST, PUT, DELETE, etc.
+            mode: 'cors', // no-cors, *cors, same-origin
+            headers: {
+                'x-access-token': userdata.token,
+                'query': JSON.stringify(query),
+            },
+        });
+        return response.json(); 
+    };
+    async function getSSCDataTable(url = '',nftSymbol = String, table = String, query = {}) {
+        const response = await fetch(url, {
+            method: 'GET', // *GET, POST, PUT, DELETE, etc.
+            mode: 'cors', // no-cors, *cors, same-origin
+            headers: {
+                'x-access-token': userdata.token,
+                'nftsymbol': nftSymbol,
+                'query': JSON.stringify(query),
+                'table': table,
+            },
+        });
+        return response.json(); 
+    };
+    //////////////////////////////////////
 
     return (
         <div className="userTokensContainer">

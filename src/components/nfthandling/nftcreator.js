@@ -13,17 +13,17 @@ import { fecthDataBE } from '../../utils/logger';
 
 //dhive to test the broadcast of a custom json
 var dhive = require("@hiveio/dhive");
-var client = new dhive.Client([ "https://hived.privex.io/","https://api.hive.blog", "https://api.hivekings.com", "https://anyx.io", "https://api.openhive.network"]);
+var client = new dhive.Client([ "https://api.hive.blog", "https://api.hivekings.com", "https://anyx.io", "https://api.openhive.network","https://hived.privex.io/"]);
 const ssc_test_id = "ssc-testNettheghost1980";
 const privateKey = dhive.PrivateKey.fromString(process.env.GATSBY_secretJAB);
 const postingKey = dhive.PrivateKey.fromString(process.env.GATSBY_postingKey);
-const SSC = require('sscjs');
-const sourceSSCURL = process.env.GATSBY_testSSCNodeURL; 
-const sscTemp = new SSC(sourceSSCURL); 
+// const SSC = require('sscjs');
+// const sourceSSCURL = process.env.GATSBY_testSSCNodeURL; 
+// const sscTemp = new SSC(sourceSSCURL); 
 const adminEP = process.env.GATSBY_adminEP;
+const nftEP = process.env.GATSBY_nftEP;
 ///////
 // TODO to load all this data from .env file
-const testRPC = "http://185.130.45.130:5000/";
 const jabFEE = { fee: "0.000", currency: "HIVE", costInstance: "0.001", costCurr: "HIVE", acceptedCur: "HIVE"};
 ////////
 // const account = "theghost1980";
@@ -106,13 +106,20 @@ const Nftcreator = (props) => {
     // 
 
     function updateIssued(){
-        sscTemp.find("nft", "nfts", { issuer: "jobaboard" }, null, 0, [], (err, result) => {
-            if(err) return console.log('Error asking state on New NFT Instance - SSCjs',err);
-            // console.log(result);
-            if(result.length > 0){
-                setIssuedNFTs(result);
+        // sscTemp.find("nft", "nfts", { issuer: "jobaboard" }, null, 0, [], (err, result) => {
+        //     if(err) return console.log('Error asking state on New NFT Instance - SSCjs',err);
+        //     // console.log(result);
+        //     if(result.length > 0){
+        //         setIssuedNFTs(result);
+        //     }
+        // });
+        getSSCData(nftEP+"allNFTs",{ issuer: "jobaboard"})
+        .then(response => {
+            if(response.length > 0){
+                setIssuedNFTs(response);
             }
-        });
+        })
+        .catch(error => console.log('Error fetching data from BE',error));
     }
 
     useEffect(() => {
@@ -150,11 +157,41 @@ const Nftcreator = (props) => {
         // TODO log this. For now just local state.
     }
     //Just to test if working properly a useeffect TO DELETE LATER ON
-    // useEffect(() => {
-    //     console.log('nftToken Value::::::::::')
-    //     console.log(nftToken);
-    //     console.log('::::::::::::::::::::::::::::::')
-    // },[nftToken]);
+    useEffect(() => {
+        console.log('nftToken Value::::::::::')
+        console.log(nftToken);
+        console.log('::::::::::::::::::::::::::::::')
+    },[nftToken]);
+
+    // TODO: move all of this fetchings to helpers.....:D
+    /////////////fecthing NFT from BE
+    //////////data fecthing BE////////////
+    async function getSSCData(url = '',query = {}) {
+        const response = await fetch(url, {
+            method: 'GET', // *GET, POST, PUT, DELETE, etc.
+            mode: 'cors', // no-cors, *cors, same-origin
+            headers: {
+                'x-access-token': token,
+                'query': JSON.stringify(query),
+            },
+        });
+        return response.json(); 
+    };
+    async function getSSCDataTable(url = '',nftSymbol = String, table = String, query = {}) {
+        const response = await fetch(url, {
+            method: 'GET', // *GET, POST, PUT, DELETE, etc.
+            mode: 'cors', // no-cors, *cors, same-origin
+            headers: {
+                'x-access-token': token,
+                'nftsymbol': nftSymbol,
+                'query': JSON.stringify(query),
+                'table': table,
+            },
+        });
+        return response.json(); 
+    };
+    //////////////////////////////////////
+    /////////////////////////////////
 
     ///setters of states
     //setting nftToken per field
@@ -301,20 +338,35 @@ const Nftcreator = (props) => {
                             //function
                             var timer;
                             function checkNFT(){
-                                sscTemp.find('nft', 'nfts', { symbol: nftToken.symbol }, null, 0, [], (err, result) => {
-                                    if(err) return console.log('Error asking state on New NFT - SSCjs',err);
-                                    if(result.length === 1 && result[0].symbol === nftToken.symbol){
+                                // sscTemp.find('nft', 'nfts', { symbol: nftToken.symbol }, null, 0, [], (err, result) => {
+                                //     if(err) return console.log('Error asking state on New NFT - SSCjs',err);
+                                //     if(result.length === 1 && result[0].symbol === nftToken.symbol){
+                                //         //stop interval
+                                //         clearInterval(timer);
+                                //         setNewNFT(result[0]);
+                                //         setNftState({
+                                //             step: "4",
+                                //             desc: `Add prop to The NFT:${nftToken.symbol}.`,
+                                //             nextstep: "Verify that NFT prop was added.",
+                                //         });
+                                //         addPropsNFT(result[0]);
+                                //     }
+                                // });
+                                getSSCData(nftEP+"allNFTs", { symbol: nftToken.symbol, issuer: "jobaboard" })
+                                .then(response => {
+                                    console.log(response);
+                                    if(response.length === 1 && response[0].symbol === nftToken.symbol){
                                         //stop interval
                                         clearInterval(timer);
-                                        setNewNFT(result[0]);
+                                        setNewNFT(response[0]);
                                         setNftState({
                                             step: "4",
                                             desc: `Add prop to The NFT:${nftToken.symbol}.`,
                                             nextstep: "Verify that NFT prop was added.",
                                         });
-                                        addPropsNFT(result[0]);
+                                        addPropsNFT(response[0]);
                                     }
-                                });
+                                }).catch(error => console.log('Error while verifying prop.',error));
                             }
                             function clock(){
                                 timer = setInterval(checkNFT,1000);
@@ -368,14 +420,32 @@ const Nftcreator = (props) => {
             // TODO: Refactor CODE as this is repeating but using different params.
             var timer3;
             function checkNFT3(){
-                sscTemp.find('nft', 'nfts', { symbol: newNft.symbol }, null, 0, [], (err, result) => {
-                    if(err) return console.log('Error asking state on New NFT - SSCjs',err);
-                    // console.log(result);
-                    if(result.length === 1 && result[0].symbol === newNft.symbol && result[0].properties.hasOwnProperty("isPremium")){
+                // sscTemp.find('nft', 'nfts', { symbol: newNft.symbol }, null, 0, [], (err, result) => {
+                //     if(err) return console.log('Error asking state on New NFT - SSCjs',err);
+                //     // console.log(result);
+                //     if(result.length === 1 && result[0].symbol === newNft.symbol && result[0].properties.hasOwnProperty("isPremium")){
+                //         console.log('This one should be the NFt with the prop added. Please Check!');
+                //         console.log(result[0]);
+                //         console.log('Did Set new info about the props on NFT.');
+                //         setNewNFT(result[0]);
+                //         setNftState({
+                //             step: "5",
+                //             desc: "Continue to Instantiate",
+                //             nextstep: "Instantiate NFT.",
+                //         });
+                //         clearInterval(timer3);
+                //         //now we must filter on the instantiateNFT by checking
+                //         // amountNft.
+                //         instantiateNFT(result[0]);
+                //     }
+                // });
+                getSSCData(nftEP+"allNFTs", { symbol: nftToken.symbol })
+                .then(response => {
+                    if(response.length === 1 && response[0].symbol === newNft.symbol && response[0].properties.hasOwnProperty("isPremium")){
                         console.log('This one should be the NFt with the prop added. Please Check!');
-                        console.log(result[0]);
+                        console.log(response[0]);
                         console.log('Did Set new info about the props on NFT.');
-                        setNewNFT(result[0]);
+                        setNewNFT(response[0]);
                         setNftState({
                             step: "5",
                             desc: "Continue to Instantiate",
@@ -384,9 +454,9 @@ const Nftcreator = (props) => {
                         clearInterval(timer3);
                         //now we must filter on the instantiateNFT by checking
                         // amountNft.
-                        instantiateNFT(result[0]);
+                        instantiateNFT(response[0]);
                     }
-                });
+                }).catch(error => console.log('Error while Instantiate prop.',error));
             }
             function clock3(){
                 timer3 = setInterval(checkNFT3,1000);
@@ -404,50 +474,87 @@ const Nftcreator = (props) => {
 
     //to check how balances change on each iteration
     function checkBEE(){
-        const query = { 
-            jsonrpc:"2.0", 
-            method:"find",
-            params: {
-                contract: 'tokens',
-                table: 'balances',
-                query: { account: 'jobaboard', symbol: 'BEE' },
-            },
-            id: Date.now(),
-        };
+        // const query = { 
+        //     jsonrpc:"2.0", 
+        //     method:"find",
+        //     params: {
+        //         contract: 'tokens',
+        //         table: 'balances',
+        //         query: { account: 'jobaboard', symbol: 'BEE' },
+        //     },
+        //     id: Date.now(),
+        // };
 
-        getDataRPC(query,"contracts");
-    };
-    async function getDataRPC(query,route) {
-        console.log(`Requesting BEE balance to:\n${testRPC}`);
-        axios.post(testRPC+route, query)
-        .then(result => {
-            // console.log(result.data);
-            if(result.data.result.length > 0){
-                setBee(result.data.result[0]);
-                console.log("Balance Received. Good!");
+        // getDataRPC(query,"contracts");
+        //new one
+        getSSCData(nftEP+"getBalance", { account: 'jobaboard', symbol: 'BEE'})
+        .then(response => {
+            console.log(response);
+            if(response.length > 0){
+                setBee(response[0])
             }
-        })
-        .catch(error => {
-            console.log("Error on RPC request", error);
-        })
+        }).catch(error => console.log('Error asking token balance',error));
     };
+    // async function getDataRPC(query,route) {
+    //     console.log(`Requesting BEE balance to:\n${testRPC}`);
+    //     axios.post(testRPC+route, query)
+    //     .then(result => {
+    //         // console.log(result.data);
+    //         if(result.data.result.length > 0){
+    //             setBee(result.data.result[0]);
+    //             console.log("Balance Received. Good!");
+    //         }
+    //     })
+    //     .catch(error => {
+    //         console.log("Error on RPC request", error);
+    //     })
+    // };
 
-    async function sendRPCAxios(toCheck, route, query) {
+    async function sendRPCBE(toCheck, query) {
         if(toCheck === 'nft'){
-            console.log(`Requesting info ${toCheck} to:\n${testRPC}`);
-            axios.post(testRPC+route, query)
-            .then(result => {
-                // console.log(result.data);
-                if(result.data.result.length === 1){
-                    //we set to see the changes.
-                    setNewNFT(result.data.result[0]);
+            // console.log(`Requesting info ${toCheck} to:\n${testRPC}`);
+            // axios.post(testRPC+route, query)
+            // .then(result => {
+            //     // console.log(result.data);
+            //     if(result.data.result.length === 1){
+            //         //we set to see the changes.
+            //         setNewNFT(result.data.result[0]);
+            //     }
+            // })
+            // .catch(error => {
+            //     console.log("Error on RPC request", error);
+            // })
+            // symbol: _newNFT.symbol
+            getSSCData(nftEP+"allNFTs", query)
+            .then(response => {
+                console.log(response);
+                if(response.length === 1 && !response.error){
+                    setNewNFT(response[0]);
+                }else{
+                    console.log(response);
                 }
-            })
-            .catch(error => {
-                console.log("Error on RPC request", error);
+            }).catch(error => {
+                console.log("Error on NFTs request to BE", error);
             })
         }
     };
+
+    // async function sendRPCAxios(toCheck, route, query) {
+    //     if(toCheck === 'nft'){
+    //         console.log(`Requesting info ${toCheck} to:\n${testRPC}`);
+    //         axios.post(testRPC+route, query)
+    //         .then(result => {
+    //             // console.log(result.data);
+    //             if(result.data.result.length === 1){
+    //                 //we set to see the changes.
+    //                 setNewNFT(result.data.result[0]);
+    //             }
+    //         })
+    //         .catch(error => {
+    //             console.log("Error on RPC request", error);
+    //         })
+    //     }
+    // };
 
     function instantiateNFT(_newNFT){
         console.log(`To instantiate:${_newNFT.symbol}.`)
@@ -542,38 +649,61 @@ const Nftcreator = (props) => {
                 var timer2;
                 function checkInstant(){
                     console.log('Checking on:' + _newNFT.symbol + "instances");
-                    sscTemp.find('nft', _newNFT.symbol+"instances", { account: account }, null, 0, [], (err, result) => {
-                        if(err) return console.log('Error asking state on New NFT Instance - SSCjs',err);
-                        console.log(result);
-                        if(result.length === amountNft){
+                    // sscTemp.find('nft', _newNFT.symbol+"instances", { account: account }, null, 0, [], (err, result) => {
+                    //     if(err) return console.log('Error asking state on New NFT Instance - SSCjs',err);
+                    //     console.log(result);
+                    //     if(result.length === amountNft){
+                    //         //now we STOP for now counting the time.
+                    //         clearInterval(timerTotal);
+
+                    //         //stop interval
+                    //         clearInterval(timer2);
+                    //         setInstances(result);
+                    //         console.log(result);
+                    //         setNftState({
+                    //             step: "8",
+                    //             desc: `Verifyed Instance of:${_newNFT.symbol}, id:${result[0]._id}.`,
+                    //             nextstep: "Done Succesfully.",
+                    //         });
+                    //         setWorking(false);
+                    //         console.log('Updating the NFT, to ensure circulating supply changes.');
+                    //         sendRPCAxios('nft',"contracts",{
+                    //                 jsonrpc:"2.0", 
+                    //                 method:"find",
+                    //                 params: {
+                    //                     contract: 'nft',
+                    //                     table: 'nfts',
+                    //                     query: { symbol: _newNFT.symbol },
+                    //                 },
+                    //                 id: Date.now(),
+                    //         });
+                    //         // as we finish here present state:
+                    //         console.log(recordSteps);
+                    //     }
+                    // });
+                    getSSCDataTable(nftEP+"allInstances",_newNFT.symbol,"instances",{ account: account })
+                    .then(response => {
+                        console.log(response);
+                        if(response.length === amountNft && !response.error){
                             //now we STOP for now counting the time.
                             clearInterval(timerTotal);
 
                             //stop interval
                             clearInterval(timer2);
-                            setInstances(result);
-                            console.log(result);
+                            setInstances(response);
+                            console.log(response);
                             setNftState({
                                 step: "8",
-                                desc: `Verifyed Instance of:${_newNFT.symbol}, id:${result[0]._id}.`,
+                                desc: `Verifyed Instance of:${_newNFT.symbol}, id:${response[0]._id}.`,
                                 nextstep: "Done Succesfully.",
                             });
                             setWorking(false);
                             console.log('Updating the NFT, to ensure circulating supply changes.');
-                            sendRPCAxios('nft',"contracts",{
-                                    jsonrpc:"2.0", 
-                                    method:"find",
-                                    params: {
-                                        contract: 'nft',
-                                        table: 'nfts',
-                                        query: { symbol: _newNFT.symbol },
-                                    },
-                                    id: Date.now(),
-                            });
+                            sendRPCBE('nft',{ symbol: _newNFT.symbol });
                             // as we finish here present state:
                             console.log(recordSteps);
                         }
-                    });
+                    }).catch(error => {console.log('Error getting All instances of NFT to BE',error)})
                 }
                 function clock2(){
                     timer2 = setInterval(checkInstant,1000);
@@ -632,48 +762,77 @@ const Nftcreator = (props) => {
             // TODO refactor all of this in a global function that we can use on all requests.
             var timerFinal;
             function lastTimer(){
-                sscTemp.find('nft', _newNFT.symbol+"instances", { account: account }, null, 0, [], (err, result) => {
-                    if(err) return console.log('Error asking state on New NFT Instance - SSCjs',err);
-                    console.log(result);
-                    if(result.length === amountNft){
+                // sscTemp.find('nft', _newNFT.symbol+"instances", { account: account }, null, 0, [], (err, result) => {
+                //     if(err) return console.log('Error asking state on New NFT Instance - SSCjs',err);
+                //     console.log(result);
+                //     if(result.length === amountNft){
+                //         //now we STOP for now counting the time.
+                //         clearInterval(timerTotal);
+
+                //         //stop interval
+                //         clearInterval(timerFinal);
+                //         setInstances(result);
+                //         console.log(result);
+                //         setNftState({
+                //             step: "8",
+                //             desc: `Verifyed Instance(s) of:${_newNFT.symbol}, id:${result[0]._id}.`,
+                //             nextstep: "Done Succesfully.",
+                //         });
+                //         setWorking(false);
+                //         console.log('Updating the NFT, to ensure circulating supply changes.');
+                //         sendRPCAxios('nft',"contracts",{
+                //                 jsonrpc:"2.0", 
+                //                 method:"find",
+                //                 params: {
+                //                     contract: 'nft',
+                //                     table: 'nfts',
+                //                     query: { symbol: _newNFT.symbol },
+                //                 },
+                //                 id: Date.now(),
+                //         });
+                //         // as we finish here present state:
+                //         console.log(recordSteps);
+                //         //as final step UPDATE THE NFTs issued by main account to prevent errors if user wants to
+                //         // create a new one right away.
+                //         updateIssued();
+
+                //         // ++++++++++++++++++
+                //         //Record event to LogOp
+                //         sendLog("Last",`Process finished successfully.`,"false","");
+                //         //End recording
+                //         // ++++++++++++++++++
+
+                //     }
+                // });
+                getSSCDataTable(nftEP+"allInstances",_newNFT.symbol,"instances",{ account: account })
+                .then(response => {
+                    console.log(response);
+                    if(response.length === amountNft && !response.error){
                         //now we STOP for now counting the time.
                         clearInterval(timerTotal);
-
                         //stop interval
                         clearInterval(timerFinal);
-                        setInstances(result);
-                        console.log(result);
+                        setInstances(response);
+                        console.log(response);
                         setNftState({
                             step: "8",
-                            desc: `Verifyed Instance(s) of:${_newNFT.symbol}, id:${result[0]._id}.`,
+                            desc: `Verifyed Instance(s) of:${_newNFT.symbol}, id:${response[0]._id}.`,
                             nextstep: "Done Succesfully.",
                         });
                         setWorking(false);
                         console.log('Updating the NFT, to ensure circulating supply changes.');
-                        sendRPCAxios('nft',"contracts",{
-                                jsonrpc:"2.0", 
-                                method:"find",
-                                params: {
-                                    contract: 'nft',
-                                    table: 'nfts',
-                                    query: { symbol: _newNFT.symbol },
-                                },
-                                id: Date.now(),
-                        });
+                        sendRPCBE('nft',{ symbol: _newNFT.symbol });
                         // as we finish here present state:
                         console.log(recordSteps);
                         //as final step UPDATE THE NFTs issued by main account to prevent errors if user wants to
-                        // create a new one right away.
                         updateIssued();
-
                         // ++++++++++++++++++
                         //Record event to LogOp
                         sendLog("Last",`Process finished successfully.`,"false","");
                         //End recording
                         // ++++++++++++++++++
-
                     }
-                });
+                }).catch(error => {console.log('Error getting All instances of NFT to BE',error)})
             }
             function clockFinal(){
                 timerFinal = setInterval(lastTimer,1000);
@@ -688,19 +847,19 @@ const Nftcreator = (props) => {
         }
     }
 
-    const getInstances = () => {
-        sscTemp.find('nft', newNFT.symbol+"instances", { account: account }, null, 0, [], (err, result) => {
-            if(err) return console.log('Error asking state on New NFT Instance - SSCjs',err);
-            console.log(result);
-        });
-    }
+    // const getInstances = () => {
+    //     sscTemp.find('nft', newNFT.symbol+"instances", { account: account }, null, 0, [], (err, result) => {
+    //         if(err) return console.log('Error asking state on New NFT Instance - SSCjs',err);
+    //         console.log(result);
+    //     });
+    // }
 
-    const getNftsOwned = () => {
-        sscTemp.find('nft', 'nfts', { issuer: 'jobaboard' }, null, 0, [], (err, result) => {
-            if(err) return console.log('Error asking state on New NFT Instance - SSCjs',err);
-            console.log(result);
-        });
-    }
+    // const getNftsOwned = () => {
+    //     sscTemp.find('nft', 'nfts', { issuer: 'jobaboard' }, null, 0, [], (err, result) => {
+    //         if(err) return console.log('Error asking state on New NFT Instance - SSCjs',err);
+    //         console.log(result);
+    //     });
+    // }
 
     const changeInput = (event) => {
         //TODO validations to be done on the react-form-handler
@@ -758,7 +917,7 @@ const Nftcreator = (props) => {
                 <Mesaggertop  
                     message={"We recommend issue a max of 20 - 29 tokens in one operation.\nWhen issuing a batch of more than 30 tokens, errors may be present.\nPlease visit the documentation, for available options."}
                     enableTime={true}
-                    timeToHide={5500}
+                    timeToHide={6500}
                     callBack={() => setMessageUser(false)}
                     linkToVisit={"/"}
                     linkText={"Docs Center - JAB"}

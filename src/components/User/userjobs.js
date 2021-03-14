@@ -11,6 +11,7 @@ import Img from 'gatsby-image';
 import Absscreenwrapper from '../absscreenwrapper';
 import Previewjob from './jobs/previewjob';
 import Menujobs from './jobs/menujobs';
+import Loader from '../loader';
 //constants
 const jobEP = process.env.GATSBY_jobEP;
 //end constants
@@ -42,21 +43,25 @@ const Userjobs = () => {
     const [selected, setSelected] = useState("");
     const [jobs, setJobs] = useState([]);
     const [selectedJob, setSelectedJOb] = useState(null);
+    const [loadingData, setLoadingData] = useState(false);
 
     //search jobs for this user on mongoDB
     useEffect(() => {
+        setLoadingData(true);
         getData(`${jobEP}${userdata.username}`)
         .then(response => {
             console.log(response);
             if(response.message === "No jobs for this user"){
                 //no jobs found
-                return console.log('No jobs for this user!');
+                console.log('No jobs for this user!');
             }else if(response.length > 0){
                 setJobs(response)
             }
+            setLoadingData(false);
         })
         .catch(error => {
             console.log('Error fecthing Job Data from BE.',error);
+            setLoadingData(false);
         })
     },[]);
 
@@ -96,7 +101,13 @@ const Userjobs = () => {
                     <div>
                         <h1>Job Dashboard</h1>
                         {
-                            (jobs.length === 0) && 
+                            loadingData &&
+                                <div style={{ width: '100px', margin: '0 auto'}}>
+                                    <Loader logginIn={true} />
+                                </div>
+                        }
+                        {
+                            (jobs.length === 0 && !loadingData) && 
                                 <div className="standarDiv320x200h">
                                     <p>Looks like you have no Jobs/Services created.</p>
                                     <p>Ask for assistance or</p>

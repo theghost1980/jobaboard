@@ -161,6 +161,16 @@ body::-webkit-scrollbar-thumb {
     border: 1px solid orange;
     border-radius: 8px;
 }
+.borderedFlexShadowMinContent {
+    display: flex;
+    flex-direction: column;
+    max-width: 82%;
+    height: auto;
+    border: 1px solid orange;
+    border-radius: 10px;
+    margin: var(--marginBewteen-Objects);
+    box-shadow: 2px 2px 5px 2px orange;
+}
 .standardUlColThin {
     display: flex;
     flex-direction: column;

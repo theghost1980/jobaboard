@@ -8,7 +8,7 @@ const Previewjob = (props) => {
     const { job, cbClose } = props;
 
     return (
-        <div className="borderedFlexShadowFullW relativeDiv coloredContrast1">
+        <div className="borderedFlexShadowMinContent relativeDiv coloredContrast1">
             <Btnclosemin btnAction={cbClose} />
             {/* {JSON.stringify(job)} */}
             {

@@ -8,12 +8,14 @@ import { check } from '../../../utils/helpers';
 import axios from 'axios';
 import Loader from '../../loader';
 import Previewjob from './previewjob';
-const SSC = require('sscjs');
-const ssc = new SSC('https://185.130.45.130:5000/');
 //constants
-const rpcURL = 'http://185.130.45.130:5000/';
+// const rpcURL = 'http://185.130.45.130:5000/';
 const adminEP = process.env.GATSBY_adminEP;
+const nftEP = process.env.GATSBY_nftEP;
+const rpcNode = process.env.GATSBY_testSSCNodeURL;
 // end constants
+// const SSC = require('sscjs');
+// const ssc = new SSC('https://185.130.45.130:5000/');
 
 // to change on my css as important
 // if you need to modify it later on: >>> "/Users/SatMan1980/Downloads/program/gatsby/jobaboard/jobAboard/node_modules/react-images-upload/index.css"
@@ -57,8 +59,8 @@ const Jobs = (props) => {
     //check on mounting
     useEffect(()=>{
         //find user's owned NFTs.
+        console.log('Asking for instances.')
         refreshUserNFTs();
-
     },[]);
 
     const [job, setJob] = useState({
@@ -95,13 +97,21 @@ const Jobs = (props) => {
 
     //refresh user tokens.
     function refreshUserNFTs(){
-        ssc.find("nft", "nfts", { issuer: "jobaboard", "properties.isPremium.authorizedEditingAccounts": userdata.username } , null, 0, [], (err, result) => {
-            if(err) return console.log('Error asking state on User NFT tokens - SSCjs',err);
-            // console.log(result);
-            if(result.length > 0){
-                setOwnedTokens(result);
+        // ssc.find("nft", "nfts", { issuer: "jobaboard", "properties.isPremium.authorizedEditingAccounts": userdata.username } , null, 0, [], (err, result) => {
+        //     if(err) return console.log('Error asking state on User NFT tokens - SSCjs',err);
+        //     // console.log(result);
+        //     if(result.length > 0){
+        //         setOwnedTokens(result);
+        //     }
+        // });
+        getSSCData(nftEP+"allNFTs",{ issuer: "jobaboard", "properties.isPremium.authorizedEditingAccounts": userdata.username })
+        .then(response => {
+            if(response.error){ console.log('Error fetching data from BE',response.error);}
+            if(response.length > 0){
+                console.log(response);
+                setOwnedTokens(response);
             }
-        });
+        })
     }
 
     const testUploadImages = () => {
@@ -219,6 +229,17 @@ const Jobs = (props) => {
             mode: 'cors', // no-cors, *cors, same-origin
             headers: {
                 'x-access-token': userdata.token
+            },
+        });
+        return response.json(); 
+    };
+    async function getSSCData(url = '',query = {}) {
+        const response = await fetch(url, {
+            method: 'GET', // *GET, POST, PUT, DELETE, etc.
+            mode: 'cors', // no-cors, *cors, same-origin
+            headers: {
+                'x-access-token': userdata.token,
+                'query': JSON.stringify(query),
             },
         });
         return response.json(); 
