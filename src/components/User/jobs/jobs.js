@@ -9,7 +9,7 @@ import axios from 'axios';
 import Loader from '../../loader';
 import Previewjob from './previewjob';
 const SSC = require('sscjs');
-const ssc = new SSC('http://185.130.45.130:5000/');
+const ssc = new SSC('https://185.130.45.130:5000/');
 //constants
 const rpcURL = 'http://185.130.45.130:5000/';
 const adminEP = process.env.GATSBY_adminEP;

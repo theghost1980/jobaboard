@@ -11,6 +11,23 @@ const Generaltesting = () => {
 
     const userdata = check();
 
+    async function getSSCData(url = '') {
+        const response = await fetch(url, {
+            method: 'GET', // *GET, POST, PUT, DELETE, etc.
+            mode: 'cors', // no-cors, *cors, same-origin
+            headers: {
+                'x-access-token': userdata.token
+            },
+        });
+        return response.json(); 
+    };
+
+    const testSSCBE = () => {
+        getSSCData("https://backendjab.herokuapp.com/ssc/ssctest/allNFTs")
+        .then(response => console.log(response))
+        .catch(error => console.log('Error on request',error));
+    }
+
     const sendLog = () => {
         const timestamp = new Date().getTime();
         const nft = JSON.stringify({
@@ -35,7 +52,15 @@ const Generaltesting = () => {
     }
     return (
         <div>
-            <button onClick={sendLog}>Send Log test</button>
+            <ul>
+                <li>
+                    {/* <button onClick={sendLog}>Send Log test</button> */}
+                </li>
+                <li>
+                    <button onClick={testSSCBE}>Send SSC test</button>
+                </li>
+            </ul>
+            
         </div>
     )
 }
