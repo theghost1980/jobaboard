@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import Img from 'gatsby-image';
+import { useStaticQuery, graphql } from 'gatsby';
 // import { Link } from "gatsby"
 import axios from 'axios';
 
@@ -12,6 +14,19 @@ const Miniprofile = (props) => {
     const { username } = props;
     const [portfolio, setPortfolio] = useState(null);
     const [profile, setProfile] = useState(null);
+
+    const data = useStaticQuery(graphql`
+        query{
+            externalIcon: file(relativePath: {eq: "external_red.png"}) {
+                childImageSharp {
+                    fixed(width: 22) {
+                        ...GatsbyImageSharpFixed_withWebp
+                    }
+                }
+            }
+        }
+    `);
+    //end grapqhl queries
 
     useEffect(() => {
         if(username){
@@ -65,7 +80,9 @@ const Miniprofile = (props) => {
                         <div className="contentMiniMargins">
                             <p>{portfolio.description}</p>
                             {/* <Link to={`/portfoliouser?query=${portfolio.username}`}>{portfolio.username}</Link> */}
-                            <a href={`/portfoliouser?query=${portfolio.username}`} target="_blank" rel="noopener noreferrer">{portfolio.username}</a>
+                            <a href={`/portfoliouser?query=${portfolio.username}`} className="aFlexAlignedCont" target="_blank" rel="noopener noreferrer">
+                                {portfolio.username}<Img fixed={data.externalIcon.childImageSharp.fixed} className="miniMarginLeft" />
+                            </a>
                         </div>
                     </div>
             }

@@ -23,13 +23,16 @@ const Previewjob = (props) => {
                             </div>
                         }
                         <div className="standardBlockMaxW80p">
-                            <Miniprofile username={job.username} />
+                            <div className="standardDivRowFullW justiAlig">
+                                <Miniprofile username={job.username} />
+                                <div>
+                                    {/* TODO: logic if logged, negociate with user if not take to login & save in history this job, so after log in redirect to this action */}
+                                    <button title="Means hire or work for this user. JAB jargon! TODO...">Jab It</button>
+                                </div>
+                            </div>
                             <h1>{job.title}</h1>
                             <p>Job Type: {job.job_type === "employee" ? "Looking to get Hired by this Job/Service":"Looking to Hire a professional"}</p>
                             <p>Desc: {job.description ? job.description : 'none'}</p>
-                            <p>Cat: {job.category}
-                                - Sub Cat: <Link to={`/explore?subcat=${job.sub_category}`}>{job.sub_category}</Link>
-                            </p>
                             <p>{job.job_type === "employer" ? 'I am willing to pay you: ': 'I ask for this service: '}{job.paying_price} of my {job.nft_symbol} tokens.</p>
                             <p>Escrow Type:{job.escrow_type}</p>
                             {
@@ -43,7 +46,7 @@ const Previewjob = (props) => {
                             {
                                 (job.images.length > 1) && 
                                 <div>
-                                    <p>Rest of support images:</p>
+                                    <p>All the images on this publication:</p>
                                     <ul className="standardULImagesRow overflowXscroll coloredContrast2 bordersRounded centeredDiv marginBottom">
                                     {
                                         job.images.map(image => {
@@ -54,9 +57,11 @@ const Previewjob = (props) => {
                                             )
                                         })
                                     }
-                                </ul>
+                                    </ul>
                                 </div>
                             }
+                            <p>Explore more on this Cat: <Link to={`/explore?category=${job.category}|sub_category=none`}>{job.category}</Link> </p>
+                            <p>Or explore this Sub Cat: <Link to={`/explore?category=${job.category}|sub_category=${job.sub_category}`}>{job.sub_category}</Link></p>
                         </div>
                     </div>
             }

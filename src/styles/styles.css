@@ -151,6 +151,9 @@ body::-webkit-scrollbar-thumb {
 }
 
 /* shared classes */
+.width90 {
+    width: 90% !important;
+}
 .justifyRight {
     justify-content: right;
 }
@@ -183,6 +186,11 @@ body::-webkit-scrollbar-thumb {
     bottom: 5px;
     right: -8px;
 }
+.aFlexAlignedCont{
+    display: flex;
+    align-items: center;
+}
+
 .miniMarginLeft {
     margin-left: 5px;
 }

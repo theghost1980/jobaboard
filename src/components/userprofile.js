@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 //helpers
-import { check, encode } from '../utils/helpers';
+import { check, encode, formatDateTime } from '../utils/helpers';
 //components
 import Loader from '../components/loader';
 import { navigate } from 'gatsby';
@@ -176,6 +176,7 @@ const UserProfile = () => {
             if(data.auth === false){
                 console.log('Error on update!');
                 console.log(data.message);
+                setuploadingData(false);
             }else{
                 console.log('Profiled Updated!');
                 console.log(data);
@@ -197,11 +198,13 @@ const UserProfile = () => {
                 setProfile(data);
                 //force reload components per navigate to profile again
                 navigate("/app/profile");
+                setuploadingData(false);
             }
-            setuploadingData(false);
         })
-        .catch(error => console.log('Error while updating user data to API + image.',error));
-        setuploadingData(false);
+        .catch(error => {
+            console.log('Error while updating user data to API + image.',error);
+            setuploadingData(false);
+        });
     };
     //end update profile
 
@@ -274,10 +277,10 @@ const UserProfile = () => {
         .then(data => {
             data.json()
             .then(msg => {
-                setLoadingData(false);
                 // console.log(msg);
                 //testing to set whole object as received
                 setProfile(msg);
+                setLoadingData(false);
             });
         })
         .catch(error => {
@@ -301,11 +304,8 @@ const UserProfile = () => {
                 loadingData ? <Loader logginIn={true} typegif={"spin"} />
                     :
                     <>
-                    <div className="rowContainer">
+                    <div className={`rowContainer ${uploadingData ? 'disableDiv': null}`}>
                         <div className="rowRightPicContainer">
-                            {
-                                uploadingData && <p>Updating the Data. Wait just a moment. Thanks.</p>
-                            }
                             <div className="userProfilePicCont">
                                 <img src={profile.avatar} 
                                     className="userProfilePic" 
@@ -325,6 +325,28 @@ const UserProfile = () => {
                                     uploadingData && <p>Uploading Image to server....</p>
                                 } */}
                             </div>
+                            {
+                                (profile.createdAt) &&
+                                <div className="smallText">
+                                    <div className="standardFlexColBordered width90 justiAlig marginsTB justRounded">
+                                        <p className="minimumMarginTB">JAB Member Since:</p>
+                                        <p className="minimumMarginTB">{formatDateTime(profile.createdAt)}</p>
+                                    </div>
+                                    {   
+                                        profile.updatedAt &&
+                                        <div className="standardFlexColBordered width90 justiAlig marginsTB justRounded">
+                                            <p className="minimumMarginTB">Last Update on Profile:</p>
+                                            <p className="minimumMarginTB">{formatDateTime(profile.updatedAt)}</p>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            {
+                                uploadingData &&
+                                    <div>
+                                        <Loader logginIn={true} typegif={"dots"} />
+                                    </div>
+                            }
                         </div>
                         <form id="profileUserForm" onSubmit={handleUpdate}>
                         <h1>@{userdata.username} - Profile Page</h1>

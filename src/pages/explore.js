@@ -19,6 +19,16 @@ const jobEP = process.env.GATSBY_jobEP;
 // TODO: pass the current category/sub category as context so the page
 // will display the required category
 
+function cleanQuery(q){
+    const newNode = {};
+    Object.entries(q).forEach(([key, val]) => {
+        if(val !== null && val !== "" && val !== "none"){
+            return (newNode[key] = val);
+        }
+    });
+    return newNode;
+}
+
 const Explore = (props) => {
     const userdata = check();
     //graphql queries
@@ -68,7 +78,7 @@ const Explore = (props) => {
 
     const [resultQuery, setResultQuery] = useState([]);
     const [loadingQuery, setLoadingQuery] = useState(false);
-    const query  = props.location.search || null;
+    const query  = props.location.search;
     console.log('Received prop to work with:');
     console.log(query);
     
@@ -108,46 +118,46 @@ const Explore = (props) => {
         })
     }
 
+    async function sendQuery(q){
+        getDataQ(jobEP + "publicAllJobsQuery",q,limit)
+        .then(response => {
+            console.log(response);
+            // TODO handle pagination
+            // if results > max per page(which can be a parameter set as a constant or .env var)
+            setResultQuery(response.result);
+            setLoadingQuery(false);
+        })
+        .catch(error => {
+            console.log('Error asking for a filtered query on BE',error);
+            setLoadingQuery(false);
+        });
+    }
+
     //search jobs 
     useEffect(() => {
         if(query){
             setLoadingQuery(true);
-            const cat = String(query).split("?cat=")[1].split("|")[0];
-            const subcat = String(query).split("subcat=")[1];
-            // console.log(`Cat:${cat}, Subcat:${subcat}`);
-            const category = decodeURI(cat);
-            const sub_category = decodeURI(subcat);
-            // console.log(`category:${category}, sub_category:${sub_category}`);
-            console.log('Sending new query....');
-            setValueQuery("category",category);
-            setValueQuery("sub_category",sub_category);
-            getDataQ(jobEP + "publicAllJobsQuery",{category: category, sub_category: sub_category, active: true },limit)
-            .then(response => {
-                console.log(response);
-                // TODO handle pagination
-                // if results > max per page(which can be a parameter set as a constant or .env var)
-                setResultQuery(response.result);
-                setLoadingQuery(false);
-            })
-            .catch(error => {
-                console.log('Error asking for a filtered query on BE',error);
-                setLoadingQuery(false);
-            });
-
+            var passedQ = {
+                category: "", sub_category: ""
+            }
+            const cleanQ = decodeURI(query);
+            // console.log(cleanQ);
+            const category = cleanQ.split("?category=")[1].split("|");
+            passedQ.category = category[0];
+            const sub_category = category[1].split("sub_category=")[1];
+            passedQ.sub_category = sub_category;
+            if(category[0]){
+                setValueQuery("category",category[0]);
+            }
+            if(sub_category){
+                setValueQuery("sub_category",sub_category);
+            }
+            passedQ.active = true;
+            const cleanedQ = cleanQuery(passedQ);
+            console.log('To execute on this cleaned one:');
+            console.log(cleanedQ);
+            sendQuery(cleanedQ);
         }
-        // setLoadingQuery(true);
-        // // TODO add the filter/sort option as a header object. Send it stringifyed and parse on server.
-        // // i.e `options`: { filter: 'xxxxx', sort: 'zzzzzzz'}
-        // console.log(`Asking to:${jobEP}publicAllJobs`)
-        // getData(`${jobEP}publicAllJobs`)
-        // .then(response => {
-        //     setResultQuery(response.result);
-        //     setLoadingQuery(false);
-        // })
-        // .catch(error => {
-        //     console.log('Error fecthing Job Data from BE.',error);
-        //     setLoadingQuery(false);
-        // })
     },[query]);
 
     //fecthing data
@@ -188,28 +198,10 @@ const Explore = (props) => {
         console.log(filterQuery,limit);
         if(filterQuery !== initialStateQ){
             setLoadingQuery(true);
-            //fix the query to avoid sending null || "" fields.
-            const newNode = {};
-            Object.entries(filterQuery).forEach(([key, val]) => {
-                if(val !== null && val !== ""){
-                    return (newNode[key] = val);
-                }
-            });
-            // console.log(newNode,limit);
             console.log('Sending new query....');
+            const newNode = cleanQuery(filterQuery);
             console.log(newNode);
-            getDataQ(jobEP + "publicAllJobsQuery",newNode,limit)
-            .then(response => {
-                console.log(response);
-                // TODO handle pagination
-                // if results > max per page(which can be a parameter set as a constant or .env var)
-                setResultQuery(response.result);
-                setLoadingQuery(false);
-            })
-            .catch(error => {
-                console.log('Error asking for a filtered query on BE',error);
-                setLoadingQuery(false);
-            });
+            sendQuery(newNode);
         };
     }
 
@@ -238,18 +230,20 @@ const Explore = (props) => {
     return (
         <Layout>
             <div className="exploreContainer">
-                <h1>Explore Page</h1>
                 {/* <p>query={query} For now brings all. TODO</p> */}
                 {/* todo set this one as a component to re-use where needed */}
-                <div className="pointer standardDiv40px40pxPlain justiAlig scaleHovered" onClick={prepareQuery}>
-                    <Img fixed={data.filterIcon.childImageSharp.fixed} />
+                <h1>Explore Categories</h1>
+                <div className="standardDivRowFullW">
+                        <p>Filters:</p>
+                        <div className="pointer standardDiv40px40pxPlain justiAlig scaleHovered" onClick={prepareQuery}>
+                            <Img fixed={data.filterIcon.childImageSharp.fixed} />
+                        </div>
                 </div>
                 {
                     showFilters &&
                     <div className="normalTextSmall standardFlexColBordered justRounded softBackground marginsTB">
                         <div className="miniMargins">
                         <div>
-                            <p>Filter by:</p>
                             <div className="standardDivRowFullW justifyContentSpaced">
                                 <p>Job/Service Type</p>
                                 <div className="standardDivRowFullW justifyContentSpaced textAlignedCenter miniMarginBottom">
@@ -373,7 +367,7 @@ const Explore = (props) => {
                                             return (
                                                 // to test carousel removed: onClick={() => setSelectedJOb(job)}
                                                 <li key={job._id}>
-                                                    <Jobresult job={job} logged={userdata.logged} openCb={() => setSelectedJOb(job)} />
+                                                    <Jobresult job={job} logged={userdata.logged} openCb={() => setSelectedJOb(job)} sourceQuery={"explore"} />
                                                 </li>
                                             )
                                         })
@@ -389,6 +383,14 @@ const Explore = (props) => {
                             <p>Try another Category using the filter :D</p>
                         </div>
                 }
+                <div>
+                    <p>TODO we could have 2 or 3 sections as</p>
+                    <ul>
+                        <li>Top users</li>
+                        <li>Trending cats AND so on</li>
+                        <li>Also what we do if no query was passed? bring something as default??</li>
+                    </ul>
+                </div>
             </div>
         </Layout>
     )

@@ -33,7 +33,9 @@ const Jobresult = (props) => {
     // check if these jobs belong to this user logged
     // if not remove the edit menu or decide if you want to handle jobs edition just in one place
     // inside of managejobs maybe????
-    const { job, logged, openCb } = props; //if loggedIn we show the status icon, otherwise noup.
+
+    // TODO add the params to read them anytime we use this component
+    const { job, logged, openCb, sourceQuery } = props; //if loggedIn we show the status icon, otherwise noup.
 
     return (
         <div className="miniDiv2 fontSmall coloredContrast1 relativeDiv scaleHovered justRounded">
@@ -78,7 +80,7 @@ const Jobresult = (props) => {
                     <p className="bolder">-{job.nft_symbol}</p>
                 </div>
                 {
-                    logged &&
+                    logged && (sourceQuery !== "explore") &&
                     <div className="absDivRow whiteBack hoveredOpaacity justRounded">
                         <Img fixed={data.statusIcon.childImageSharp.fixed} />
                         <p>{job.active ? 'Active - Published':'Not Active'}</p>

@@ -42,7 +42,7 @@ const Index = () => {
               data.append_menu.edges.map(({ node: item}) => {
                 return (
                   <li key={item.id} className="catItemCont">
-                    <Link to={`/explore?${item.query}`}>
+                    <Link to={`/explore?category=${item.name}|sub_category=none`}>
                       <div className="imgContCat">
                         <img src={item.image} className="imgCat" alt={`${item.name}-${item.id}`} />
                         <h3>{item.name}</h3>

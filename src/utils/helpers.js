@@ -12,6 +12,9 @@ const beechatEP = process.env.GATSBY_beeChatEP;
 // TODO: I will create my own encoding function.
 // the kay is from a given word/key I will encode all inside LS when the info is sensitive.
 // let's try to save key,values as well so we keep the secret inside the .env
+// Just in case this approach do not work
+// we may implement just for the encode/decode functions
+// this method: https://obfuscator.io/
 // TODO bellow
 // TODO important ---> remove this shit from project.....var bcrypt = require('bcryptjs');
 

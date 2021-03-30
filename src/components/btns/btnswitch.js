@@ -27,6 +27,7 @@ const Btnswitch = (props) => {
         }
     `);
     //end grapqhl queries
+    
     if(initialValue === null){ 
         initialValue = false ;
         if(showValueDevMode){ console.log(`Prop as initialValue not received, using false.`)}
