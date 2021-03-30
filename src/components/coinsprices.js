@@ -35,6 +35,7 @@ const Coinprices = () => {
     `);
     //end grapqhql queries
 
+    const [active, setActive] = useState(false);
     const [coins, setCoins] = useState({
         ethereum: {usd: 0},
         hive: {usd: 0},
@@ -49,19 +50,24 @@ const Coinprices = () => {
             if(response.status === 200){
                 response.json()
                 .then(res => {
-                    if (res.gecko_says === "(V3) To the Moon!"){
+                    if (res.gecko_says === "(V3) To the Moon!"){ //"(V3) To the Moon!""
                         //api working, now ask for prices.
+                        setActive(true);
+                        console.log('Coin Gecko active & working now, asking for prices...');
                         getCoins(listCoins)
                         .then(response => {
                             // console.log(response);
                             setCoins(response);
                         })
                         .catch(error => {
-                            console.log('Error getting coin prices, listcoins!');
-                            console.log(error);
+                            console.log('Error getting coin prices, listcoins!',error);
+                            //here deactivate and do not show.
+                            setActive(false);
                         })
                     }
                 })
+            }else{
+                setActive(false);
             }
         })
         .catch(err => {
@@ -90,7 +96,9 @@ const Coinprices = () => {
 
     return (
         <div className="newsCoinsContainer">
-            <ul className="ulCoinList">
+            {
+                active &&
+                <ul className="ulCoinList">
                 {
                     (coins.ethereum.usd > 0) ?
                         <>
@@ -108,9 +116,10 @@ const Coinprices = () => {
                            </li>
                         </>
                         :
-                        <p>Loading...</p>
+                        <p className="xtraSmall">Loading Live data...</p>
                 }
-            </ul>
+                </ul>
+            }
         </div>
     )
 }

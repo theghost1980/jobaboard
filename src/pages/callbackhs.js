@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { navigate } from 'gatsby';
 //components
 import Loader from '../components/loader';
 //utils
 import { encode } from '../utils/helpers';
 
-var hivesigner = require('hivesigner');
+// var hivesigner = require('hivesigner');
 //constants
 const authEP = process.env.GATSBY_authEP;
 //end constants
@@ -17,17 +17,17 @@ const authEP = process.env.GATSBY_authEP;
 // });
 
 const Callbackhs = (props) => {
-    const [profile, setProfile] = useState({
-        access_token: "",
-        username: "",
-        expires_in: "",
-        state: "",
-        profilePicUrl: "",
-        token:  "",
-        logginIn:  true,
-        usertype:  "",
-        loginmethod: 'HS'
-    });
+    // const [profile, setProfile] = useState({
+    //     access_token: "",
+    //     username: "",
+    //     expires_in: "",
+    //     state: "",
+    //     profilePicUrl: "",
+    //     token:  "",
+    //     logginIn:  true,
+    //     usertype:  "",
+    //     loginmethod: 'HS'
+    // });
     // console.log(props);
     //to run only once on load, when the props are received
     useEffect(() => {
@@ -67,8 +67,6 @@ const Callbackhs = (props) => {
                             usertype:  encode(usertype),
                             expires_in: encode(expires_in),
                             state: encode(state),
-                            logginIn:  encode(false),
-                            usertype:  encode(usertype),
                             loginmethod: encode('HS'),
                         };
 
@@ -112,7 +110,7 @@ const Callbackhs = (props) => {
             //     }
             // })
         }
-    },[]);
+    },[props.location.search]);
 
     //////////Fecthing/POST request////////////
     ////////Fetching POST request to backend
@@ -143,37 +141,37 @@ const Callbackhs = (props) => {
     //so we should refactor all the check() function on helpers, in order to see how the user is logged in.
     // also we need to define diferent methods later on to: sign transactions, broadcast, using HS or KCH.
 
-    const getProfile = () => {
-        if(profile.logged){
-            const client = new hivesigner.Client({
-                app: 'jobaboard',
-                callbackURL: 'http://localhost:8000/callbackhs',
-                scope: ['vote', 'comment'],
-                accessToken: profile.access_token,
-            });
-            client.me(function(err,res){
-                if(err) return console.log('Error getting profile user Hivesigner');
-                if(res){
-                    console.log(res);
-                    //we have the profile, we can setDataUser, setDataUser.method: 'HS'.
-                }
-            })
-        }
-    }
+    // const getProfile = () => {
+    //     if(profile.logged){
+    //         const client = new hivesigner.Client({
+    //             app: 'jobaboard',
+    //             callbackURL: 'http://localhost:8000/callbackhs',
+    //             scope: ['vote', 'comment'],
+    //             accessToken: profile.access_token,
+    //         });
+    //         client.me(function(err,res){
+    //             if(err) return console.log('Error getting profile user Hivesigner');
+    //             if(res){
+    //                 console.log(res);
+    //                 //we have the profile, we can setDataUser, setDataUser.method: 'HS'.
+    //             }
+    //         })
+    //     }
+    // }
 
-    const logOutHS = () => {
-        if(profile.logged){
-            const client = new hivesigner.Client({
-                app: 'jobaboard',
-                callbackURL: 'http://localhost:8000/callbackhs',
-                scope: ['vote', 'comment'],
-                accessToken: profile.access_token,
-            });
-            client.revokeToken(function (err, res) {
-                console.log(err, res)
-            });
-        }
-    }
+    // const logOutHS = () => {
+    //     if(profile.logged){
+    //         const client = new hivesigner.Client({
+    //             app: 'jobaboard',
+    //             callbackURL: 'http://localhost:8000/callbackhs',
+    //             scope: ['vote', 'comment'],
+    //             accessToken: profile.access_token,
+    //         });
+    //         client.revokeToken(function (err, res) {
+    //             console.log(err, res)
+    //         });
+    //     }
+    // }
     
     return (
         <div style={{
@@ -181,7 +179,7 @@ const Callbackhs = (props) => {
             height: '100vh'
         }}>
             {
-                profile.logginIn && <Loader logginIn={true} />
+                <Loader logginIn={true} />
             }
         </div>
     )

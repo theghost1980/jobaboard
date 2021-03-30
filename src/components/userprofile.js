@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 //helpers
 import { check, encode } from '../utils/helpers';
 //components
 import Loader from '../components/loader';
 import { navigate } from 'gatsby';
-import Img from 'gatsby-image';
+
+// import Img from 'gatsby-image';
 
 //TODO make this as a module in > utils
 //cloudinary
@@ -32,7 +33,7 @@ const UserProfile = () => {
     const [loadingData, setLoadingData] = useState(true);
     const [uploadingData, setuploadingData] = useState(false);
     //state to test the image uploading and then received here as response.secure_url
-    const [imageUploaded, setimageUploaded] = useState("");
+    // const [imageUploaded, setimageUploaded] = useState("");
 
     const [profile, setProfile] = useState({
         avatar: "",
@@ -77,25 +78,25 @@ const UserProfile = () => {
     };
     ////////END Fecthing GET to BE
     ///////PUT fetch = Update User data
-    async function updateData(url = '', data) {
-        const response = await fetch(url, {
-        method: 'PUT', // *GET, POST, PUT, DELETE, etc.
-        mode: 'cors', // no-cors, *cors, same-origin
-        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-        //   credentials: 'same-origin', // include, *same-origin, omit
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Accept': 'application/json',
-            'x-access-token': userdata.token
-        },
-        //   redirect: 'follow', // manual, *follow, error
-        //   referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-        body: new URLSearchParams(
-            data
-        ),
-        });
-        return response; 
-    };
+    // async function updateData(url = '', data) {
+    //     const response = await fetch(url, {
+    //     method: 'PUT', // *GET, POST, PUT, DELETE, etc.
+    //     mode: 'cors', // no-cors, *cors, same-origin
+    //     cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+    //     //   credentials: 'same-origin', // include, *same-origin, omit
+    //     headers: {
+    //         'Content-Type': 'application/x-www-form-urlencoded',
+    //         'Accept': 'application/json',
+    //         'x-access-token': userdata.token
+    //     },
+    //     //   redirect: 'follow', // manual, *follow, error
+    //     //   referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+    //     body: new URLSearchParams(
+    //         data
+    //     ),
+    //     });
+    //     return response; 
+    // };
     //now update data with put + file, using the same as the uploadimage
     async function updateDataWTFileImg(url = '', formData) {
         const response = await fetch(url, {
@@ -108,22 +109,22 @@ const UserProfile = () => {
         });
         return response.json(); 
     };
-    ///////END Put fetch
+    ///////END post fetch
 
     ///testing just to handle the image
-    async function updateImg(url = '', formData) {
-        const response = await fetch(url, {
-            method: 'POST', //
-            mode: 'cors', // no-cors, *cors, same-origin
-            headers: {
-                'x-access-token': userdata.token
-            },
-            //   redirect: 'follow', // manual, *follow, error
-            //   referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-            body: formData,
-        });
-        return response.json(); 
-    };
+    // async function updateImg(url = '', formData) {
+    //     const response = await fetch(url, {
+    //         method: 'POST', //
+    //         mode: 'cors', // no-cors, *cors, same-origin
+    //         headers: {
+    //             'x-access-token': userdata.token
+    //         },
+    //         //   redirect: 'follow', // manual, *follow, error
+    //         //   referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+    //         body: formData,
+    //     });
+    //     return response.json(); 
+    // };
     /////end testing image handling
 
     /////////end DATA fecthing////////////
@@ -226,8 +227,6 @@ const UserProfile = () => {
                 current.src = e.target.result;
             };
             reader.readAsDataURL(imgFile);
-            // TODO: Ask razqouliqbal o como se llame.... :D
-            //i believe we should handle upload images in node/BE.
 
             //now we pass the file as a test
             updateProfile('file',event.target.files[0]);
@@ -276,7 +275,7 @@ const UserProfile = () => {
             data.json()
             .then(msg => {
                 setLoadingData(false);
-                console.log(msg);
+                // console.log(msg);
                 //testing to set whole object as received
                 setProfile(msg);
             });
@@ -305,12 +304,13 @@ const UserProfile = () => {
                     <div className="rowContainer">
                         <div className="rowRightPicContainer">
                             {
-                                uploadingData && <p>Updating the Data. Wait 4 years. Thanks.</p>
+                                uploadingData && <p>Updating the Data. Wait just a moment. Thanks.</p>
                             }
                             <div className="userProfilePicCont">
                                 <img src={profile.avatar} 
                                     className="userProfilePic" 
                                     ref={uploadedImage}    
+                                    alt={profile._id}
                                 />
                             </div>
                             <div className="profilePicSelector">

@@ -1,6 +1,11 @@
 import React from 'react';
 import { useStaticQuery, graphql } from "gatsby";
 
+/**
+ * @logginIn true/false to show the component
+ * @typegif spin,dots,blocks -> default Spin
+ */
+
 const Loader = (props) => {
     const { logginIn, typegif } = props;
     //graphql queries

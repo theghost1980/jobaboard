@@ -88,7 +88,6 @@ body::-webkit-scrollbar-thumb {
     position: fixed;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
     align-items: center;
     width: 100%;
     height: 100%;
@@ -152,6 +151,66 @@ body::-webkit-scrollbar-thumb {
 }
 
 /* shared classes */
+.justifyRight {
+    justify-content: right;
+}
+.btnEmoticonsChat {
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    width: 30px;
+    height: 30px;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid orange;
+    border-radius: 5px;
+    background: orange;
+}
+.inputSenderCont {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 50px;
+    border: 1px solid orange;
+    border-radius: 8px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+    justify-content: center;
+}
+.miniIconAbs {
+    position: absolute;
+    bottom: 5px;
+    right: -8px;
+}
+.miniMarginLeft {
+    margin-left: 5px;
+}
+.textColorContrast1 {
+    color: rgb(160, 86, 86);
+}
+.trTablePortP {
+    background: orange;
+    color: white;
+}
+.tablePortPublic {
+    width: 100%;
+    border: 1px solid orange;
+    text-align: center;
+}
+.publicPortUl {
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+    padding-inline-start: 0px;
+    border: 1px solid orange;
+    border-radius: 8px;
+}
+.imageMedium{
+    display: block;
+    width: 180px;
+    height: auto;
+}
 .standardFlexFixed {
     display: flex;
     flex-direction: column;
@@ -170,6 +229,25 @@ body::-webkit-scrollbar-thumb {
     border-radius: 10px;
     margin: var(--marginBewteen-Objects);
     box-shadow: 2px 2px 5px 2px orange;
+}
+.standardUlColPlain {
+    list-style: none;
+    height: auto;
+    padding-inline-start: 0px;
+}
+.standardUlColAutoW {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+    padding-inline-start: 0px;
+    list-style: none;
+}
+.justWidth70{
+    width: 70%;
+}
+.justWidth30{
+    width: 30%;
 }
 .standardUlColThin {
     display: flex;
@@ -214,7 +292,6 @@ body::-webkit-scrollbar-thumb {
 }
 .scaleHovered {
     transition: all .2s cubic-bezier(0.77, 0, 0.175, 1);
-    cursor: pointer;
 }
 .scaleHovered:hover {
     transform: scale(1.1);
@@ -225,8 +302,11 @@ body::-webkit-scrollbar-thumb {
 }
 .miniImg {
     width: 100%;
-    height: auto;
+    height: 100%;
     border-radius: 8px;
+}
+.softBackground {
+    background: rgba(255, 166, 0, 0.149);
 }
 .coloredContrast3Soft {
     background: rgba(51, 124, 160, 0.1);
@@ -260,6 +340,9 @@ body::-webkit-scrollbar-thumb {
 .fadeInLonger {
     animation: fadeLonger 1s cubic-bezier(0.55, 0.055, 0.675, 0.19) 1;
 }
+.fadeInLongerInf {
+    animation: fadeLonger 0.5s cubic-bezier(0.55, 0.055, 0.675, 0.19) 10;
+}
 @keyframes fadeLonger{
     from{opacity: 0;}
     to{opacity: 1;}
@@ -292,6 +375,12 @@ body::-webkit-scrollbar-thumb {
 .marginTop {
     margin-top: var(--marginBewteen-Objects);
 }
+.activeSelected {
+    box-shadow: 1px 2px 4px 1px orange;
+}
+.miniMarginTop {
+    margin-top: calc(var(--marginBewteen-Objects)/3);
+}
 .borderBottom {
     border-bottom: 1px solid #214E34;
 }
@@ -320,6 +409,9 @@ body::-webkit-scrollbar-thumb {
 }
 .fontSmall {
     font-size: x-small;
+}
+.fontXssmall {
+    font-size: xx-small !important;
 }
 .wrapDiv{
     flex-wrap: wrap;
@@ -480,6 +572,9 @@ body::-webkit-scrollbar-thumb {
 .centeredDiv {
     margin: 0 auto;
 }
+.textAlignedCenter{
+    text-align: center;
+}
 .boxShadowContrast1 {
     box-shadow: 1px 1px 2px 1px #E9F9F0;
 }
@@ -511,6 +606,13 @@ body::-webkit-scrollbar-thumb {
 .standardContentMargin {
     margin: var(--marginBewteen-Objects);
 }
+.contentMiniMargins {
+    margin-left: calc(var(--marginBewteen-Objects)/2);
+    margin-right: calc(var(--marginBewteen-Objects)/2);
+}
+.trTableWhite {
+    background: rgb(252, 252, 247);
+}
 .xSmalltext {
     font-size: xx-small;
     color: #214E34;
@@ -521,6 +623,9 @@ body::-webkit-scrollbar-thumb {
 .gralLink {
     margin-left: var(--marginBewteen-Objects);
     height: auto;
+}
+.displayFlex{
+    display: flex;
 }
 .alignJustCentered {
     justify-content: center;
@@ -539,11 +644,31 @@ body::-webkit-scrollbar-thumb {
     height: 20px !important;
     align-items: center;
 }
+.portfolioFlexBig {
+    display: flex;
+    flex-direction: column;
+    width: 35%;
+    height: auto;
+    background: #E9F9F0;
+}
+.portfolioJobResults {
+    display: flex;
+    flex-direction: column;
+    width: 65%;
+    height: auto;
+    background: #337CA0;
+}
 .standardDivRowFullW {
     display: flex;
     flex-direction: row;
     width: 100%;
     height: auto;
+}
+.justifyContentSpaced {
+    justify-content: space-between; 
+}
+.justifyContentSEvenly {
+    justify-content: space-evenly;
 }
 .backGroundDed {
     background: white;
@@ -553,6 +678,22 @@ body::-webkit-scrollbar-thumb {
     flex-direction: column;
     width: 90%;
     height: auto;
+}
+.justJustifiedContent {
+    justify-content: center;
+}
+.lowerOpacity {
+    opacity: 0.6 !important;
+}
+.justAligned {
+    align-items: center;
+}
+.justAlignEnd {
+    align-items: flex-end;
+}
+.activeChat {
+    background: orange;
+    color: white;
 }
 .justiAlig {
     justify-content: center;
@@ -568,6 +709,12 @@ body::-webkit-scrollbar-thumb {
     display: flex;
     flex-direction: column;
     width: 200px;
+    height: auto;
+}
+.standardFlex120Row {
+    display: flex;
+    flex-direction: row;
+    width: 120px;
     height: auto;
 }
 .standardDiv60Percent {
@@ -588,6 +735,9 @@ body::-webkit-scrollbar-thumb {
     height: 25px;
     margin: 0 auto;
 }
+.marginAuto{
+    margin: 0 auto;
+}
 .standardBlock150px {
     display: inline-block;
     width: 150px;
@@ -602,6 +752,27 @@ body::-webkit-scrollbar-thumb {
     width: 100%;
     height: 40px;
 }
+.standardDivRowFlex80p {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 80%;
+    height: 30px;
+}
+.standardFlexColBordered {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+    border: 1px solid orange;
+}
+.standardDiv40px40pxPlain {
+    display: flex;
+    flex-direction: column;
+    width: 40px;
+    height: 40px;
+}
 .standardDivRowFlex100pX100pCentered {
     display: flex;
     flex-direction: column;
@@ -610,6 +781,28 @@ body::-webkit-scrollbar-thumb {
     width: 100px;
     height: 100px;
     margin: 0 auto;
+}
+.formColFlex90p {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 90%;
+    height: auto;
+}
+.borderUlLi {
+    border: 1px solid orange;
+    border-radius: 8px;
+    padding: 6px;
+}
+.justHeightAuto {
+    height: auto;
+}
+.standardUlRowFlexPlain {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding-inline-start: 0px;
+    list-style: none;
 }
 .standardUlRowFlexAuto {
     display: flex;
@@ -655,6 +848,13 @@ body::-webkit-scrollbar-thumb {
 .relativeDiv {
     position: relative;
 }
+.standardRowDivPlain {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: auto;
+    justify-content: space-between;
+}
 .standardRowDiv {
     display: flex;
     flex-direction: row;
@@ -669,6 +869,11 @@ body::-webkit-scrollbar-thumb {
 .miniImageJobs {
     display: block;
     width: 60px;
+    height: auto;
+}
+.miniImageJobs2 {
+    display: block;
+    width: 65px;
     height: auto;
 }
 .imgUploadedCont {
@@ -744,6 +949,33 @@ body::-webkit-scrollbar-thumb {
     margin: 0 auto;
     justify-content: center;
 }
+.standarDiv200x200h {
+    display: flex;
+    flex-direction: column;
+    width: 200px;
+    height: 200px;
+    margin: 0 auto;
+    justify-content: center;
+}
+.standardFlexColMinH400 {
+    display: flex;
+    flex-direction: column;
+    min-height: 400px;
+    width: 100%;
+    align-content: center;
+}
+.standardFlexRowMinH400 {
+    display: flex;
+    flex-direction: row;
+    min-height: 400px;
+    width: 100%;
+}
+.standardCol30p{
+    width: 30%;
+}
+.standardCol70p{
+    width: 70%;
+}
 .standarDiv400h {
     display: flex;
     flex-direction: column;
@@ -812,15 +1044,62 @@ body::-webkit-scrollbar-thumb {
     width: 100%;
     height: auto;
 }
+.standardSmallDivAbs {
+    display: block;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    width: 80px;
+    height: auto;
+}
 .miniText {
     font-size: x-small;
+}
+.smallText {
+    font-size: small;
+}
+.miniPaddingTB {
+    padding-top: calc(var(--marginBewteen-Objects)/2);
+    padding-bottom: calc(var(--marginBewteen-Objects)/2);
+}
+.liMiniRow {
+    display: flex;
+    flex-direction: row;
+    font-size: small;
+    height: auto;
+    align-content: center;
 }
 .paddings {
     padding: var(--marginBewteen-Objects);
 }
+.animMsgDeleted {
+    display: none;
+}
+
+.miniPaddings {
+    padding: calc(var(--marginBewteen-Objects)/2);
+}
+.minWidth {
+    min-width: 80px;
+}
+.minimumMarginTB {
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+.marginsTB {
+    margin-top: var(--marginBewteen-Objects);
+    margin-bottom: var(--marginBewteen-Objects);
+}
+.miniMarginTB {
+    margin-top: calc(var(--marginBewteen-Objects)/2);
+    margin-bottom: calc(var(--marginBewteen-Objects)/2);
+}
 .margins {
     margin-right: var(--marginBewteen-Objects);
     margin-bottom: var(--marginBewteen-Objects);
+}
+.miniMargins {
+    margin: calc(var(--marginBewteen-Objects)/2);
 }
 .animBlocksIcon{
     animation-name: BlocksMovingAbit;
@@ -941,6 +1220,24 @@ body::-webkit-scrollbar-thumb {
 .justTopMargin {
     margin-top: var(--marginBewteen-Objects);
 }
+.justBorders {
+    border: 1px solid orange;
+}
+.justbackground {
+    background: white; 
+}
+.justBottomMargin {
+    margin-bottom: var(--marginBewteen-Objects);
+    margin-left: 0px;
+    margin-right: 0px;
+    margin-top: 0px;
+}
+.justBottomMarginMin {
+    margin-bottom: calc(var(--marginBewteen-Objects)/2);
+    margin-left: 0px;
+    margin-right: 0px;
+    margin-top: 0px;
+}
 .alertInput {
     border-color: #EA3546;
 }
@@ -1002,7 +1299,94 @@ body::-webkit-scrollbar-thumb {
 .pointer {
     cursor: pointer;
 }
+.justifyFlexStart {
+    justify-content: flex-start !important;
+}
+.justifyFlexCenter {
+    justify-content: center;
+}
 /* emd shared classes */
+
+/* beeChat fixed page */
+.beeChatFixedCont {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 300px;
+    overflow-y: scroll;
+    border: 1px solid orange;
+    border-radius: 8px;
+    background: #337CA0;
+}
+.beeChatFixedMsgCont {
+    display: flex;
+    flex-direction: column;
+    max-width: 300px;
+    height: auto;
+    border-radius: 8px;
+    margin: 10px;
+    background: white;
+}
+.beeChatTsFrom {
+    /* position: absolute;
+    bottom: -25px;
+    left: 0px; */
+    margin-left: 10px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-right: 10px;
+    color: white;
+    font-size: x-small;
+}
+.miniIndicatorAbs {
+    position: absolute;
+    top: 0px;
+    right: 5px;
+    font-size: smaller;
+    color: #EA3546;
+}
+.miniDivAbsRight {
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    width: 25px;
+    height: 25px;
+    position: absolute;
+    bottom: 0px;
+    right: 10px;
+    justify-content: center;
+    align-items: center;
+    transition: all .1s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    border-radius: 8px;
+}
+.miniDivAbsRight:hover{
+    border: 1px solid orange;
+    border-radius: 8px;
+}
+.miniDivAbsRight:hover > .showOptionsHovered {
+    display: flex;
+    flex-direction: column;
+}
+
+.standardUlHide {
+    position: absolute;
+    bottom: -37px;
+    right: -10px;
+    display: none;
+    list-style: none;
+    padding-inline-start: 0px;
+    background: white;
+    border-radius: 4px;
+    border: 1px solid orange;
+}
+.standardUlHide > li {
+    padding: 1px;
+}
+.standardUlHide > li:hover{
+    background: orange;
+    color: white;
+}
+/* end beeChat fixed page */
 
 /* preview job component */
 .previewJobCont {
@@ -1072,6 +1456,16 @@ body::-webkit-scrollbar-thumb {
     cursor: pointer;
     transition: all .1s ease-in-out;
 }
+.absInfoItem {
+    display: flex;
+    width: 20px;
+    height: 20px;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+}
 .absInfoCont:hover{
     transform: scale(1.15);
     border: 1px solid #337CA0;
@@ -1134,8 +1528,14 @@ body::-webkit-scrollbar-thumb {
     border: 2px solid orange;
     border-radius: 8px;
 }
+.hoveredBoxShadow:hover{
+    box-shadow: 1px 2px 4px 1px orange;
+}
 .marginBottom {
     margin-bottom: var(--marginBewteen-Objects);
+}
+.miniMarginBottom {
+    margin-bottom: calc(var(--marginBewteen-Objects)/2);
 }
 /* end unparent classes */
 
@@ -1238,6 +1638,15 @@ main {
     left: calc(var(--marginBewteen-Objects)*5); */
 }
 /* end background carousel */
+
+/* mini slider component */
+.miniSlider {
+    display: block;
+    width: 100%;
+    height: 160px;
+    overflow: hidden;
+}
+/* end mini slider component */
 
 /* menu option user */
 .userMenuContainer {
@@ -1348,7 +1757,7 @@ main {
     display: flex;
     flex-direction: column;
     width: 100%;
-    height: 400px;
+    min-height: 400px;
 }
 /* end managePortfolio component */
 
@@ -2028,6 +2437,9 @@ input[type=text]:focus{
 }
 .propSearch {
     color: orange;
+    font-style: italic;
+}
+.italicText {
     font-style: italic;
 }
 .absCloseCont {

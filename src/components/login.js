@@ -10,19 +10,23 @@ import onClickOutside from 'react-onclickoutside';
 import LoginHS from './hivesigner/loginHS';
 import Loader from './loader';
 //utils
-import { encode } from '../utils/helpers';
+import { encode, check } from '../utils/helpers';
 import { cryptoUtils } from '@hiveio/dhive';
+// import { getDataBeeChat } from './BeeChat/beechatchecker';
 //constants
 const starWars = process.env.GATSBY_starWars;
 const authEP = process.env.GATSBY_authEP;
+const beechatEP = "https://beechat.hive-engine.com/api/";
 //end constants
 
 
 
 const Login = (props) => {
+    const userdata = check();
     //props from parents
     const { cancelOnClick, 
-            successfulLogin } = props;
+            successfulLogin,
+        } = props;
     //end props from parents
 
     //graphql queries
@@ -39,6 +43,12 @@ const Login = (props) => {
     `);
     //end grapqhql queries
 
+    // useEffect(() => {
+    //     return function cleanup() {
+    //         console.log('Clean Up from login.js component!!!!');
+    //     };
+    // },[])
+
     // const { setData } = useContext(AuthContext);
 
     //state constants
@@ -47,11 +57,58 @@ const Login = (props) => {
 
     //functions, callbacks
     Login.handleClickOutside = () => {
-        // console.log('Clicked out side me');
-        cancelOnClick(false);
+        if(!userdata.logged){
+            // console.log('Clicked out side me');
+            cancelOnClick(false);
+        }
     };
-    ////////Fetching POST request to backend
-    async function postData(url = '', account, signature) {
+
+    // log in into Beechat
+    function logInBeeChat(timestamp,msg){
+        // testing on beechat here as soon as the user is logged in
+        const urlGet = beechatEP + "users/login?" + `username=${account}&ts=${timestamp}&sig=${msg}`;
+        getData(urlGet)
+        .then(result => {
+            console.log('Results from BeeChat API if logged succesfully:');
+            console.log(result);
+            // from here we may send all this data to
+            // token & refresh_tokens to localstorage (later on to cookies)
+            if(result.token && result.refresh_token){
+                localStorage.setItem('_GOfUb_T', result.token);
+                localStorage.setItem('_GOfUb_RT',result.refresh_token);
+                console.log('Tokens received from Bee, stored in LS.');
+            };
+        })
+        .catch(error => {
+            console.log('Error fetching on API BeeChat');
+            console.log(error);
+        })
+        //end testing beeChat
+    }
+    // end log in in
+    // fecthing GET on BEECHAT
+    async function getData(url = '') {
+        const response = await fetch(url, {
+            method: 'GET',
+            mode: 'cors',
+            cache: 'no-cache', 
+        });
+        return response.json(); 
+    };
+    // async function getDataWT(url = '',_token) {
+    //     const response = await fetch(url, {
+    //         method: 'GET',
+    //         mode: 'cors',
+    //         cache: 'no-cache', 
+    //         headers: {
+    //             'Authorization': `Bearer ${_token}`
+    //         },
+    //     });
+    //     return response.json(); 
+    // };
+    // ///////////
+    ////////Fetching request to backend
+    async function postData(url = '', account, signature, ts) {
         const response = await fetch(url, {
         method: 'POST', // *GET, POST, PUT, DELETE, etc.
         mode: 'cors', // no-cors, *cors, same-origin
@@ -61,6 +118,7 @@ const Login = (props) => {
             // 'Content-Type': 'application/json'
             'Content-Type': 'application/x-www-form-urlencoded',
             'Accept': 'application/json',
+            'ts': ts,
         },
         //   redirect: 'follow', // manual, *follow, error
         //   referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
@@ -74,20 +132,31 @@ const Login = (props) => {
     ////////END Fecthing POST to BE
     ////////async login function
     async function loginUser(){
-        const keyChain = await keychain(window, 'requestSignBuffer', account, starWars, 'Posting');
+        const timestamp = Date.now();
+        const ts = account + timestamp; 
+        // -----------testing to modify
+        //old way without ts
+        // const keyChain = await keychain(window, 'requestSignBuffer', account, starWars, 'Posting');
+        // end old way
+        // new way using ts
+        const keyChain = await keychain(window, 'requestSignBuffer', account, ts, 'Posting');
+        // end new way
+        // ------------end testing
         const {data, success, msg, cancel, notActive} = keyChain;
+        console.log(data);
         if(success){ 
-            // console.log('Message signed!');
-            // console.log(keyChain);
-            //now for testing the server back-end
             const dataUsername = data.username;
-            postData(`${authEP}checkGatsbySig`, dataUsername, msg)
+            postData(`${authEP}checkGatsbySig`, dataUsername, msg, ts)
             .then(data => {
                 console.log(data);
                 data.json()
-                .then(msg => {
-                    console.log(msg);
-                    const { profile_PicURL, token, usertype, banned} = msg;
+                .then(response => {
+                    console.log(response);
+                    const { profile_PicURL, token, usertype, banned} = response;
+                    //testing to log into beechat after user was logged into JAB
+                    // logInBeeChat(timestamp,msg);
+                    // end testing
+
                     // TODO -> Important
                     // Get the settings under the > Setting table on MongoDB
                     // btw we need to create that.
@@ -102,10 +171,11 @@ const Login = (props) => {
                         usertype:  encode(usertype),
                         loginmethod: encode('KCH'),
                         banned: encode(banned),
+                        newmessages: encode("x1-f"),
                     };
                     const JSONprofile = JSON.stringify(profile);
                     localStorage.setItem("_NoneOfYourBusiness",JSONprofile);
-                    successfulLogin();
+                    successfulLogin(account,timestamp,msg);
                     if(banned){
                         alert('You have been Banned. Please Contact the admins as you only have some limited features on this platform.!');
                     }
@@ -146,7 +216,7 @@ const Login = (props) => {
     };
 
     return (
-        <div className={`loginCont ${logginIn ? 'addAutoW': null}`} id="loginContainer">
+        <div className={`loginCont ${logginIn ? 'addAutoW': null }`} id="loginContainer">
                 {
                     logginIn && <Loader logginIn={logginIn} />
                 }

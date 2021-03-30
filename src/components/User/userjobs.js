@@ -33,6 +33,20 @@ const Userjobs = () => {
                      ...GatsbyImageSharpFixed_withWebp
                  }
              }
+         } 
+         employeeIcon: file(relativePath: {eq: "employee.png"}) {
+             childImageSharp {
+                 fixed(width: 30) {
+                     ...GatsbyImageSharpFixed_withWebp
+                 }
+             }
+         }
+         employerIcon: file(relativePath: {eq: "employer.png"}) {
+             childImageSharp {
+                 fixed(width: 30) {
+                     ...GatsbyImageSharpFixed_withWebp
+                 }
+             }
          }
      }
      `);
@@ -47,6 +61,10 @@ const Userjobs = () => {
 
     //search jobs for this user on mongoDB
     useEffect(() => {
+        loadMyJobs();
+    },[]);
+
+    function loadMyJobs(){
         setLoadingData(true);
         getData(`${jobEP}${userdata.username}`)
         .then(response => {
@@ -62,9 +80,8 @@ const Userjobs = () => {
         .catch(error => {
             console.log('Error fecthing Job Data from BE.',error);
             setLoadingData(false);
-        })
-    },[]);
-
+        });
+    }
     //fecthing data
     async function getData(url = '') {
         const response = await fetch(url, {
@@ -83,13 +100,18 @@ const Userjobs = () => {
     function closeJOB(){
         setSelectedJOb(null);
     }
+
+    const goIndexJobUpdate = () => {
+        loadMyJobs();
+        setSelected("");
+    }
     
     return (
         <div>
             {/* jobs menu absolute on top */}
             <div className="menuJobsContainer">
                 <ul className="ulJobMenu">
-                    <li onClick={() => setSelected("")}>Job Dashboard</li>
+                    <li onClick={goIndexJobUpdate}>Job Dashboard</li>
                     <li onClick={() => setSelected("jobs")}>New Job</li>
                     <li onClick={() => setSelected("managejobs")}>Manage Jobs</li>
                     <li onClick={() => setSelected("manageportfolio")}>Manage Portfolio</li>
@@ -116,7 +138,7 @@ const Userjobs = () => {
                         }
                         {
                             selectedJob &&
-                                <Absscreenwrapper>
+                                <Absscreenwrapper xtraClass={"justifyFlexStart"}>
                                     {
                                         userdata.logged &&
                                         <Menujobs />
@@ -127,7 +149,7 @@ const Userjobs = () => {
                         {
                             (jobs.length > 0) &&
                             <div>
-                                <ul className="standardUlHorMini wrapDiv coloredContrast3Soft justRounded">
+                                <ul className="standardUlHorMini wrapDiv coloredContrast3Soft justRounded pointer">
                                     {
                                         jobs.map(job => {
                                             return (
@@ -150,6 +172,11 @@ const Userjobs = () => {
                                                                 <p>{job.active ? 'Active - Published':'Not Active'}</p>
                                                             </div>
                                                             <p className="noMargins">Created: {job.createdAt}</p>
+                                                            <div className="alignJustCentered displayFlex">
+                                                                <Img fixed={job.job_type === "employee" ? data.employeeIcon.childImageSharp.fixed:data.employerIcon.childImageSharp.fixed} 
+                                                                    title={job.job_type === "employee" ? "Published to get hired":"Published to Hire a professional"} 
+                                                                />
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </li>

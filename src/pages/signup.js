@@ -2,7 +2,7 @@ import React from 'react';
 //components
 import Layout from '../components/layout';
 import { Link, useStaticQuery, graphql } from 'gatsby';
-import Img from 'gatsby-image';
+// import Img from 'gatsby-image';
 //typewriter effect
 import { Typewriter } from 'react-typewriting-effect'
 import 'react-typewriting-effect/dist/index.css'
@@ -15,15 +15,19 @@ const Signup = () => {
         query {
             signInImg: file(relativePath: {eq: "edited-jobaboard.svg"}) {
                 publicURL
+                id
             }
             benefit_lock: file(relativePath: {eq: "benefit1.svg"}) {
                 publicURL
+                id
             }
             benefit_instant: file(relativePath: {eq: "benefit2.svg"}) {
                 publicURL
+                id
             }
             benefit_dapps: file(relativePath: {eq: "benefit3.svg"}) {
                 publicURL
+                id
             }
         }
     `);
@@ -51,6 +55,7 @@ const Signup = () => {
                         <img src={data.signInImg.publicURL} 
                             // TODO onLoad={() => <p>Loading...</p>}
                             className="svgSignUpImage"
+                            alt={`${data.signInImg.id}`}
                         />
                     </div>
                 </div>
@@ -66,7 +71,7 @@ const Signup = () => {
                                 <h2>Control you finances</h2>
                                 <p>Less risk of losing your money. You are your own bank. Yes, just as you read it. You have full control of your tokens, all the time.</p>
                                 <div className="cardImgCont">
-                                    <img src={data.benefit_lock.publicURL} className="imgBenefitSVG" />
+                                    <img src={data.benefit_lock.publicURL} className="imgBenefitSVG" alt={`${data.benefit_lock.id}`} />
                                 </div>
                             </div>
                         </li>
@@ -81,7 +86,7 @@ const Signup = () => {
                                 </h2>
                                 <p>Thanks to blockchain technology, used by Hive's blockchain, you can send or receive your tokens in seconds. <a href="https://hiveblocks.com/">See in real time</a> how fast the tokens move.</p>
                                 <div className="cardImgCont">
-                                    <img src={data.benefit_instant.publicURL} className="imgBenefitSVG" />
+                                    <img src={data.benefit_instant.publicURL} className="imgBenefitSVG" alt={`${data.benefit_instant.id}`} />
                                 </div>
                             </div>
                         </li>
@@ -90,7 +95,7 @@ const Signup = () => {
                                 <h2>App and DApps</h2>
                                 <p>By having a Hive account, you have access to many applications. One of them is jobaboard. That's why our motto is "one account to rule them all".</p>
                                 <div className="cardImgCont">
-                                    <img src={data.benefit_dapps.publicURL} className="imgBenefitSVG" />
+                                    <img src={data.benefit_dapps.publicURL} className="imgBenefitSVG" alt={`${data.benefit_dapps.id}`}  />
                                 </div>
                             </div>
                         </li>

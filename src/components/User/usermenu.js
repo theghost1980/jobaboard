@@ -3,13 +3,30 @@ import React, { useEffect, useState } from 'react';
 import Notifications from '../notifications';
 import { Link, useStaticQuery, graphql } from 'gatsby';
 import Img from 'gatsby-image';
-import { check } from '../../utils/helpers';
+import { check, getStoredField } from '../../utils/helpers';
+import Beechatchecker from '../BeeChat/beechatchecker';
+//testing react/redux
+import { useSelector } from 'react-redux';
+// import { selectCount } from '../../features/counter/counterSlice';
+import { selectNotifications } from '../../features/notifications/notiSlice';
+// import {
+//     decrement,
+//     increment,
+//     incrementByAmount,
+//     incrementAsync,
+//     selectCount,
+//     counterSlice,
+//   } from '';
+  //end testing reac/redux
 
-const UserMenu = () => {
+const UserMenu = (props) => {
     const userdata  = check();
     const [fixed, setFixed] = useState(false);
     const [open, setOpen] = useState(false);
-
+    //testing react-redux
+    // const count = useSelector(selectCount);
+    const newmessages = useSelector(selectNotifications);
+    console.log(`Actual value newmessages from usermenu:${newmessages}`);
     //set event on scroll down to fix the user menu on top.
     useEffect(() => {
         function checkScroll(){
@@ -78,6 +95,13 @@ const UserMenu = () => {
                     }
                 }
             }
+            event: file(relativePath: {eq: "bell.png"}) {
+                childImageSharp {
+                    fixed(width: 20) {
+                        ...GatsbyImageSharpFixed_withWebp
+                    }
+                }
+            }
         }
     `);
     //end grapqhql queries
@@ -107,8 +131,16 @@ const UserMenu = () => {
                     </Link>
                     {/* TODO make the settings option to set chat as flyer or fixed. */}
                     <Link to="/app/beechatfixed" className="gralLink">
-                        <li className="menuOptionLi">
+                        <li className="menuOptionLi relativeDiv">
                             <Img fixed={data.chatIcon.childImageSharp.fixed} className="imgOptionsUser"  />
+                            {
+                                (newmessages) &&
+                                <div className="absInfoItem">
+                                    <div className="fadeInLongerInf">
+                                        <Img fixed={data.event.childImageSharp.fixed}/>
+                                    </div>
+                                </div>
+                            }
                         </li>
                     </Link>
                     {

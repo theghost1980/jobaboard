@@ -19,6 +19,7 @@ function Notifications(props) {
     // }]);
     const [noti, setNoti] = useState([]);
     const [notiSelected, setNotiSelected] = useState(null);
+    const [newNotifications, setNewNotifications] = useState(false);
 
      /////////data fecthing PUT/GET////////
      ////////Fetching POST request to backend
@@ -45,9 +46,10 @@ function Notifications(props) {
             .then(data => {
                 data.json()
                 .then(msg => {
-                    console.log(msg);
+                    // console.log(msg);
                     //testing to set whole object as received
                     // setProfile(msg);
+                    setNewNotifications(msg.length > 0 ? true : false);
                     setNoti(msg);
                 })
                 .catch(err => {

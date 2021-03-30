@@ -25,7 +25,7 @@ const Mesaggertop = (props) => {
     return (
         <div className="messagerTopContainer fadeInLonger">
             <div className="standardContentMargin">
-                <p>{message}</p>
+                <p>{`${message}`}</p>
                 {
                     (linkToVisit && linkToVisit !== "")
                     && <Link className="greenLink centered" to={`${linkToVisit}`}>{linkText}</Link>

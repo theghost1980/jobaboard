@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 // import { navigate } from "gatsby";
 //hiveio/keychain
 // import {keychain, isKeychainInstalled, hasKeychainBeenUsed} from '@hiveio/keychain';

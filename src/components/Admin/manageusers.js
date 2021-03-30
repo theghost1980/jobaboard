@@ -172,7 +172,7 @@ const Manageusers = () => {
                         {
                                 users.map(user => {
                                     return (
-                                        <li key={`${user.id}-list-users-jobaboard`}
+                                        <li key={`${user._id}-list-users-jobaboard`}
                                             className={`standardLiHovered ${user.banned ? 'userBanned': null}`}
                                             onClick={() => setSelectedUser(user)}
                                         >
@@ -204,7 +204,7 @@ const Manageusers = () => {
                     {
                         logs.map(log => {
                             return (
-                                <li key={`${log.id}-log-User-jobaboard`}
+                                <li key={`${log._id}-log-User-jobaboard`}
                                     className="standardLiHovered"
                                     onClick={() => setSelectedLogUser(log)}
                                 >

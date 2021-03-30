@@ -16,20 +16,20 @@ import Beechatfixed from "../components/BeeChat/beechatfixed";
 // import Status from "../components/Status"
 
 const App = () => (
-  <Layout>
-    {/* <Status /> */}
-    <Router>
-      {/* <PrivateRoute path="/app/profile" component={Profile} /> */}
-      <PrivateRouteAdmin path="app/adminpanel" component={AdminPanel} />
-      <PrivateRoute path="/app/settings" component={UserSettings} />
-      <PrivateRoute path="/app/beechatfixed" component={Beechatfixed} />
-      <PrivateRoute path="/app/profile" component={UserProfile} />
-      <PrivateRoute path="/app/wallet" component={Userwallet} />
-      <PrivateRoute path="/app/tokens" component={TokensUser} />
-      <PrivateRoute path="/app/jobs" component={Userjobs} />
-      <UserLogin path="/app/userlogin" />
-    </Router>
-  </Layout>
+    <Layout>
+      {/* <Status /> */}
+      <Router>
+        {/* <PrivateRoute path="/app/profile" component={Profile} /> */}
+        <PrivateRouteAdmin path="app/adminpanel" component={AdminPanel} />
+        <PrivateRoute path="/app/settings" component={UserSettings} />
+        <PrivateRoute path="/app/beechatfixed" component={Beechatfixed} />
+        <PrivateRoute path="/app/profile" component={UserProfile} />
+        <PrivateRoute path="/app/wallet" component={Userwallet} />
+        <PrivateRoute path="/app/tokens" component={TokensUser} />
+        <PrivateRoute path="/app/jobs" component={Userjobs} />
+        <UserLogin path="/app/userlogin" />
+      </Router>
+    </Layout>
 )
 
 export default App

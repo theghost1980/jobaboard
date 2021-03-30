@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Blockchainobserver from '../components/blockchainobserver';
 // import BeeChat from '../components/BeeChat/mainBeeChat';
 

@@ -386,6 +386,8 @@ const Nftcreator = (props) => {
 
     function addPropsNFT(newNft){
         console.log(`NFT: ${newNft.symbol} Received. Adding 1 prop to the NFT`);
+        // TODO: condition to check if the main account is instantiating
+        // to remove it from "authorizedEditingAccounts"
         const json =
         {
             "contractName": "nft",
@@ -574,11 +576,10 @@ const Nftcreator = (props) => {
         setWorking(true);
 
         // TODO:
-        // maybe Iterate based on amountNft to create the array of nfts to instantiate
-        // after this, check if array > 10, so we must split in subArray of 10 each
-        // if 1 < array <= 10 we can send in one custom json.
-        // if array > 10, then send subArrays.
-        //constants
+        // chequear porque al usar la main account, no puede enviarselos a si mismo.
+        // el error esta o aca debajo cuando se hace el to:
+        // o mas abajo cuando as ique correr paso a paso.
+        // por ahora funciona crear para las demas cuentas que sean distintias a la main
         const feeSymbol = "BEE";
         var json = {};
         var arrayJson = []; 
@@ -830,6 +831,10 @@ const Nftcreator = (props) => {
                         //Record event to LogOp
                         sendLog("Last",`Process finished successfully.`,"false","");
                         //End recording
+                        //here send to parent tokens a message to self update the list
+                        // TODO
+                        // Another TODO very important
+                        // Here I must register this NFTs as owned by this user on MongoDB.
                         // ++++++++++++++++++
                     }
                 }).catch(error => {console.log('Error getting All instances of NFT to BE',error)})

@@ -2,6 +2,7 @@ import React from 'react';
 import Btnclose from '../../btns/btncloseMin';
 import Btnclosemin from '../../btns/btncloseMin';
 import { Link } from 'gatsby';
+import Miniprofile from './subcomponents/miniprofile';
 
 
 const Previewjob = (props) => {
@@ -22,12 +23,14 @@ const Previewjob = (props) => {
                             </div>
                         }
                         <div className="standardBlockMaxW80p">
+                            <Miniprofile username={job.username} />
                             <h1>{job.title}</h1>
+                            <p>Job Type: {job.job_type === "employee" ? "Looking to get Hired by this Job/Service":"Looking to Hire a professional"}</p>
                             <p>Desc: {job.description ? job.description : 'none'}</p>
                             <p>Cat: {job.category}
                                 - Sub Cat: <Link to={`/explore?subcat=${job.sub_category}`}>{job.sub_category}</Link>
                             </p>
-                            <p>I am willing to pay you:{job.paying_price} of my {job.nft_symbol} tokens.</p>
+                            <p>{job.job_type === "employer" ? 'I am willing to pay you: ': 'I ask for this service: '}{job.paying_price} of my {job.nft_symbol} tokens.</p>
                             <p>Escrow Type:{job.escrow_type}</p>
                             {
                                 (job.escrow_type === "select_from_lists") &&
