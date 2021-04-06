@@ -12,6 +12,12 @@ import Loader from './loader';
 //utils
 import { encode, check } from '../utils/helpers';
 import { cryptoUtils } from '@hiveio/dhive';
+
+//testing react/redux
+import { useDispatch } from 'react-redux';
+import { setValueOnProfile } from '../features/userprofile/profileSlice';
+// end testing 
+
 // import { getDataBeeChat } from './BeeChat/beechatchecker';
 //constants
 const starWars = process.env.GATSBY_starWars;
@@ -22,6 +28,10 @@ const beechatEP = "https://beechat.hive-engine.com/api/";
 
 
 const Login = (props) => {
+    //testing react/redux
+    const dispatch = useDispatch();
+    // end testing
+
     const userdata = check();
     //props from parents
     const { cancelOnClick, 
@@ -162,6 +172,14 @@ const Login = (props) => {
                     // btw we need to create that.
                     // it will help us to: - set the chat as the user wants + other future options.
                     //set all upcomming data.
+
+                    //testing react redux store
+                    dispatch(setValueOnProfile({ type: "username", value: dataUsername}));
+                    dispatch(setValueOnProfile({ type: "logged", value: true}));
+                    dispatch(setValueOnProfile({ type: "usertype", value: usertype}));
+                    dispatch(setValueOnProfile({ type: "token", value: token}));
+                    // end testing redux
+
                     const profile = {
                         profilePicUrl:  encode(profile_PicURL),
                         token:  encode(token),
@@ -172,6 +190,7 @@ const Login = (props) => {
                         loginmethod: encode('KCH'),
                         banned: encode(banned),
                         newmessages: encode("x1-f"),
+                        authbee: encode(false),
                     };
                     const JSONprofile = JSON.stringify(profile);
                     localStorage.setItem("_NoneOfYourBusiness",JSONprofile);

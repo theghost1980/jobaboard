@@ -22,8 +22,9 @@ import {
 import UserMenu from './User/usermenu';
 
 //testing react/redux
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { setNewMessages } from '../features/notifications/notiSlice';
+import { selectProfile } from '../features/userprofile/profileSlice';
 // end testing 
 
 //hivesigner SDK + init
@@ -111,6 +112,11 @@ const Navbar = () => {
     if(userdata.banned === true){
         alert('You have been Banned. Please Contact the admins as you only have some limited features on this platform.!\nTODO: Show this more nicely in a component bellow logo.');
     }
+
+    // testing profile redux here
+    const _profile = useSelector(selectProfile);
+    console.log(_profile);
+    // end testing
 
     // console.log(userdata);
     //state constants/vars

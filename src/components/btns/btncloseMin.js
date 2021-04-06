@@ -2,6 +2,12 @@ import React from 'react';
 import Img from 'gatsby-image';
 import { useStaticQuery, graphql } from 'gatsby';
 
+/**
+ * Assign the project to an employee.
+ * @param {String} classCSS - The css class that belongs to.
+ * @param {function} btnAction - Call back to assign a value on each switch action
+ */
+
 const Btnclosemin = (props) => {
     const { classCSS, btnAction } = props;
 

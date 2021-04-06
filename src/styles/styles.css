@@ -13,13 +13,6 @@ GatsbyImageSharpFluid_withWebp
 GatsbyImageSharpFluid_withWebp_noBase64
 GatsbyImageSharpFluid_withWebp_tracedSVG */
 
-/* [url=https://imgbb.com/][img]https://i.ibb.co/dGKfQ8N/graphic-design.jpg[/img][/url]
-[url=https://imgbb.com/][img]https://i.ibb.co/4YJnHPv/lifestyle.jpg[/img][/url]
-[url=https://imgbb.com/][img]https://i.ibb.co/pZrSPWf/music.jpg[/img][/url]
-[url=https://imgbb.com/][img]https://i.ibb.co/kxtcBMj/programming.png[/img][/url]
-[url=https://imgbb.com/][img]https://i.ibb.co/2vftwSJ/tech.jpg[/img][/url]
-[url=https://imgbb.com/][img]https://i.ibb.co/FwM05Dy/vide.jpg[/img][/url] */
-
 /* credits */
 /* https://reactcommunity.org/react-tabs/ */
 /* Photo by Jake Ryan from Pexels - https://www.pexels.com/photo/smiling-black-dressmaker-working-on-sewing-machine-4358401/ */
@@ -194,6 +187,9 @@ body::-webkit-scrollbar-thumb {
 .miniMarginLeft {
     margin-left: 5px;
 }
+.miniMarginRight {
+    margin-right: 5px;
+}
 .textColorContrast1 {
     color: rgb(160, 86, 86);
 }
@@ -243,6 +239,12 @@ body::-webkit-scrollbar-thumb {
     height: auto;
     padding-inline-start: 0px;
 }
+.standardUlColPlain90p {
+    list-style: none;
+    width: 90%;
+    height: auto;
+    padding-inline-start: 0px;
+}
 .standardUlColAutoW {
     display: flex;
     flex-direction: column;
@@ -256,6 +258,15 @@ body::-webkit-scrollbar-thumb {
 }
 .justWidth30{
     width: 30%;
+}
+.standardUlColFullWMaxH300p {
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+    padding-inline-start: 0px;
+    height: 200px;
+    width: 100%;
+    overflow-y: scroll;
 }
 .standardUlColThin {
     display: flex;
@@ -294,6 +305,17 @@ body::-webkit-scrollbar-thumb {
     align-content: center;
     height: 40px;
     border-top-right-radius: 6px;
+}
+.absDivColSmall {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-content: center;
+    top: 0px;
+    right: -5px;
+    width: 40px;
+    height: 40px;
 }
 .hoveredOpaacity {
     transition: all 0.2s cubic-bezier(0.47, 0, 0.745, 0.715);
@@ -879,6 +901,7 @@ body::-webkit-scrollbar-thumb {
     width: 60px;
     height: auto;
 }
+
 .miniImageJobs2 {
     display: block;
     width: 65px;
@@ -1019,6 +1042,10 @@ body::-webkit-scrollbar-thumb {
     font-size: small;
     color: #EA3546;
 }
+.warningTextXSmall {
+    font-size: x-small;
+    color: #EA3546;
+}
 .normalTextSmall {
     font-size: small;
 }
@@ -1101,6 +1128,10 @@ body::-webkit-scrollbar-thumb {
 .miniMarginTB {
     margin-top: calc(var(--marginBewteen-Objects)/2);
     margin-bottom: calc(var(--marginBewteen-Objects)/2);
+}
+.extraMiniMarginsTB {
+    margin-top: 4px;
+    margin-bottom: 4px;
 }
 .margins {
     margin-right: var(--marginBewteen-Objects);
@@ -1252,11 +1283,11 @@ body::-webkit-scrollbar-thumb {
 .specialText {
     color: #337CA0;
 }
-.spanAbs {
+/* .spanAbs {
     position: absolute;
     bottom: -20px;
     color: #EA3546;
-}
+} */
 .miniDivAbs150{
     display: flex;
     width: 150px;
@@ -1312,6 +1343,10 @@ body::-webkit-scrollbar-thumb {
 }
 .justifyFlexCenter {
     justify-content: center;
+}
+.smallImage {
+    width: 100px;
+    height: auto;
 }
 /* emd shared classes */
 
@@ -1414,6 +1449,14 @@ body::-webkit-scrollbar-thumb {
     border-radius: 10px;
     margin: var(--marginBewteen-Objects);
     box-shadow: 2px 2px 5px 2px orange;
+}
+.borderedFlexShadow90pW2 {
+    display: flex;
+    flex-direction: column;
+    width: 90%;
+    height: auto;
+    border: 1px solid orange;
+    border-radius: 10px;
 }
 /* end preview job component */
 
@@ -1538,6 +1581,10 @@ body::-webkit-scrollbar-thumb {
 }
 .hoveredBoxShadow:hover{
     box-shadow: 1px 2px 4px 1px orange;
+}
+.hoveredBordered:hover {
+    border: 1px solid orange;
+    border-radius: 8px;
 }
 .marginBottom {
     margin-bottom: var(--marginBewteen-Objects);

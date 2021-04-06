@@ -10,6 +10,33 @@ import Robotips from '../../components/robots/robotips';
 import Mesaggertop from '../../components/messages/mesaggertop';
 import Btnswitch from '../btns/btnswitch';
 import { fecthDataBE } from '../../utils/logger';
+import { useStaticQuery, graphql } from 'gatsby';
+import Img from 'gatsby-image';
+
+
+// IF we handle all the test SSC requests on server, we don't need to use the VPN.
+// TODO we can take a different approach to create the NFT.
+// validate input data -> this is very important to avoid errors
+// After payment & validation.
+// send the custom json. Here we may take 2 paths:
+// 1. send as custom json as we are doing, but this implies to modify so it can be done in server
+//      so we dont need to store/use the private keys on client side.
+// 2. learn and use the transfer method on the same transfer done by user.
+        // we could test on this method to see if this is more efficient
+// After sending the broadcast, we must look into that TxId.
+// if errors, will appear on field result.logs -> we must parse it to get:
+    // result.logs.errors
+// if no error then logs will appear as bellow:
+    // {"events":[{"contract":"tokens","event":"transfer","data":{"from":"jobaboard","to":"null","symbol":"BEE","quantity":"100"}}]}
+    // which let us know the NFT was created.
+// now we must test this approach to see how to verify the NFT and apply the props
+//  if needed. As we can create any new token with some default props and
+//  allow the user to modify this at will later on.
+//by doing this all the above we can:
+// 1. define 2 methods for NFT creation.
+// 1.1 The jobito helper, so we can reuse some parts of the old nftcreator, to guide the user and show him tips + the process live.
+// 1.2 A nftcreator more automated so it will handle the whole process on server and, as soon as it was created,
+//      it will send a notification to the user so he may check the NTF + instances.
 
 //dhive to test the broadcast of a custom json
 var dhive = require("@hiveio/dhive");
@@ -22,10 +49,10 @@ const postingKey = dhive.PrivateKey.fromString(process.env.GATSBY_postingKey);
 // const sscTemp = new SSC(sourceSSCURL); 
 const adminEP = process.env.GATSBY_adminEP;
 const nftEP = process.env.GATSBY_nftEP;
+const nfthandlermongoEP = process.env.GATSBY_nfthandlermongoEP;
 ///////
 // TODO to load all this data from .env file
 const jabFEE = { fee: "0.000", currency: "HIVE", costInstance: "0.001", costCurr: "HIVE", acceptedCur: "HIVE"};
-////////
 // const account = "theghost1980";
 
 const dialogs = [
@@ -53,6 +80,19 @@ var timerTotal;
  */
 
 const Nftcreator = (props) => {
+    //graphql queries
+    const data = useStaticQuery(graphql`
+        query{
+            infoIcon: file(relativePath: {eq: "info.png"}) {
+                childImageSharp {
+                    fixed(width: 25) {
+                        ...GatsbyImageSharpFixed_withWebp
+                    }
+                }
+            }
+        }
+    `);
+    //end grapqhl queries
     // TODO very important
     // when we create a new NFT or issue
     // we must send a comand to the parent component to update
@@ -93,6 +133,8 @@ const Nftcreator = (props) => {
     const [sameName, setSameName] = useState(false);
     const [messageUser, setMessageUser] = useState(false);
     const [addMoreDetails, setAddMoreDetails] = useState(false);
+    const [priceNft, setPriceNft] = useState(1); //default value as 1 the coin accepted on the platform
+    const [showNFTs, setShowNFTs] = useState(false);
     //
 
     //timer function to keep time track of the whole process.
@@ -113,6 +155,7 @@ const Nftcreator = (props) => {
         //         setIssuedNFTs(result);
         //     }
         // });
+        // TODO add the sort option on BE about this type of queries.
         getSSCData(nftEP+"allNFTs",{ issuer: "jobaboard"})
         .then(response => {
             if(response.length > 0){
@@ -136,9 +179,12 @@ const Nftcreator = (props) => {
     //testing to record all steps in another state
     //just to analyse the steps and see if I must change order of step to add prop value.
     useEffect(() => {
-        setRecordSteps(prevState => [
-            ...prevState, { state: nftState }
-        ]);
+        if(nftState){
+            setRecordSteps(prevState => [
+                ...prevState, { state: nftState }
+            ]);
+            console.log(recordSteps);
+        }
     }, [nftState])
 
     function errorOnProcess(){
@@ -166,6 +212,18 @@ const Nftcreator = (props) => {
     // TODO: move all of this fetchings to helpers.....:D
     /////////////fecthing NFT from BE
     //////////data fecthing BE////////////
+     async function sendPostBE(url = '', formData, headers) {
+        const response = await fetch(url, {
+            method: 'POST', // *GET, POST, PUT, DELETE, etc.
+            mode: 'cors', // no-cors, *cors, same-origin
+            // headers: {
+            //     'x-access-token': userdata.token
+            // },
+            headers: headers,
+            body: formData,
+        });
+        return response.json(); 
+    };
     async function getSSCData(url = '',query = {}) {
         const response = await fetch(url, {
             method: 'GET', // *GET, POST, PUT, DELETE, etc.
@@ -221,7 +279,59 @@ const Nftcreator = (props) => {
     }
     ////////
 
-    //asking transfer for now with hive-keychain.
+    useEffect(() => {
+        if(newNFT && newNFT !== null){
+            console.log(newNFT);
+            if(!newNFT.properties.hasOwnProperty("isPremium")){
+                console.log('Yes the F property is not here')
+                sendNFTMongoDB(newNFT);
+            }
+            // here we stamp the newly nft to this user on mongoDB nft.
+        }
+    }, [newNFT]);
+
+    function sendNFTMongoDB(_newNFT){
+        // TODO
+        // add the image as the user wants in the form and upload it.
+        // we just need to handle the uploading first so we will send over here the
+        // url i guess we can upload it as soon as the process start and set the response
+        // as an upcomming state and use it here.
+        console.log('Sending NFT request to create the token on mongoDB');
+        console.log('We are about to send:::');
+        console.log(_newNFT);
+
+        const formdata = new FormData();
+        formdata.append("symbol", _newNFT.symbol);
+        formdata.append("name", _newNFT.name);
+        formdata.append("nft_id", _newNFT._id);
+        formdata.append("account", account);
+        formdata.append("orgName", "JAB jobs and gigs on a Hive blockchain");
+        formdata.append("productName", "JAB NFT on the run");
+        formdata.append("price", priceNft);
+        formdata.append("authorizedIssuingAccounts", JSON.stringify(['jobaboard', account]));
+        formdata.append("issuer", "jobaboard");
+        formdata.append("supply", _newNFT.supply);
+        formdata.append("circulatingSupply", _newNFT.circulatingSupply);
+        formdata.append("createdAt", new Date);
+
+        // TODO man.
+        // IF file -> TODO.
+        // if(file){
+        //     formData.append("file",file[0]);
+        // }
+
+        const headers = {
+            'x-access-token': `${token}`,
+            'id': `${_newNFT._id}`,
+        };
+        sendPostBE(nfthandlermongoEP+"addNFTDB",formdata,headers)
+        .then(response => {
+            console.log(response);
+        })
+        .catch(error => console.log('Error when creating NFT on mongoDB',error));
+    }
+
+    //asking transfer for now , only with hive-keychain.
     const askTransfer = () => {
         if(!nft || nft === ""){ return console.log('No input no Sauce for you!')};
         if(!account || account === ""){ return console.log("Error fatal on props. Contact Admins.")};
@@ -232,7 +342,7 @@ const Nftcreator = (props) => {
         //End recording
         // ++++++++++++++++++
 
-        const str = `\nSymbol: ${nftToken.symbol}\nName: ${nftToken.name}\nOrganization: ${nftToken.orgName}\nProduct Name: ${nftToken.productName}\nUrl: ${nftToken.url}\nMax Supply: ${nftToken.maxSupply}`
+        const str = `\nSymbol: ${nftToken.symbol}\nName: ${nftToken.name}\nOrganization: ${nftToken.orgName}\nProduct Name: ${nftToken.productName}\nUrl: ${nftToken.url}\nMax Supply: ${nftToken.maxSupply}\nPrice for each of your tokens:${priceNft} ${jabFEE.acceptedCur}`
         const answer = window.confirm(`Please check the current features of your token:${str}\nDo you agree to proceed?`);
         if(!answer){ 
             // ++++++++++++++++++
@@ -269,7 +379,6 @@ const Nftcreator = (props) => {
                         //End recording
                         // ++++++++++++++++++
                     }
-                    
                 }
                 setWorking(false);
                 errorOnProcess();
@@ -355,7 +464,7 @@ const Nftcreator = (props) => {
                                 getSSCData(nftEP+"allNFTs", { symbol: nftToken.symbol, issuer: "jobaboard" })
                                 .then(response => {
                                     console.log(response);
-                                    if(response.length === 1 && response[0].symbol === nftToken.symbol){
+                                    if(response.length === 1 && response[0].symbol === nftToken.symbol){        
                                         //stop interval
                                         clearInterval(timer);
                                         setNewNFT(response[0]);
@@ -969,10 +1078,29 @@ const Nftcreator = (props) => {
                             <li>Actual System Fee: <span style={{ color: 'red'}}>{jabFEE.fee} {jabFEE.currency}</span></li>
                             <li>Cost Per Instance:<span style={{ color: 'red'}}> {jabFEE.costInstance} {jabFEE.costCurr}</span></li>
                         </ul>
+                        { sameName && 
+                            <div className="standardDivRowFullW justAligned">
+                                <p className="normalTextSmall alertSpan">Name Exists! Choose a different one please.</p>
+                                <div className="alertSpan normalTextSmall" onClick={() => setShowNFTs(!showNFTs)}>
+                                    <Img className="pointer" fixed={data.infoIcon.childImageSharp.fixed} title="Help me decide by showing current NFTs names." />
+                                </div>
+                            </div>
+                        }
+                        {
+                            showNFTs && issuedNFTs &&
+                                <ul className="standardUlColFullWMaxH300p textColorContrast1">
+                                    {
+                                        issuedNFTs.map(nft => {
+                                            return (
+                                                <li key={`${nft._id}-issuedNFT`}>{nft.symbol}</li>
+                                            )
+                                        })
+                                    }
+                                </ul>
+                        }
                         <form ref={formRef} className="standardFormHor relativeDiv colorX">
                             <label htmlFor="symbol">Token's Name:</label>
                             <input name="symbol" type="text" onChange={changeInput} className={sameName ? 'alertInput': null}/>
-                            { sameName && <span className="spanAbs">Name Exists! Choose a different one please.</span>}
                             <label htmlFor="nft_amount">Amount:</label>
                             <input name="nft_amount" defaultValue="0" type="text" onChange={calculateAmount} />
                             <p>Total to Pay: {totalAmount.toString()} {jabFEE.acceptedCur}</p>
@@ -981,6 +1109,7 @@ const Nftcreator = (props) => {
                             sideText={"Add more Details"} 
                             btnAction={(cen) => receivedFromSwitch(cen)} 
                             showValueDevMode={false}
+                            initialValue={false}
                         />
                         {
                             addMoreDetails &&
@@ -996,6 +1125,8 @@ const Nftcreator = (props) => {
                                         <input name="url" type="text" onChange={(e)=> setValueNFT(e.target.name,e.target.value)} />
                                         <label htmlFor="maxSupply">Max Supply:</label>
                                         <input name="maxSupply" type="text" onChange={(e)=> setValueNFT(e.target.name,e.target.value)} />
+                                        <label htmlFor="priceNft">Price of each token:(on {jabFEE.acceptedCur})</label>
+                                        <input name="priceNft" type="text" onChange={(e)=> setPriceNft(Number(e.target.value))} />
                                     </form>
                                 </div>
                         }

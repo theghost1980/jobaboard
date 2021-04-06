@@ -1,6 +1,7 @@
 //libs
 import { navigate } from "gatsby"
 import { isKeychainInstalled, hasKeychainBeenUsed } from '@hiveio/keychain';
+
 //JWT
 const jwt = require('jsonwebtoken');
 //constants
@@ -67,7 +68,7 @@ export const isBrowser = () => typeof window !== "undefined"
 export const check = () =>
   isBrowser() 
     ? checkIt()
-    : { logged: false, username: "", profilePicUrl: "", usertype: "", logginIn: false, token: "", loginmethod: "", access_token: "", bt: "", brt: "", banned: false, ts: "", msg: '', currentchatid: "", newmessages: "" }
+    : { logged: false, username: "", profilePicUrl: "", usertype: "", logginIn: false, token: "", loginmethod: "", access_token: "", bt: "", brt: "", banned: false, ts: "", msg: '', currentchatid: "", newmessages: "", authbee: false }
 
 //////////////////SOCKET//////////////////////
 // all socket handlers
@@ -83,16 +84,27 @@ export function sendPayloadSocket(data){
         socket.send(JSON.stringify(data));
     }else{
         console.log('Socket not ready.');
+        // testing to send the initsocket right here under thus not ready condition
+        initSocket();
     }
 };
 
 export function authSocket(token){
-    sendPayloadSocket({
-        "type": "authenticate",
-        "payload": {
-            "token": `${token}`
-        }
-    });
+    // for now just added a new field on userdata
+    // authbee as boolean
+    // so here we will read each time to see if !auth then auth
+
+    // const authBee = getStoredField("authbee");
+    // console.log(`Value read from authbee LS:${authBee}`);
+    // if(authBee === "false"){
+        // console.log("Sending auth to bee as was in false!!");
+        sendPayloadSocket({
+            "type": "authenticate",
+            "payload": {
+                "token": `${token}`
+            }
+        });
+    // }    
 }
 
 function checkSocket(){
@@ -118,7 +130,7 @@ export function logOutBee(){
             console.log(response);
         }
     })
-    .catch(error => console.log('Error loggin user out from bee.',error));
+    .catch(error => console.log('Error when loggin user out from bee.',error));
 }
 
 export function initSocket(){
@@ -132,8 +144,14 @@ export function initSocket(){
         //auth
         // authSocket(token);
         // testing reading fromls to see if works
-        const _token = getStoredField("bt");
-        authSocket(_token);
+        if(isDataLs()){
+            const _token = getStoredField("bt");
+            if(_token){
+                authSocket(_token);
+            }
+        }else{
+            console.log('No more data on LS.');
+        }
     };
     _socket.onmessage = function(event) {
         console.log(`[message] Data received from server: ${event.data}`);
@@ -148,6 +166,8 @@ export function initSocket(){
             // const refresh_token = decode(parsedProfile.brt);
             const refresh_token =  getStoredField("brt");
             console.log(`I have received from getter:brt as:${refresh_token}`);
+            // clean authbee to follow the actual logic
+            // setStoredField("authbee",false);
             //end getter
             // const refresh_token = localStorage.getItem('_GOfUb_RT');
             fecthDataRequest(beechatEP + "users/refresh-token",refresh_token)
@@ -158,15 +178,23 @@ export function initSocket(){
                     // const parsedP = JSON.parse(localStorage.getItem("_NoneOfYourBusiness"));
                     // parsedP.bt = encode(response.token); // 
                     setStoredField("bt",response.token); //new access_token for bee chat API.
-                    // localStorage.setItem("_NoneOfYourBusiness",JSON.stringify(parsedP));
-                    //end setter
-                    // localStorage.setItem('_GOfUb_T',response.token);
                     //auth again
                     authSocket(response.token);
                 }
             })
+        }else if(data.type == "status"){
+            // {"type":"status","payload":{"authenticated":true}}
+            console.log('Received data event on helpers!');
+            console.log(data.payload);
+            if(data.payload.authenticated){
+                //now we set the field
+                // setStoredField("authbee",true);
+                console.log('It should be done only once!!!');
+            }
+        }else if (data.type === "chat-message"){
+            // so redux cannot be used here, so we must find another way....
+            // TODO
         }
-        //as soon as we get the new token, set it
     };
     _socket.onclose = function(event) {
         if (event.wasClean) {
@@ -187,6 +215,10 @@ export function initSocket(){
     // return _socket;
 };
 //////////////////////////////////////////////
+function isDataLs(){
+    const data = localStorage.getItem("_NoneOfYourBusiness");
+    return (data && data !== null && data !== "") ? true : false;
+}
 //check/set/get data on local storage function
 export function setStoredField(field,value){
     const parsed = JSON.parse(localStorage.getItem("_NoneOfYourBusiness"));
@@ -203,6 +235,7 @@ export function setStoredField(field,value){
 export function getStoredField(fieldToGet){
     // object['property']
     const parsed = JSON.parse(localStorage.getItem("_NoneOfYourBusiness"));
+    if(!parsed) return null //no more data stored...
     const field = parsed[`${fieldToGet}`];
     // TODO add as testing mode
     // console.log(`Reading:${fieldToGet} as:${field} decoded:${decode(field)}`);
@@ -211,7 +244,7 @@ export function getStoredField(fieldToGet){
 function tryLoginBee(){
     const actualToken = getStoredField("bt");
     if(actualToken){
-        fecthDataRequest(beechatEP + "/users/verify",actualToken)
+        fecthDataRequest(beechatEP + "users/verify",actualToken)
         .then(response => {
             console.log(response);
             //depending on response we re-auth using the ts/msg stored
@@ -244,6 +277,7 @@ export function checkIt(){
         msg: '',
         currentchatid: "",
         newmessages: "", 
+        authbee: false,
     }
     if(typeof window !== "undefined"){
         if(isKeychainInstalled && hasKeychainBeenUsed){
@@ -286,6 +320,7 @@ export function checkIt(){
                                     msg: dataJsonDeco.msg,
                                     currentchatid: dataJsonDeco.currentchatid,
                                     newmessages: dataJsonDeco.newmessages,
+                                    authbee: dataJsonDeco.authbee,
                                 }
                                 console.log('Still valid, used data on localstorage.');
                                 // testing to check if valid data for bee Chat

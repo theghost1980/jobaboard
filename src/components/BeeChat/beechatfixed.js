@@ -11,8 +11,9 @@ import Loader from '../loader';
 //testing react/redux
 import { useDispatch } from 'react-redux';
 import { setNewMessages } from '../../features/notifications/notiSlice';
-import Mesaggertop from '../messages/mesaggertop';
 // end testing 
+
+import Mesaggertop from '../messages/mesaggertop';
 
 //constants
 const beechatEP = "https://beechat.hive-engine.com/api/";
