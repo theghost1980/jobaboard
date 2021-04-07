@@ -13,6 +13,8 @@ import { Link } from 'gatsby';
 import Loader from '../loader';
 import Nftcreator from '../nfthandling/nftcreator';
 import Nftcreatorfinal from '../nfthandling/nftcreatorfinal';
+//hiveio/keychain
+import { isKeychainInstalled} from '@hiveio/keychain';
 //testing SSCjs library
 // const SSC = require('sscjs');
 // const ssc = new SSC('http://185.130.45.130:5000/');
@@ -23,6 +25,7 @@ var client = new dhive.Client(["https://api.hive.blog", "https://api.hivekings.c
 //constants
 const nftEP = process.env.GATSBY_nftEP;
 const nfthandlermongoEP = process.env.GATSBY_nfthandlermongoEP;
+const ssc_test_id = "ssc-testNettheghost1980";
 
 const Tokensuser = () => {
     const userdata = check();
@@ -44,8 +47,10 @@ const Tokensuser = () => {
     const [noInstancesOfNFT, setnoInstancesOfNFT] = useState(false);
     const [myNFTsMongo, setMyNFTsMongo] = useState([]);
     const [selected, setSelected] = useState(null);
-    const [amountSelected, setAmountSelected] = useState(0);
+    const [selectedInstances, setSelectedInstances] = useState([]);
     const [showCreator, setShowCreator] = useState(false);
+    const [wantToBurn, setWantToBurn] = useState(false);
+    const [tx, setTx] = useState(null);
     //init forms-hooks
     const { register, handleSubmit, errors } = useForm();
     // on load
@@ -61,19 +66,59 @@ const Tokensuser = () => {
     // to execute on each set state
     useEffect(() => {
         if(selected){
+            setSelectedInstances([]);
             console.log(`Searching on:${selected.symbol}`);
             getSSCDataTable(nftEP+"allInstances",`${selected.symbol}`,"instances",{ account: userdata.username })
             .then(response => {
                 console.log(response);
-                if(response.length > 0){
-                    setAmountSelected(response.length);
-                };
+                setSelectedInstances(response);
+                // if(response.length > 0){
+                //     setSelectedInstances(response);
+                // };
             }).catch(error => console.log('Error fecthing BE - instances.',error));
         }
     }, [selected])
+    useEffect(() => {
+        if(tx){
+            //testing on 3s
+            setTimeout(getInfoTX,3000);
+        }
+    }, [tx]);
     // end to execute on each set
 
     // functions/CB
+    function getInfoTX(){
+        if(tx){
+            getSSCDataTX(nftEP + "tx", tx)
+            .then(response => {
+                console.log(response);
+                if(response.status === "askAgain"){
+                    return setTimeout(getInfoTX,3000);
+                }else{
+                    //{"events":[{"contract":"nft","event":"burn","data":{"account":"theghost1980","ownedBy":"u","unlockedTokens":{},"unlockedNfts":[],"symbol":"APII","id":"1"}}]}
+                    console.log(response);
+                    if(response.logs){
+                        const logs = JSON.parse(response.logs);
+                        console.log(logs.events);
+                        if(logs.events.length === 1 && logs.events[0].event === "burn"){
+                            //burned. show message to user
+                            setWantToBurn(false);
+                            setSelected(null);
+                            setSelectedInstances([]);
+                            const msg = `Symbol: ${logs.events[0].data.symbol} ID: ${logs.events[0].data.id} has been sent to null.`
+                            alert('Token Burned Successfully\n' + msg);
+                            setTx(null);
+                            //TODO: update the main nft list.
+                            // TODO: send log to loggerOP
+                        }
+                    }
+                }
+            })
+            .catch(error => {
+                console.log('Error asking data ssc on BE',error);
+            });
+        }
+    }
     const updateUserNFTS = () => {
         console.log('Updating NFTs');
         updateNFTs();
@@ -99,6 +144,8 @@ const Tokensuser = () => {
     const onSaleNft = () => {
         if(selected && !selected.for_sale){
             // TODO a component abs on top to show the loader while we load data or do something
+            // TODO add the logic so the same component can be used to toogle on_sale
+            // maybe with a cool down to prevent abuse or "fooling around"
             const query = {
                 for_sale: true,
                 updatedAt: new Date().toString(),
@@ -118,6 +165,42 @@ const Tokensuser = () => {
     const showCreatorHideRest = () => {
         setShowCreator(true);
         setSelected(null);
+    }
+    function burnToken(token){
+        // TODO: play with the logic on, if this token is been used on a job?
+        // I guess in_use can serve to "transfers" maybe but cannot see the logic yet.
+        if(isKeychainInstalled){
+            const answer = window.confirm('You are about to Burn 1 token. Shall we proceed?');
+            if(answer){
+                console.log(`To burn:${token._id}`);
+                const jsonData = {
+                            "contractName": "nft",
+                            "contractAction": "burn",
+                            "contractPayload": {
+                                "nfts": [ {"symbol": String(selected.symbol), "ids": [ String(token._id) ]} ]
+                            }
+                }
+                const msg = `To burn 1 ${selected.symbol}`;
+                window.hive_keychain.requestCustomJson(userdata.username, ssc_test_id, "Active", JSON.stringify(jsonData), msg, function(result){
+                    const { message, success, error } = result;
+                    console.log(result);
+                    if(!success){
+                        if(error !== "user_cancel"){
+                            const { error, cause, data } = result.error;
+                            console.log('Error while trying to burn NFT.', message);
+                        }else if(error === "user_cancel"){
+                            // addStateOP({ state: 'User cancelled before transfer.', data: { date: new Date().toString()} }); 
+                            console.log('User cancelled burning!');
+                        }
+                    }else if (success){
+                        //check on this txId to analize results.
+                        setTx(result.result.id);
+                        console.log('Checking TX!',result.result.id);
+                        // TODO: send log to loggerOP
+                    };
+                });
+            }
+        }
     }
     // END functions/CB
 
@@ -306,6 +389,17 @@ const Tokensuser = () => {
     }
 
     //////////data fecthing BE////////////
+    async function getSSCDataTX(url = '',tx) {
+        const response = await fetch(url, {
+            method: 'GET', // *GET, POST, PUT, DELETE, etc.
+            mode: 'cors', // no-cors, *cors, same-origin
+            headers: {
+                'x-access-token': userdata.token,
+                'tx': tx,
+            },
+        });
+        return response.json(); 
+    };
     async function getSSCData(url = '',query = {}) {
         const response = await fetch(url, {
             method: 'GET', // *GET, POST, PUT, DELETE, etc.
@@ -381,7 +475,7 @@ const Tokensuser = () => {
             }
             {
                 selected &&
-                <div className="relativeDiv">
+                <div className="relativeDiv marginsTB">
                     <Btnclosemin classCSS={"absDivColSmall"} btnAction={() => setSelected(null)} />
                     <div className="standardDivRowFullW">
                         <div className="standardDiv30Percent">
@@ -396,7 +490,7 @@ const Tokensuser = () => {
                                         <div className="contentMiniMargins">
                                             {/* for now i will handle it straight away from hive ssc */}
                                             {
-                                                amountSelected && <h2 className="noMargintop">{amountSelected.toString()} {amountSelected === 1 ? 'Token':'Tokens'}</h2>
+                                                <h2 className="noMargintop">{selectedInstances.length.toString()} {selectedInstances.length === 1 ? 'Token':'Tokens'}</h2>
                                             }
                                             {
                                                 <ul className="normalTextSmall standardUlColPlain90p">
@@ -407,15 +501,43 @@ const Tokensuser = () => {
                                     </div>
                                 </li>
                                 <li>
-                                    <div className="borderedFlexShadow90pW2 miniMarginTB">
-                                        <p className="contentMiniMargins warningTextXSmall">Danger Zone</p>
-                                        <ul className="standardUlColPlain contentMiniMargins">
-                                            <li className="standardLiHovered">Burn Tokens</li>
-                                        </ul>
-                                    </div>
+                                    {
+                                        (selectedInstances.length > 0) &&
+                                        <div className="borderedFlexShadow90pW2 miniMarginTB">
+                                            <p className="contentMiniMargins warningTextXSmall">Danger Zone</p>
+                                            <ul className="standardUlColPlain contentMiniMargins">
+                                                <li className="standardLiHovered" onClick={() => setWantToBurn(true)}>Burn Tokens</li>
+                                            </ul>
+                                        </div>
+                                    }
                                 </li>
                             </ul>
                         </div>
+                        {
+                            wantToBurn &&
+                            <Abswrapper xtraClass={"justiAlig"}>
+                                <div className="standardDiv60Percent relativeDiv justBorders justRounded justbackground marginAuto">
+                                    <Btnclosemin classCSS={"closeBtnAbs"} btnAction={() => setWantToBurn(false)} />
+                                    <div className="standardContentMargin">
+                                        <p>You must understand that this action cannot be undone.</p>
+                                        <p>Once a token has been burned, we cannot recover it. So please proceed with caution.</p>
+                                        <p>Select the Token to burn from the list</p>
+                                        <ul className="justBorders justRounded ">
+                                            {
+                                                selectedInstances.map(token => {
+                                                    return (
+                                                        <li key={`${token._id}-toBurn`} className="standardLiHovered" onClick={() => burnToken(token)}>
+                                                            ID: {token._id} - Owned By: {token.ownedBy}
+                                                            {/* TODO: add a loader when is trying to burn the token. */}
+                                                        </li>
+                                                    )
+                                                })
+                                            }
+                                        </ul>
+                                    </div>
+                                </div>
+                            </Abswrapper>
+                        }
                         <div className="standardDiv60Percent">
                             <p className="extraMiniMarginsTB">Symbol: {selected.symbol}</p>
                             <p className="extraMiniMarginsTB">Price: {selected.price} HIVE</p>
@@ -425,10 +547,12 @@ const Tokensuser = () => {
                                 selected.updatedAt && <p className="extraMiniMarginsTB">Updated At: {formatDateTime(selected.updatedAt)}</p>
                             }
                             <p className="extraMiniMarginsTB">For sale: {selected.for_sale ? 'Yes':'No'}</p>
+                            <p className="extraMiniMarginsTB">Actual price: {selected.price}</p>
                             <p className="extraMiniMarginsTB">Issued On: {selected.issued_On}</p>
                             <p className="extraMiniMarginsTB">Issued By: {selected.issuer}</p>
                             <p className="extraMiniMarginsTB">Name: {selected.name}</p>
                             <p className="extraMiniMarginsTB">Organization Name: {selected.orgName}</p>
+                            {/* TODO: create a component called hivePrice that get the price from coinPrices component and show the icon, plus option as when clicked show price on hive/USD */}
                             <p className="extraMiniMarginsTB">Product Name: {selected.productName}</p>
                             <p className="extraMiniMarginsTB">Supply: {selected.supply}</p>
                             <p className="extraMiniMarginsTB">Circulating Supply: {selected.circulatingSupply}</p>
