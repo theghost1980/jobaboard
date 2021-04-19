@@ -8,11 +8,13 @@ import { check } from '../../../utils/helpers';
 import axios from 'axios';
 import Loader from '../../loader';
 import Previewjob from './previewjob';
+import Btninfo from '../../btns/btninfo';
 //constants
 // const rpcURL = 'http://185.130.45.130:5000/';
 const adminEP = process.env.GATSBY_adminEP;
 const nftEP = process.env.GATSBY_nftEP;
 const rpcNode = process.env.GATSBY_testSSCNodeURL;
+const nfthandlermongoEP = process.env.GATSBY_nfthandlermongoEP;
 // end constants
 // const SSC = require('sscjs');
 // const ssc = new SSC('https://185.130.45.130:5000/');
@@ -24,12 +26,6 @@ const rpcNode = process.env.GATSBY_testSSCNodeURL;
 
 
 const Jobs = (props) => {
-
-    //first thing we must do when mounting this component is:
-    // check if user has owned tokens && the balance in one of them
-    // is > 0.
-    // if true, proceeed, load/add(owned.balances > 0) owned tokens on selection bellow, so he can choose from list
-    // if false, show message take user to tokens creations.
 
     //graphql queries
     const data = useStaticQuery(graphql`
@@ -65,6 +61,11 @@ const Jobs = (props) => {
     const userdata = check();
     //check on mounting
     useEffect(()=>{
+
+        const _coins = localStorage.getItem("coins");
+        if(_coins){
+            setCoins(JSON.parse(_coins));
+        }
         initCreateJob();
     },[]);
 
@@ -73,6 +74,7 @@ const Jobs = (props) => {
         category: String,
         sub_category: String,
         title: String,
+        days_to_complete: 1, //by default 1 day.
         job_type: String,
         description: String,
         images: [String], 
@@ -97,12 +99,16 @@ const Jobs = (props) => {
     const [created, setCreated] = useState(false);
     const [newReceivedJob, setNewReceivedJOb] = useState(null);
     const [showNewJob, setShowNewJob] = useState(false);
+    const [coins, setCoins] = useState(null);
     // to reset the imageUploader
     const [resetImgUp, setResetImgUp] = useState(false);
     // error on image so we will reset :D
     const [errorImage, setErrorImage] = useState(false);
 
     const [showMyJobs, setShowMyJobs] = useState(false);
+
+    const [myNFTsMongo, setMyNFTsMongo] = useState([]); //the one this user has created on JAB an he is the actual issuer = owner.
+    const [showMyNftsMongo, setShowMyNftsMongo] = useState(false);
 
     function initCreateJob(){
         //find user's owned NFTs.
@@ -148,9 +154,46 @@ const Jobs = (props) => {
                 console.log(response);
                 setOwnedTokens(response);
             }
-        })
+        });
+        updateNFTs();
     }
 
+    //functions/CB
+    function updateNFTs(){
+        const query = {
+            nft_id: null,
+            symbol: '',
+            account: userdata.username,
+        };
+        const sortby = { "symbol": 1 };
+        bringNFTs(query,sortby);
+    }
+    function bringNFTs(query,sortby){
+        sendGETBEJustH(nfthandlermongoEP + "getNFTquery",query,0, sortby)
+        .then(response => {
+            console.log(response);
+            if(response.status === 'sucess'){
+                setMyNFTsMongo(response.result);
+            }
+        }).catch(error => console.log('Error asking for NFTs on this user from DB, mongo.',error));
+    }
+    // end functions/CB
+
+    // data fecthing
+    async function sendGETBEJustH(url = '', query = {},limit = Number,sortby = {}) {
+        const response = await fetch(url, {
+            method: 'GET', // *GET, POST, PUT, DELETE, etc.
+            mode: 'cors', // no-cors, *cors, same-origin
+            headers: {
+                'x-access-token': userdata.token,
+                'query': JSON.stringify(query),
+                'limit': limit,
+                'sortby': JSON.stringify(sortby),
+            },
+        });
+        return response.json(); 
+    };
+    // end data fecthing
     const testUploadImages = () => {
         //show loader
         setLoading(true);
@@ -196,8 +239,9 @@ const Jobs = (props) => {
         formdata.append("description", job.description);
         formdata.append("sub_category", job.sub_category);
         formdata.append("title", job.title);
+        formdata.append("days_to_complete", job.days_to_complete);
         formdata.append("job_type", job.job_type);
-        formdata.append("nft_symbol", selectedNft);
+        formdata.append("nft_symbol", selectedNft.symbol);
         formdata.append("paying_price", job.paying_price);
         formdata.append("escrow_type", job.escrow_type);
         formdata.append("escrow_username", job.escrow_username);
@@ -323,6 +367,12 @@ const Jobs = (props) => {
         setJobField("nft_symbol",symbolNft);
     }
 
+    const handleNftSelectedByIcon = (token) => {
+        console.log('Selected:',token);
+        setSelectedNft(token);
+        setJobField("nft_symbol",token.symbol);
+    }
+
     const handleSelectedCat = (event) => {
         const cat = event.target.value;
         const _subCats = data.cats.edges.filter(({node: category}) => category.name === cat)[0].node.sub;
@@ -379,6 +429,9 @@ const Jobs = (props) => {
                                                 }
                                             </div>
                             }
+                            <label htmlFor="days_to_complete">How many days to complete:<Btninfo size={"mini"} msg={"This is an estimation to show. Can be modified on this Job by you at anytime, but before a deal is made with this Job/Gig."} /> </label>
+                            <input name="days_to_complete" ref={register({ pattern: /[0-9]/g, required: true })} onChange={(e) => setJobField(e.target.name,e.target.value)} />
+                            {errors.days_to_complete && <span className="errorValidation">'Please enter numbers Only.'</span>}
                             <label htmlFor="job_type">Job Type</label>
                             <select name="job_type" ref={register({ required: true })} onChange={(e)=>setJobField(e.target.name,e.target.value)}>
                                 <option defaultValue="Select Type"></option>
@@ -412,7 +465,7 @@ const Jobs = (props) => {
                                 }
                             </select>
                             }
-                            <label htmlFor="nft_symbol">Token to Use</label>
+                            {/* <label htmlFor="nft_symbol">Token to Use</label>
                             <select name="nft_symbol" ref={register({ required: true })} onChange={handleNftSelected}>
                             <option defaultValue="Select one Token"></option>
                                 {
@@ -426,12 +479,46 @@ const Jobs = (props) => {
                                         )
                                     })
                                 }
-                            </select>
-                            <label htmlFor="divPaying">I'm paying the Amount of</label>
-                            <div className="standardDivRowFullW hSmall" name="divPaying">
-                                <input name="paying_price" className="inputSmall" ref={register({ pattern: /[0-9.,]/g, required: true })} onChange={(e)=>setJobField(e.target.name,e.target.value)}  />
-                                <span>-{selectedNft ? selectedNft : 'Please select one Token.'}</span>
-                            </div>
+                            </select> */}
+                            {/* new way more visual showing a mini icon of each user NFT */}
+                            {/* <button className="btnMini2 normalTextSmall" onClick={() => setShowMyNftsMongo(!showMyNftsMongo)}>My NFTs</button> */}
+                            <p>{selectedNft ? `Token Selected: ${selectedNft.symbol} each on:${selectedNft.price} HIVE`: 'Please select a Token from the list bellow!'}</p>
+                            {   myNFTsMongo &&
+                                <ul className="standardUlRowFlexPlain overflowXscroll">
+                                    {
+                                        myNFTsMongo.map(token => {
+                                            return (
+                                                <li key={token._id} className="pointer hoveredBordered miniMarginLeft" onClick={() => handleNftSelectedByIcon(token)}>
+                                                    <div className="textAlignedCenter">
+                                                        <div>
+                                                            <img src={token.thumb} className="miniImageJobs" />
+                                                        </div>
+                                                        <p className="xSmalltext justBoldtext">{token.symbol}</p>
+                                                        <p className="xSmalltext">{token.price} HIVE</p>
+                                                    </div>
+                                                </li>
+                                            )
+                                        })
+                                    }
+                                </ul>
+                            }
+                            {/* emd new more visual way */}
+                            { selectedNft && job.job_type &&
+                                <>
+                                <label htmlFor="divPaying">
+                                    {job.job_type === "employee" ? 'I will ask ': 'I will Pay '}
+                                </label>
+                                <div className="standardDivRowFullW hSmall" name="divPaying">
+                                    <input name="paying_price" className="inputSmall" 
+                                        ref={register({ pattern: /[0-9.,]/g, required: true })} 
+                                        onChange={(e)=>setJobField(e.target.name,e.target.value)}  
+                                        defaultValue="1"
+                                    />
+                                    {/* <span>-{selectedNft ? selectedNft : 'Please select one Token.'}</span> */}
+                                    <span> In HIVE:{selectedNft.price * job.paying_price} {(coins && job.paying_price) ? ` In USD:${Number(job.paying_price * coins.hive.usd * selectedNft.price).toFixed(3)}`: null }</span>
+                                </div>
+                                </>
+                            }
                             {errors.paying_price && <span className="errorValidation">'Please enter numbers Only.'</span>}
                             <label htmlFor="verifyed_profiles_only">Accept only Verified profiles</label>
                             <input type="checkbox" name="verifyed_profiles_only" ref={register} onChange={(e)=>setJobField(e.target.name,e.target.value)} />

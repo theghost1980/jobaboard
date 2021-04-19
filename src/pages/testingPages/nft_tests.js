@@ -37,6 +37,17 @@ const Nfttests = () => {
     // now testing to see if the issuer is keep even when the token's ownership has been
     // transferred
 
+    const logs = {
+        "errors": [
+            "not allowed to issue tokens"
+        ]
+    };
+    const found = logs.errors.filter(error => error === "not allowed to issue tokens");
+    if(found.length >= 1){
+        console.log('Error found');
+    }
+    console.log(logs.errors.length);
+
     // async function getSSCData(url = '',query = {}) {
     //     const response = await fetch(url, {
     //         method: 'GET', // *GET, POST, PUT, DELETE, etc.

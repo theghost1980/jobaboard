@@ -78,9 +78,13 @@ const Explore = (props) => {
 
     const [resultQuery, setResultQuery] = useState([]);
     const [loadingQuery, setLoadingQuery] = useState(false);
+    const [defaultQuery, setDefaultQuery] = useState(null);
     const query  = props.location.search;
-    console.log('Received prop to work with:');
-    console.log(query);
+    // console.log('Received prop to work with:');
+    // console.log(query);
+    // if(!query){//apply a default value
+    //     setDefaultQuery('explore?category=Graphics%20&%20Design|sub_category=none');
+    // }
     
     const [selectedJob, setSelectedJOb] = useState(null);
     const initialStateQ = { job_type: "", active: true, category: "", sub_category: ""};
@@ -133,6 +137,33 @@ const Explore = (props) => {
         });
     }
 
+    // to load on each change of state
+    useEffect(() => {
+        if(defaultQuery){
+            setLoadingQuery(true);
+            var passedQ = {
+                category: "", sub_category: ""
+            }
+            const cleanQ = decodeURI(defaultQuery);
+            // console.log(cleanQ);
+            const category = cleanQ.split("?category=")[1].split("|");
+            passedQ.category = category[0];
+            const sub_category = category[1].split("sub_category=")[1];
+            passedQ.sub_category = sub_category;
+            if(category[0]){
+                setValueQuery("category",category[0]);
+            }
+            if(sub_category){
+                setValueQuery("sub_category",sub_category);
+            }
+            passedQ.active = true;
+            const cleanedQ = cleanQuery(passedQ);
+            console.log('To execute on this cleaned one:');
+            console.log(cleanedQ);
+            sendQuery(cleanedQ);
+            setDefaultQuery(null);
+        }
+    }, [defaultQuery]);
     //search jobs 
     useEffect(() => {
         if(query){
@@ -159,6 +190,14 @@ const Explore = (props) => {
             sendQuery(cleanedQ);
         }
     },[query]);
+
+    //to load on init
+    useEffect(() => {
+        if(!query){
+            setDefaultQuery('explore?category=Graphics%20&%20Design|sub_category=none');
+        }
+    }, []);
+    //END to load on init
 
     //fecthing data
     async function getData(url = '') {
@@ -197,6 +236,7 @@ const Explore = (props) => {
         console.log('Executing query + filters selected');
         console.log(filterQuery,limit);
         if(filterQuery !== initialStateQ){
+            setShowFilters(false);
             setLoadingQuery(true);
             console.log('Sending new query....');
             const newNode = cleanQuery(filterQuery);
@@ -354,7 +394,7 @@ const Explore = (props) => {
                                 userdata.logged &&
                                 <Menujobs />
                             }
-                            <Previewjob job={selectedJob} cbClose={closeJOB} />
+                            <Previewjob job={selectedJob} cbClose={closeJOB} userdata={userdata} />
                         </Absscreenwrapper>
                 }
                 {

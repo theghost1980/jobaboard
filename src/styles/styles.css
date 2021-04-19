@@ -131,7 +131,12 @@ body::-webkit-scrollbar-thumb {
     border: 1px solid #EA3546;
 }
 /* end layout */
-
+.standardDisplayJusSpaceAround {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    justify-content: space-around;
+}
 .standardDiv70Auto {
     display: flex;
     flex-direction: column;
@@ -183,9 +188,25 @@ body::-webkit-scrollbar-thumb {
     display: flex;
     align-items: center;
 }
-
+.borderTPGroove {
+    border-top: groove;
+    border-bottom: groove;
+}
+.aInlineFlexPlain{
+    display: inline-flex;
+}
 .miniMarginLeft {
     margin-left: 5px;
+}
+.miniPaddingLeft {
+    padding-left: 5px;
+}
+.marginRight {
+    margin-right: var(--marginBewteen-Objects);
+}
+.marginRL {
+    margin-left: var(--marginBewteen-Objects);
+    margin-right: var(--marginBewteen-Objects);
 }
 .miniMarginRight {
     margin-right: 5px;
@@ -209,6 +230,10 @@ body::-webkit-scrollbar-thumb {
     padding-inline-start: 0px;
     border: 1px solid orange;
     border-radius: 8px;
+}
+.textMediumWhite {
+    font-size: medium;
+    color: white;
 }
 .imageMedium{
     display: block;
@@ -253,11 +278,24 @@ body::-webkit-scrollbar-thumb {
     padding-inline-start: 0px;
     list-style: none;
 }
+.justWH {
+    width: 30px;
+    height: 30px;
+}
 .justWidth70{
     width: 70%;
 }
+.justWidth90{
+    width: 90%;
+}
 .justWidth30{
     width: 30%;
+}
+.justWidth200{
+    width: 200px;
+}
+.justWidth100per{
+    width: 100%;
 }
 .standardUlColFullWMaxH300p {
     display: flex;
@@ -278,8 +316,46 @@ body::-webkit-scrollbar-thumb {
     align-items: center;
     justify-content: center;
 }
+.standardUlColW20pFullH {
+    display: flex;
+    flex-direction: column;
+    width: 20%;
+    height: 100%;
+    list-style: none;
+    padding-inline-start: 0px;
+    background: #214E34;
+}
+.standardUlColW90pFullH{
+    display: flex;
+    flex-direction: column;
+    width: 90%;
+    height: 100%;
+    list-style: none;
+    padding-inline-start: 0px;
+    background: #214E34;
+}
 .whiteBack {
     background: white;
+}
+.absDivRow100x100 {
+    display: flex;
+    flex-direction: row;
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    justify-content: center;
+    align-content: center;
+    width: 100px;
+    height: 100px;
+}
+.absDivRow10_5{
+    display: flex;
+    flex-direction: row;
+    position: absolute;
+    right: 10px;
+    top: 5px;
+    justify-content: center;
+    align-content: center;
 }
 .absDivRow {
     display: flex;
@@ -348,6 +424,12 @@ body::-webkit-scrollbar-thumb {
     height: 320px;
     margin: var(--marginBewteen-Objects);
 }
+.miniDiv15p {
+    display: flex;
+    flex-direction: column;
+    width: 15px;
+    height: 15px;
+}
 .miniDiv2{
     display: flex;
     flex-direction: column;
@@ -397,6 +479,12 @@ body::-webkit-scrollbar-thumb {
 }
 .justRounded {
     border-radius: 10px;
+}
+.justRoundedFull {
+    border-radius: 50%;
+}
+.justRoundedMini {
+    border-radius: 4px;
 }
 .marginTopRigthMin {
     margin-top: 4px;
@@ -468,6 +556,11 @@ body::-webkit-scrollbar-thumb {
 .btnMini {
     font-size: xx-small !important;
     margin-left: 8px;
+}
+.btnMini2 {
+    font-size: x-small !important;
+    width: 90px;
+    height: auto;
 }
 .textShadowBasic{
     /* text-shadow: 1px 1px 2px #214E34 !important; */
@@ -563,6 +656,20 @@ body::-webkit-scrollbar-thumb {
 .marginLeft{
     margin-left: var(--marginBewteen-Objects);
 }
+.standardUlRow {
+    display: flex;
+    flex-direction: row;
+    list-style: none;
+    padding-inline-start: 0px;
+    align-items: center;
+    align-content: center;
+    height: 40px;
+}
+.standardUlRow li {
+    float: left;
+    /* margin-right: 10px; */
+    margin: 0 auto;
+}
 .standardLiHovered:hover{
     background: orange;
     color: white;
@@ -575,6 +682,16 @@ body::-webkit-scrollbar-thumb {
     display: flex;
     flex-direction: row;
     justify-content: space-evenly;
+    width: 100%;
+    height: auto;
+    font-size: medium;
+    padding-inline-start: 0px;
+    list-style: none;
+}
+.standardUlHorSpaceAround {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
     width: 100%;
     height: auto;
     font-size: medium;
@@ -599,6 +716,9 @@ body::-webkit-scrollbar-thumb {
 .overflowXscroll{
     overflow-x: scroll;
 }
+.overflowYscroll{
+    overflow-y: scroll;
+}
 .centeredDiv {
     margin: 0 auto;
 }
@@ -613,6 +733,9 @@ body::-webkit-scrollbar-thumb {
 }
 .allMargins{
     margin: var(--marginBewteen-Objects);
+}
+.allMiniMargins {
+    margin: 5px;
 }
 .standardLink {
     transition: all .1s cubic-bezier(0.95, 0.05, 0.795, 0.035);
@@ -632,6 +755,9 @@ body::-webkit-scrollbar-thumb {
 }
 .colorX{
     color: #214E34;
+}
+.contentMarginMax {
+    margin: calc(var(--marginBewteen-Objects)*4);
 }
 .standardContentMargin {
     margin: var(--marginBewteen-Objects);
@@ -657,9 +783,27 @@ body::-webkit-scrollbar-thumb {
 .displayFlex{
     display: flex;
 }
+.justColorGray {
+    color: gray;
+}
 .alignJustCentered {
     justify-content: center;
     align-items: center;
+}
+.justMaxHeight {
+    max-height: 90px;
+}
+.justMarginAuto {
+    margin: auto;
+}
+.justMargin0auto {
+    margin: 0 auto;
+}
+.justHeight90p {
+    height: 90px;
+}
+.justHeight400p {
+    height: 400px;
 }
 .whiteBack {
     background: white;
@@ -669,6 +813,9 @@ body::-webkit-scrollbar-thumb {
 }
 .darkText {
     color: #214E34;
+}
+.brightText {
+    color: white;
 }
 .hSmall {
     height: 20px !important;
@@ -688,14 +835,42 @@ body::-webkit-scrollbar-thumb {
     height: auto;
     background: #337CA0;
 }
+.noMarginBTP {
+    margin-block-end: 0px;
+    margin-block-start: 0px;
+}
+.standardDivColFullW {
+    display: flex;
+    flex-direction: column;
+    width: auto;
+    height: auto;
+}
+.backColorOldLace {
+    background: oldlace;
+}
 .standardDivRowFullW {
     display: flex;
     flex-direction: row;
     width: 100%;
     height: auto;
 }
+.standardDivRow90W {
+    display: flex;
+    flex-direction: row;
+    width: 90%;
+    height: auto;
+}
+.listItemClosed {
+    list-style-type: disclosure-closed;
+}
+.listItemOpened {
+    list-style-type: disclosure-open;
+}
 .justifyContentSpaced {
     justify-content: space-between; 
+}
+.cursorDelete {
+    cursor: move;
 }
 .justifyContentSEvenly {
     justify-content: space-evenly;
@@ -714,6 +889,23 @@ body::-webkit-scrollbar-thumb {
 }
 .lowerOpacity {
     opacity: 0.6 !important;
+}
+.justDisplayContents {
+    display: contents;
+}
+.justDisplayGrid {
+    display: grid;
+}
+.justR-20T{
+    right: -20px;
+    top: 0px;
+}
+.justL-40T10{
+    left: -40px;
+    top: 10px;
+}
+.justAbsolutePos {
+    position: absolute;
 }
 .justAligned {
     align-items: center;
@@ -747,6 +939,12 @@ body::-webkit-scrollbar-thumb {
     width: 120px;
     height: auto;
 }
+.standardFlex120Col {
+    display: flex;
+    flex-direction: column;
+    width: 120px;
+    height: auto;
+}
 .standardDiv60Percent {
     display: flex;
     flex-direction: column;
@@ -773,6 +971,19 @@ body::-webkit-scrollbar-thumb {
     width: 150px;
     height: 150px;
     margin: 0 auto;
+}
+.justDisplayFlex {
+    display: flex;
+}
+.justDispInlineFlex {
+    display: inline-flex;
+}
+.standardDivRowFlexAutoH {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    height: auto;
 }
 .standardDivRowFlex {
     display: flex;
@@ -802,6 +1013,12 @@ body::-webkit-scrollbar-thumb {
     flex-direction: column;
     width: 40px;
     height: 40px;
+}
+.standardRowFlex200pxAutoH {
+    display: flex;
+    flex-direction: row;
+    width: 200px;
+    height: auto;
 }
 .standardDivRowFlex100pX100pCentered {
     display: flex;
@@ -869,6 +1086,9 @@ body::-webkit-scrollbar-thumb {
     font-size: small;
     color: #EA3546;
 }
+.absInlineDisplay {
+    display: inline;
+}
 .topRight {
     position: absolute;
     top: 0px;
@@ -893,6 +1113,10 @@ body::-webkit-scrollbar-thumb {
     justify-content: center;
     align-items: center;
 }
+.standardRowDivAutoWHPlain {
+    display: flex;
+    flex-direction: row;
+}
 .spaceEvenly {
     justify-content: space-evenly;
 }
@@ -901,7 +1125,12 @@ body::-webkit-scrollbar-thumb {
     width: 60px;
     height: auto;
 }
-
+.minibtn {
+    justify-content: center;
+    align-items: center;
+    width: 60px;
+    height: 30px;
+}
 .miniImageJobs2 {
     display: block;
     width: 65px;
@@ -917,6 +1146,24 @@ body::-webkit-scrollbar-thumb {
     position: relative;
     border: 1px solid orange;
     font-size: smaller;
+}
+.confirmationBtn {
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 35px;
+    height: 35px;
+}
+.miniConfirmationBtn {
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 15px;
+    height: 15px;
 }
 .closeBtnAbs {
     cursor: pointer;
@@ -1049,6 +1296,19 @@ body::-webkit-scrollbar-thumb {
 .normalTextSmall {
     font-size: small;
 }
+.hoveredAlert:hover {
+    background: #EA3546;
+    color: white;
+    width: 80%;
+}
+.textSmallOrange {
+    font-size: small;
+    color: orange;
+}
+.textXSmallOrange {
+    font-size: x-small;
+    color: orange;
+}
 .standardFormHor {
     display: flex;
     flex-direction: row;
@@ -1057,8 +1317,21 @@ body::-webkit-scrollbar-thumb {
     justify-content: space-between;
     height: 30px;
 }
+.justOverflowAuto{
+    overflow: auto;
+}
+.standardFormColHorFullWAutoH{
+    display: flex;
+    flex-direction: column;
+    background: whitesmoke;
+    width: 100%;
+    height: auto;
+}
 .centered {
     text-align: center;
+}
+.width100p {
+    width: 100px;
 }
 .divCalltoAction {
     display: flex;
@@ -1077,6 +1350,19 @@ body::-webkit-scrollbar-thumb {
     display: flex;
     flex-direction: row;
     width: 100%;
+    height: auto;
+}
+.justRight120pTop0p {
+    right: -120px;
+    top: 0px;
+}
+.activeDisplay:hover .smallAbsDivDisNone120pPlain {
+    display: flex;
+}
+.smallAbsDivDisNone120pPlain {
+    position: absolute;
+    display: none;
+    width: 120px;
     height: auto;
 }
 .standardSmallDivAbs {
@@ -1256,11 +1542,44 @@ body::-webkit-scrollbar-thumb {
         border: 1px solid #EA3546;
         border-radius: 10px;
     }
+    .disableDiv2
+    {
+        pointer-events: none;
+        border: 2px solid #EA3546;
+        border-radius: 10px;
+    }
+    .disableDiv3
+    {
+        pointer-events: none;
+        border: 2px solid #EA3546;
+        border-radius: 10px;
+        background-color: rgb(204, 203, 203);
+    }
+.justTopZindex {
+    z-index: 11000;
+}
+.justWebKitFillAvail {
+    width: -webkit-fill-available;
+    width: inherit;
+}
 .justTopMargin {
     margin-top: var(--marginBewteen-Objects);
 }
+.justTransitions{
+    transition: all 0.2s ease-in-out;
+}
+.justTopRightPos {
+    top: 0px;
+    right: 0px;
+}
 .justBorders {
     border: 1px solid orange;
+}
+.justshadows {
+    box-shadow: 0px 1px 3px 1px orange;
+}
+.justBoldtext {
+    font-weight: bold;
 }
 .justbackground {
     background: white; 
@@ -1311,6 +1630,17 @@ body::-webkit-scrollbar-thumb {
     justify-content: center;
     align-items: center;
 }
+.animFadeFast {
+    animation: halffadeIn 0.8s ease-in-out infinite;
+}
+@keyframes halffadeIn {
+    from {
+        opacity: 0.5;
+    }
+    to {
+        opacity: 1;
+    }
+}
 .animFade {
     animation: fadeIn 0.5s cubic-bezier(0.645, 0.045, 0.355, 1) 1;
 }
@@ -1347,6 +1677,15 @@ body::-webkit-scrollbar-thumb {
 .smallImage {
     width: 100px;
     height: auto;
+}
+.smallImageMax120x120 {
+    max-width: 120px;
+    max-height: 120px;
+}
+.divFlex100x100 {
+    display: flex;
+    width: 100px;
+    height: 100px;
 }
 /* emd shared classes */
 
@@ -1507,6 +1846,15 @@ body::-webkit-scrollbar-thumb {
     cursor: pointer;
     transition: all .1s ease-in-out;
 }
+.justpaddingTB {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+.justPosAbsRightTop {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+}
 .absInfoItem {
     display: flex;
     width: 20px;
@@ -1585,6 +1933,39 @@ body::-webkit-scrollbar-thumb {
 .hoveredBordered:hover {
     border: 1px solid orange;
     border-radius: 8px;
+}
+.hoverText:hover .textToHover {
+    font-size: medium;
+    color: #EA3546;
+}
+.justBackBlack {
+    background: black;
+}
+.justBackRed {
+    background: #EA3546;
+}
+.standardUlInlineFDisplay {
+    display: inline-flex;
+    list-style: none;
+    padding-inline-start: 0px;
+}
+.standardDivFlexPlain {
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.textNomarginXSmall {
+    margin-bottom: 0px;
+    margin-top: 0px;
+    font-size: x-small;
+    margin: 0 auto;
+}
+.textNomarginXXSmall {
+    margin-bottom: 0px;
+    margin-top: 0px;
+    font-size: xx-small;
+    margin: 0 auto;
 }
 .marginBottom {
     margin-bottom: var(--marginBewteen-Objects);
@@ -1805,6 +2186,12 @@ main {
     width: 100%;
     height: 400px;
 }
+.manageOrdersContainer {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 400px;
+}
 /* end manage jobs component */
 
 /* managePortfolio component */
@@ -1848,6 +2235,9 @@ main {
 }
 .ulSupportMenu > li {
     margin: var(--marginBewteen-Objects);
+}
+.nodisplay {
+    display: none;
 }
 .noMargins {
     margin: 0px;

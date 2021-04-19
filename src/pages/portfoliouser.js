@@ -1,12 +1,13 @@
 import React, { useState, useEffect} from 'react';
 import Layout from '../components/layout';
 import axios from 'axios';
-import { check } from '../utils/helpers';
+import { check, formatDateTime } from '../utils/helpers';
 import Jobresult from '../components/User/jobs/subcomponents/jobresult';
 import Absscreenwrapper from '../components/absscreenwrapper';
 import Menujobs from '../components/User/jobs/menujobs';
 import Previewjob from '../components/User/jobs/previewjob';
 import Loader from '../components/loader';
+import Follower from '../components/interactions/follower';
 
 //constants
 const portfolio_EP = process.env.GATSBY_portfolioEP;
@@ -22,6 +23,8 @@ const Porfoliouser = (props) => {
     const [activeJobs, setActiveJobs] = useState(null);
     const [selectedJob, setSelectedJOb] = useState(null);
     const [loadingData, setLoadingData] = useState(false);
+    const [noPortolfio, setNoPortolfio] = useState(false);
+    const [lookedUpUser, setLookedUpUser] = useState(null);
     
     const query  = props.location.search || null;
     console.log(`Query portfolio user:${query}`);
@@ -34,11 +37,16 @@ const Porfoliouser = (props) => {
         if(query){
             setLoadingData(true);
             const username = String(query).split('=')[1];
+            setLookedUpUser(username);
+            console.log('Querying on:',portfolio_EP+"queryUser"+" username:" + username);
             getData(portfolio_EP+"queryUser",username)
             .then(response => {
                 console.log(response);
                 if(!response.message){
                     setPortfolio(response);
+                }
+                if(response.status === "failed" && response.message === "User has no porfoltio yet"){
+                    setNoPortolfio(true);
                 }
             })
             .catch(error => console.log('Error fetching data from BE',error));
@@ -119,18 +127,26 @@ const Porfoliouser = (props) => {
                         </Absscreenwrapper>
                 }
                 {
+                    noPortolfio &&
+                    <div>
+                        <h1>Sorry but @{lookedUpUser} has no portfolio created.</h1>
+                        <h3>If you know him, let him know the crypto police is looking for him!</h3>
+                    </div>
+                }
+                {
                     (portfolio && profile) &&
                     <div className="portfolioFlexBig">
                         <div className="contentMiniMargins">
                         <h1>Portfolio of {portfolio.username}</h1>
-                        <div>
+                        <div className="justiAlig">
                             <img 
                                 src={profile.avatar ? profile.avatar : noImage} 
-                                className="imageMedium" 
+                                className="imageMedium marginAuto" 
                                 alt={`${profile.avatar ? profile.avatar : noImage}-${portfolio.username}`}
                             />
                         </div>
                         <blockquote className="italicText">"{portfolio.story_line}"</blockquote>
+                        <Follower xclassCSS={"whiteBack justBorders justRounded marginBottom"} token={userdata.token} interactTo={lookedUpUser} />
                         <p>Description: {portfolio.description}</p>
                         <p>Member since: {profile.createdAt}</p>
                         {
@@ -233,6 +249,26 @@ const Porfoliouser = (props) => {
                     </div>
                 }
                 <div className="portfolioJobResults">
+                {
+                    noPortolfio &&
+                    <div>
+                        {
+                            profile && 
+                            <div className="justiAlig">
+                                <img 
+                                    src={profile.avatar ? profile.avatar : noImage} 
+                                    className="imageMedium justBorders marginAuto" 
+                                    alt={`${profile.avatar ? profile.avatar : noImage}`}
+                                />
+                                {
+                                    profile.createdAt &&
+                                    <p className="textMediumWhite textAlignedCenter">Member since: {formatDateTime(profile.createdAt)}</p>
+                                }
+                                <Follower xclassCSS={"whiteBack justBorders justRounded marginBottom"} token={userdata.token} interactTo={lookedUpUser} />
+                            </div>
+                        }
+                    </div>
+                }
                 {
                     (activeJobs && activeJobs.length > 0)
                         &&

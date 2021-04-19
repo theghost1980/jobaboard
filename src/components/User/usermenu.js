@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 //components
 import Notifications from '../notifications';
 import { Link, useStaticQuery, graphql } from 'gatsby';
@@ -9,6 +9,9 @@ import Beechatchecker from '../BeeChat/beechatchecker';
 import { useSelector } from 'react-redux';
 // import { selectCount } from '../../features/counter/counterSlice';
 import { selectNotifications } from '../../features/notifications/notiSlice';
+
+//testing to get context from socketbee
+import { Socket } from '../BeeChat/socketBee';
 // import {
 //     decrement,
 //     increment,
@@ -23,10 +26,13 @@ const UserMenu = (props) => {
     const userdata  = check();
     const [fixed, setFixed] = useState(false);
     const [open, setOpen] = useState(false);
+    const [topMiniMessage, setTopMiniMessage] = useState(null);
     //testing react-redux
     // const count = useSelector(selectCount);
     const newmessages = useSelector(selectNotifications);
-    console.log(`Actual value newmessages from usermenu:${newmessages}`);
+    // console.log(`Actual value newmessages from usermenu:${newmessages}`);
+
+    const socketBee = useContext(Socket);
     //set event on scroll down to fix the user menu on top.
     useEffect(() => {
         function checkScroll(){
@@ -95,6 +101,13 @@ const UserMenu = (props) => {
                     }
                 }
             }
+            market: file(relativePath: {eq: "market.png"}) {
+                childImageSharp {
+                    fixed(width: 35) {
+                        ...GatsbyImageSharpFixed_withWebp
+                    }
+                }
+            }
             event: file(relativePath: {eq: "bell.png"}) {
                 childImageSharp {
                     fixed(width: 20) {
@@ -105,6 +118,24 @@ const UserMenu = (props) => {
         }
     `);
     //end grapqhql queries
+
+    //to handle on every state change
+    useEffect(() => {
+        //TODO
+        // we may to change this from context to redux
+        // doing the same as chatmessage and setting it up as null after some time
+        // and test it as right know when opened a new page, it do not get the context.
+        // if the redux do not work as well then LEAVE the pages out of the /app domain as "without new incomming messages"
+        // OR include those pages into app domain 
+        if(socketBee && socketBee.chatMessage){
+            if(socketBee.chatMessage.to === userdata.username){
+                setTopMiniMessage(socketBee.chatMessage);
+                // console.log(socketBee.chatMessage);
+                setTimeout(() => setTopMiniMessage(null),4000);
+            }
+        }
+    },[socketBee]);
+    //END to handle on every state change
 
     return (
             <div className="userMenuContainer">
@@ -127,6 +158,11 @@ const UserMenu = (props) => {
                     <Link to="/app/jobs" className="gralLink">
                         <li className="menuOptionLi">
                             <Img fixed={data.jobsIcon.childImageSharp.fixed} className="imgOptionsUser"  />
+                        </li>
+                    </Link>
+                    <Link to="/nftmarket" className="gralLink">
+                        <li className="menuOptionLi">
+                            <Img fixed={data.market.childImageSharp.fixed} className="imgOptionsUser"  />
                         </li>
                     </Link>
                     {/* TODO make the settings option to set chat as flyer or fixed. */}
@@ -168,6 +204,12 @@ const UserMenu = (props) => {
                         fixedBellowUM={fixed ? 'makeMeFixed60px' : null}    
                     />
                 </div>
+                {
+                    topMiniMessage &&
+                    <div className={`standardDivRowFullW backColorOldLace justJustifiedContent ${fixed ? 'makeMeFixed60px' : null}`}>
+                        <p>On Chat -> {topMiniMessage.from} says: {String(topMiniMessage.content).substring(0,20) +"..."} (Link go there TODO)</p>
+                    </div>
+                }
             </div>
     )
 }

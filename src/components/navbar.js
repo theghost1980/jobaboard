@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+//testing to get context from socketbee
+import { Socket } from './BeeChat/socketBee';
 import { useStaticQuery, graphql, Link, navigate } from "gatsby"
 //components
 import Img from 'gatsby-image';
@@ -23,8 +25,10 @@ import UserMenu from './User/usermenu';
 
 //testing react/redux
 import { useDispatch, useSelector } from 'react-redux';
-import { setNewMessages } from '../features/notifications/notiSlice';
-import { selectProfile } from '../features/userprofile/profileSlice';
+// import { setNewMessages } from '../features/notifications/notiSlice';
+// import { selectProfile } from '../features/userprofile/profileSlice';
+import { isKeychainInstalled, keychain } from '@hiveio/keychain';
+import { setStored } from '../features/socket/socketSlice';
 // end testing 
 
 //hivesigner SDK + init
@@ -46,8 +50,8 @@ const epsBee = [
 ]
 //end constants
 
-
-const Navbar = () => {
+const Navbar = (props) => {
+    const { fireReadLS } = props;
     //graphql queries
     const data = useStaticQuery(graphql`
     query {
@@ -106,6 +110,58 @@ const Navbar = () => {
     //TODO
     // const { state: userdata, setData }  = useContext(AuthContext);
     const userdata = check();
+    
+    // end to load on changes
+    // for testing we will call navbar without login.
+    // useEffect(() => {
+    //     loginBee();
+    // },[]);
+    // async function loginBee(){
+    //     if(isKeychainInstalled){
+    //         const userdata = { username: 'theghost1980'};
+    //         const timestamp = Date.now();
+    //         const ts = userdata.username + timestamp; 
+    //         await window.hive_keychain.requestSignBuffer(userdata.username, ts, "Posting", function(result){
+    //             const { message, success, error } = result;
+    //             console.log(result);
+    //             if(success){
+    //                 const sig = result.result;
+    //                 const urlGet = beechatEP + "users/login?" + `username=${userdata.username}&ts=${timestamp}&sig=${sig}`;
+    //                 fecthDataRequest(urlGet, null)
+    //                 .then(response => {
+    //                     console.log(response);
+    //                     const actualToken = response.token;
+    //                     setStoredField("bt",response.token);
+    //                     setStoredField("brt",response.refresh_token);
+    //                     setStoredField("currentchatid","xxx");
+    //                     setStoredField("ts",timestamp);
+    //                     setStoredField("msg",sig);
+    //                     initSocket();
+    //                     fecthDataRequest(beechatEP + "messages/new",actualToken)
+    //                     .then(response => {
+    //                         if(response.length > 0){
+    //                             setStoredField("newmessages","true");
+    //                             // TODO how????
+    //                             // dispatch(setNewMessages(true));
+    //                         }else{
+    //                             setStoredField("newmessages","false");
+    //                             // TODO how????
+    //                             // dispatch(setNewMessages(true));
+    //                         }
+    //                     }).catch(error => console.log('Error fetching NM on API BeeChat',error));
+    //                 }).catch(error => console.log('Error fetching on API BeeChat',error));
+    //             }else if (error){
+    //                 // TODO handle error
+    //             };
+    //         });
+    //     }
+    // }
+    // if(!userdata.authbee){
+    //     //try a new login and sig using hiveKeyChain. for now, later on we must ask to the people of peakd to see how they do this.
+    //     if(isKeychainInstalled){
+    //         reLoginBee(userdata);
+    //     }
+    // }
 
     // TODO move this as a nice annoying message on bellow the logo as warning
     // + limit features adding the banned param inside the private routers
@@ -113,10 +169,10 @@ const Navbar = () => {
         alert('You have been Banned. Please Contact the admins as you only have some limited features on this platform.!\nTODO: Show this more nicely in a component bellow logo.');
     }
 
-    // testing profile redux here
-    const _profile = useSelector(selectProfile);
-    console.log(_profile);
-    // end testing
+    // // testing profile redux here
+    // const _profile = useSelector(selectProfile);
+    // console.log(_profile);
+    // // end testing
 
     // console.log(userdata);
     //state constants/vars
@@ -124,11 +180,11 @@ const Navbar = () => {
     const [menuUserClicked, setMenuUserClicked] = useState(false);
     //for context on get beeChat data
     // const [newMessages, setNewMessages] = useState(false);
-    const [socket, setSocket] = useState(null);
+    // const [socket, setSocket] = useState(null);
 
-    //testing react/redux
-    const dispatch = useDispatch();
-    // end testing
+    // //testing react/redux
+    // const dispatch = useDispatch();
+    // // end testing
 
     //end state constants/vars
 
@@ -267,9 +323,11 @@ const Navbar = () => {
         const urlGet = beechatEP + "users/login?" + `username=${account}&ts=${timestamp}&sig=${msg}`;
         fecthDataRequest(urlGet,null)
         .then(response => {
-            console.log('Results from BeeChat API if logged succesfully:');
-            console.log(response);
-            const actualToken = response.token;
+            localStorage.setItem("bToken", response.token);
+            localStorage.setItem("brToken", response.refresh_token);
+            // console.log('Results from BeeChat API if logged succesfully:');
+            // console.log(response);
+            // const actualToken = response.token;
             //set inside user data as localStorage.setItem("_NoneOfYourBusiness",JSONprofile);
             // TODO a possible try/catch if needed
             setStoredField("bt",response.token);
@@ -288,37 +346,31 @@ const Navbar = () => {
             // localStorage.setItem('_GOfUb_T', response.token);
             // localStorage.setItem('_GOfUb_RT',response.refresh_token);
             console.log('Tokens received from Bee, stored in LS into profile object encoded.');
+            // fire the reading on socketBee
             //init/set the socket
             // setSocket(initSocket());
 
-            initSocket();
+            // initSocket();
+            
 
-            fecthDataRequest(beechatEP + "messages/new",actualToken)
-            .then(response => {
-                console.log('Results from unread:');
-                console.log(response);
-                // localStorage.setItem("unread",JSON.stringify(response)); // save into LS 
-                if(response.length > 0){
-                    // setNewMessages(true);
-                    setStoredField("newmessages","true");
-                    //using react/redux now.
-                    dispatch(setNewMessages(true));
-                }else{
-                    setStoredField("newmessages","false");
-                    //using react/redux now.
-                    dispatch(setNewMessages(false));
-                }
-                console.log(`Actual value on newmessages:${getStoredField("newmessages")}`);
-                //now the rest of data looping into object
-                // epsBee.forEach(epData => {
-                //     fecthDataRequest(beechatEP + epData.ep,actualToken)
-                //     .then(response => {
-                //         console.log(`Results from: ${epData.ep}`);
-                //         console.log(response);
-                //         localStorage.setItem(epData.lsItem,JSON.stringify(response));
-                //     }).catch(error => console.log(`Error getting ${epData.lsItem}`,error));
-                // })
-            }).catch(error => console.log('Error fetching NM on API BeeChat',error));
+            // fecthDataRequest(beechatEP + "messages/new",actualToken)
+            // .then(response => {
+            //     console.log('Results from unread:');
+            //     console.log(response);
+            //     // localStorage.setItem("unread",JSON.stringify(response)); // save into LS 
+            //     if(response.length > 0){
+            //         // setNewMessages(true);
+            //         setStoredField("newmessages","true");
+            //         //using react/redux now.
+            //         dispatch(setNewMessages(true));
+            //     }else{
+            //         setStoredField("newmessages","false");
+            //         //using react/redux now.
+            //         dispatch(setNewMessages(false));
+            //     }
+            //     console.log(`Actual value on newmessages:${getStoredField("newmessages")}`);
+            // }).catch(error => console.log('Error fetching NM on API BeeChat',error));
+
         }).catch(error => console.log('Error fetching on API BeeChat',error));
 
         // getData(urlGet)
@@ -585,6 +637,7 @@ const Navbar = () => {
                         </div>
                     </div>
                 </div>
+                {/* Testing to have socketBee wrapping the usermenu */}
                 {
                     userdata.logged && <UserMenu />
                 }

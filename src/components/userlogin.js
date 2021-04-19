@@ -15,7 +15,10 @@ const starWars = process.env.GATSBY_starWars;
 const authEP = process.env.GATSBY_authEP;
 //end constants
 
-
+// TODO fusion this with the actual login we are using
+// becuase this one is not working as is the old method.
+// also at some point we need to check on HS method and see if posible use it as
+// - instantiate & stuff but just using HS.
 
 const UserLogin = () => {
 

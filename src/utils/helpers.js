@@ -74,7 +74,7 @@ export const check = () =>
 // all socket handlers
 //variables/constants
 const beechatSocket = process.env.GATSBY_socketBeeChat;
-export var socket;
+// export var socket;
 
 export function sendPayloadSocket(data){
     if(socket === null){ return console.log('Socket not open || defined. Please fix this.')};
@@ -119,18 +119,29 @@ function checkSocket(){
 }
 
 export function logOutBee(){
-    fecthDataRequestOut(beechatEP + "users/logout",getStoredField('bt'))
+    fecthDataRequestOut(beechatEP + "users/logout",localStorage.getItem('bToken'))
     .then(response => {
         if(response.status === 204){
             console.log('User logged out from Bee Api.');
-            //set socket to null to force closing the actual connection.
-            socket = null;
         }else{
-            console.log('Something happend when logging user out. Bee API.');
-            console.log(response);
+            console.log('Something happend when logging user out. Bee API.',response);
         }
     })
     .catch(error => console.log('Error when loggin user out from bee.',error));
+}
+
+function checkBeeToken(bt){
+    fecthDataRequest(beechatEP + "users/verify",bt)
+    .then(response => {
+        if(response.statusCode === 401 && response.error === "Unauthorized" && response.message === "Expired token"){
+            return false;
+        }else{
+            return true;
+        }
+    }).catch(error => {
+        console.log('Error fetching Bee API to test actual token',error)
+        return 'error';
+    });
 }
 
 export function initSocket(){
@@ -143,10 +154,22 @@ export function initSocket(){
         socket = _socket;
         //auth
         // authSocket(token);
-        // testing reading fromls to see if works
         if(isDataLs()){
             const _token = getStoredField("bt");
             if(_token){
+                //check if valid token if not ask for a new one
+                const valid = checkBeeToken();
+                if(!valid){ //we must ask for a new one
+                    fecthDataRequest(beechatEP + "users/refresh-token",getStoredField("brt"))
+                    .then(response => {
+                        console.log(response);
+                        if(response.token){
+                            setStoredField("bt",response.token); //new access_token for bee chat API.
+                            //auth again
+                            authSocket(response.token);
+                        }
+                    })
+                }
                 authSocket(_token);
             }
         }else{
@@ -234,7 +257,7 @@ export function setStoredField(field,value){
 }
 export function getStoredField(fieldToGet){
     // object['property']
-    const parsed = JSON.parse(localStorage.getItem("_NoneOfYourBusiness"));
+    const parsed = isBrowser === true ? JSON.parse(localStorage.getItem("_NoneOfYourBusiness")) : null;
     if(!parsed) return null //no more data stored...
     const field = parsed[`${fieldToGet}`];
     // TODO add as testing mode
@@ -249,15 +272,19 @@ function tryLoginBee(){
             console.log(response);
             //depending on response we re-auth using the ts/msg stored
             if(response.statusCode === 401 && response.error === "Unauthorized" && response.message === "Expired token"){
-                //as ts is too old for server
-                // for now logs user out
-                alert('Session Expired. Please log in.');
-                localStorage.clear();
-                console.log('User Forced Logged OUT!');
+                // can we just ak for the user to relogn but only in bee API so it wont force the user to log out from JAB be as well? this may be a solution...
+                // localStorage.clear();
+                // console.log('User Forced Logged OUT!');
                 //TODO this need to be tested and fixed as right now I am seeing the alert 3 times....
-                return navigate("/");
+
+                return 'reLogBee';
+            }else{
+                return 'none';
             }
-        }).catch(error => {return console.log('Error fetching Bee API to test actual token',error)});
+        }).catch(error => {
+            console.log('Error fetching Bee API to test actual token',error)
+            return 'error';
+        });
     }
 }
 export function checkIt(){
@@ -326,15 +353,20 @@ export function checkIt(){
                                 // testing to check if valid data for bee Chat
                                 //testing to check for socket on each loading/render as we
                                 // do on auth
-                                checkSocket();
-                                tryLoginBee();
+                                // checkSocket();
+                                // const _bee = tryLoginBee();
+                                // if(_bee === "reLogBee"){
+                                //     setStoredField("authbee",false); 
+                                // }else if(_bee === "error"){
+                                //     //TODO seomthing with this error...
+                                // }
                             }
                         });
                     }else{
                         console.log('Token not present!!!');
                     }
                 } catch (error) {
-                    console.log('Error while trying to parse, data corrupted or changed!!!');
+                    console.log('Error while trying to parse, data corrupted or changed!!!',error);
                     console.log('TODO auto-login');
                     // console.log(error);
                 }

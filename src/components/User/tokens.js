@@ -3,9 +3,8 @@ import { check, formatDateTime } from '../../utils/helpers';
 import axios from 'axios';
 //hooks-forms
 import { useForm } from 'react-hook-form';
-// testing scroll
-
-//end testing scroll
+// import Img from 'gatsby-image';
+// import { useStaticQuery, graphql } from 'gatsby';
 //components
 import Btnclosemin from '../btns/btncloseMin';
 import Abswrapper from '../absscreenwrapper';
@@ -15,6 +14,13 @@ import Nftcreator from '../nfthandling/nftcreator';
 import Nftcreatorfinal from '../nfthandling/nftcreatorfinal';
 //hiveio/keychain
 import { isKeychainInstalled} from '@hiveio/keychain';
+import Instantiator from '../nfthandling/nftinstantiator';
+import Nfteditor from '../nfthandling/nfteditor';
+import Btndisplayhiveusd from '../btns/btndisplayhiveusd';
+import Nftsender from '../nfthandling/nftsender';
+import Btninfo from '../btns/btninfo';
+import Btnoutlink from '../btns/btnoutlink';
+import Alerticon from '../icons/alerticon';
 //testing SSCjs library
 // const SSC = require('sscjs');
 // const ssc = new SSC('http://185.130.45.130:5000/');
@@ -23,11 +29,40 @@ import { isKeychainInstalled} from '@hiveio/keychain';
 var dhive = require("@hiveio/dhive");
 var client = new dhive.Client(["https://api.hive.blog", "https://api.hivekings.com", "https://anyx.io", "https://api.openhive.network"]);
 //constants
+// TODO put in on .env
+const jabFEE = { fee: "0.002", currency: "HIVE", costInstance: "0.001", costCurr: "HIVE", acceptedCur: "HIVE"};
 const nftEP = process.env.GATSBY_nftEP;
+const userEP = process.env.GATSBY_userEP;
 const nfthandlermongoEP = process.env.GATSBY_nfthandlermongoEP;
 const ssc_test_id = "ssc-testNettheghost1980";
+const amountArray = [
+    {id: 'A-1', amount: 1},
+    {id: 'A-2', amount: 2},
+    {id: 'A-3', amount: 3},
+    {id: 'A-4', amount: 4},
+    {id: 'A-5', amount: 5},
+    {id: 'A-6', amount: 6},
+    {id: 'A-7', amount: 7},
+    {id: 'A-8', amount: 8},
+    {id: 'A-9', amount: 9},
+    {id: 'A-10', amount: 10},
+]
+
+// IMportant TODO when creating the sale of a token.
+// 1. A user wants to a NFT.
+// 2. B users wants to buy it, so we so a transfers and emit a custom json.
+    // 2.1 the amount is the price of the token.
+    // 2.2 the json is first "addAuthorizedIssuingAccounts" as the user B is th enew owner.
+    // 2.3 another custom json with "transferOwnership"
+    // Note: let's play on this to see what is the best way to do it.
 
 const Tokensuser = () => {
+    // grapqhl queries
+    // const data = useStaticQuery(graphql` query{ expandIcon: file(relativePath: {eq: "expand_arrow.png"}) { childImageSharp { fixed(width: 18) { ...GatsbyImageSharpFixed_withWebp }}}
+    //         collapseIcon: file(relativePath: {eq: "collapse_arrow.png"}) { childImageSharp { fixed(width: 18) { ...GatsbyImageSharpFixed_withWebp }} }}
+    // `);
+    //end grapqhl queries
+
     const userdata = check();
     // TODO: factor the state, maybe to use less.
     const [hive, setHive] = useState(null);
@@ -45,12 +80,23 @@ const Tokensuser = () => {
     const [nameLenght, setNameLenght] = useState(0);
     const [selectedNFT, setSelectedNFT] = useState(null);
     const [noInstancesOfNFT, setnoInstancesOfNFT] = useState(false);
-    const [myNFTsMongo, setMyNFTsMongo] = useState([]);
+    const [myNFTsMongo, setMyNFTsMongo] = useState([]); //the one this user has created on JAB an he is the actual issuer = owner.
+    const [myHoldings, setMyHoldings] = useState([]); //represent the instances this user has. You look into user.holding[] and each one of those means he has at least 1 instance. With that data, we look into each instance table and bring the data when user request it.
     const [selected, setSelected] = useState(null);
     const [selectedInstances, setSelectedInstances] = useState([]);
     const [showCreator, setShowCreator] = useState(false);
     const [wantToBurn, setWantToBurn] = useState(false);
     const [tx, setTx] = useState(null);
+    const [wantToInstantiate, setWantToInstantiate] = useState(false);
+    const [amount, setAmount] = useState(0);
+    const [showInstantiator, setShowInstantiator] = useState(false);
+    const [showEditor, setShowEditor] = useState(false);
+    const [wantToEdit, setWantToEdit] = useState(false);
+    const [wantToSend, setWantToSend] = useState(false);
+    const [selectedFromHive, setselectedFromHive] = useState(null);
+    const [showDangerZone, setShowDangerZone] = useState(false);
+    const [toEdit, setToEdit] = useState("");
+    const [authEditingAcc, setAuthEditingAcc] = useState(null);
     //init forms-hooks
     const { register, handleSubmit, errors } = useForm();
     // on load
@@ -60,12 +106,15 @@ const Tokensuser = () => {
     // to load once on first render
     useEffect(() => {
         updateNFTs();
+        updateHoldings();
     }, []);
     // END to load once on first render
 
     // to execute on each set state
     useEffect(() => {
         if(selected){
+            setLoadingData(true);
+            setselectedFromHive(null);
             setSelectedInstances([]);
             console.log(`Searching on:${selected.symbol}`);
             getSSCDataTable(nftEP+"allInstances",`${selected.symbol}`,"instances",{ account: userdata.username })
@@ -75,7 +124,26 @@ const Tokensuser = () => {
                 // if(response.length > 0){
                 //     setSelectedInstances(response);
                 // };
-            }).catch(error => console.log('Error fecthing BE - instances.',error));
+            }).catch(error => {
+                console.log('Error fecthing BE - instances.',error);
+                setLoadingData(false);
+            });
+            //here we will ask to get selectedFromHive which is the ones holding the data for:
+            // - authorizedIssuingAccounts: [String]
+            // - supply: Number
+            // - circulatingSupply: Number
+            console.log(`Searching on:${selected.symbol} but in Hive chain...`);
+            getSSCData(nftEP+"allNFTs",{ symbol: selected.symbol,  })
+            .then(response => {
+                console.log(response);
+                if(response.length === 1){
+                    setselectedFromHive(response[0]);
+                    setLoadingData(false);
+                }
+            }).catch(error => {
+                console.log('Error fecthing BE - instances.',error);
+                setLoadingData(false);
+            });
         }
     }, [selected])
     useEffect(() => {
@@ -87,6 +155,9 @@ const Tokensuser = () => {
     // end to execute on each set
 
     // functions/CB
+    // function addIntoHoldings(value){
+    //     setMyHoldings(prevState => [ ...prevState, value]);
+    // }
     function getInfoTX(){
         if(tx){
             getSSCDataTX(nftEP + "tx", tx)
@@ -122,6 +193,37 @@ const Tokensuser = () => {
     const updateUserNFTS = () => {
         console.log('Updating NFTs');
         updateNFTs();
+    }
+    // const getNftAuthAcc = () => {
+
+    // }
+    function updateHoldings(){
+        //we must check on holding so we can bring all the tokens he holds.
+        const headers = { 
+            'x-access-token': userdata.token, 
+            'query': JSON.stringify({ holding: 1 }),
+            'tolookup': null,
+        }; //as if you need to lookup for user just fill the header tolookup
+        getDataWH(userEP+"jabUserField",headers).then(response => {
+            console.log(response);
+            if(response.status === "sucess" && response.result.holding.length > 0){
+                //now search on the info of this nft on mongo.
+                // testing the in operator query = { quantity: { $in: [20, 50] } } // i.e { symbol: { $in: [..._holding] } }
+                const _holding = response.result.holding;
+                console.log(`Searching on:${JSON.stringify(_holding)} BE for ${userdata.username}`);
+                const query = { nft_id: null, symbol: { $in: [..._holding] }, account: null,};
+                sendGETBEJustH(nfthandlermongoEP + "getNFTquery",query,0, { "null": null })
+                .then(response => {
+                    console.log(response);
+                    if(response.status === 'sucess' && response.result.length > 0){
+                        // we may add it to myHoldings
+                        setMyHoldings(response.result);
+                    }
+                }).catch(error => console.log('Error asking for NFTs on this user from DB, mongo.',error));
+            }
+        }).catch(error => {
+            console.log('Error asking for holding field',error);
+        });
     }
     function updateNFTs(){
         const query = {
@@ -199,8 +301,54 @@ const Tokensuser = () => {
                         // TODO: send log to loggerOP
                     };
                 });
+            }else{
+                console.log('Token Burning cancelled. Send this to loggerOps');
             }
         }
+    }
+    const successOp = () => {
+        console.log('Called from ChilDo!')
+        updateNFTs();
+        if(myHoldings.length > 0){
+            //update them as well
+            updateHoldings();
+        }
+        // const selec = selected;
+        setSelected(null); //testing this "trick" to see it will update the 2 nft states :P
+        setselectedFromHive(null);
+        // setSelected(selec); //results: it works but it make the whole 2 components to re-render dunno how nice is that????
+        //for now let's close any of the options so the user can select again what to do.
+        closeAllOthers();
+        // setShowInstantiator(false);
+    }
+    function closeAllOthers(){
+        setShowInstantiator(false);
+        setShowEditor(false);
+        setAmount(0);
+        setWantToInstantiate(false);
+        setWantToEdit(false);
+        setWantToSend(false);
+    }
+    const closeInstantiator = () => {
+        setShowInstantiator(false);
+    }
+    const closeEditor = () => {
+        setShowEditor(false);
+    }
+    const closeSender = () => {
+        setWantToSend(false);
+    }
+    const collapseClean = () => {
+        setAmount(0);
+        setWantToInstantiate(!wantToInstantiate);
+    } 
+    const closeAndUpdateNFTs = () => {
+        setShowCreator(false);
+        updateNFTs();
+    }
+    const editNft = (toEdit) => {
+        setToEdit(toEdit);
+        setShowEditor(true);
     }
     // END functions/CB
 
@@ -226,6 +374,14 @@ const Tokensuser = () => {
                 'nft_id': nft_id,
                 'query':JSON.stringify(query),
             },
+        });
+        return response.json(); 
+    };
+    async function getDataWH(url = '', headers = {}) {
+        const response = await fetch(url, {
+            method: 'GET',
+            mode: 'cors', 
+            headers: headers,
         });
         return response.json(); 
     };
@@ -432,11 +588,35 @@ const Tokensuser = () => {
             {
                 (myNFTsMongo.length > 0) &&
                 <div>
-                    <h1>My current Tokens</h1>
+                    <h1 className="relativeDiv">My Creations<Btninfo msg={'These are all the NFTs you have created.'} /> </h1>
                     <p>Click on one of the tokens to present details and options bellow.</p>
                     <ul className="standardUlRowFlexPlain overflowXscroll">
                         {
                             myNFTsMongo.map(token => {
+                                return (
+                                    <li key={token._id} className="pointer hoveredBordered miniMarginLeft" onClick={() => setSelected(token)}>
+                                        <div className="textAlignedCenter">
+                                            <div>
+                                                <img src={token.thumb} className="smallImage" />
+                                            </div>
+                                            <p className="xSmalltext">Symbol: {token.symbol}</p>
+                                            <p className="xSmalltext">Price: {token.price} HIVE</p>
+                                        </div>
+                                    </li>
+                                )
+                            })
+                        }
+                    </ul>
+                </div>
+            }
+            {
+                (myHoldings.length > 0) &&
+                <div>
+                    <h1>My Holdings<Btninfo msg={'These are all the Tokens you hold.'} /> </h1>
+                    <p>Click on one of the tokens to present details and options bellow.</p>
+                    <ul className="standardUlRowFlexPlain overflowXscroll">
+                        {
+                            myHoldings.map(token => {
                                 return (
                                     <li key={token._id} className="pointer hoveredBordered miniMarginLeft" onClick={() => setSelected(token)}>
                                         <div className="textAlignedCenter">
@@ -469,32 +649,82 @@ const Tokensuser = () => {
             {
                 showCreator && 
                 <div className="relativeDiv">
-                    <Btnclosemin classCSS={"absDivColSmall"} btnAction={() => setShowCreator(false)}/>
-                    <Nftcreatorfinal updateOnSuccess={updateUserNFTS} />
+                    <Btnclosemin classCSS={"absDivColSmall"} btnAction={closeAndUpdateNFTs}/>
+                    <Nftcreatorfinal updateOnSuccess={successOp} />
                 </div>
             }
             {
-                selected &&
-                <div className="relativeDiv marginsTB">
+                selected && selectedFromHive &&
+                <div className="relativeDiv marginsTB borderTPGroove">
                     <Btnclosemin classCSS={"absDivColSmall"} btnAction={() => setSelected(null)} />
                     <div className="standardDivRowFullW">
                         <div className="standardDiv30Percent">
                             <img src={selected.image} className="imageMedium" />
                             <ul className="standardUlColPlain90p normalTextSmall">
-                                <li className="standardLiHovered">Cast More</li>
-                                <li className="standardLiHovered">Edit</li>
-                                <li className="standardLiHovered" onClick={onSaleNft}>Put on sale</li>
+                                {   (selected.account === userdata.username) &&
+                                    <li className={`standardLiHovered ${!wantToInstantiate ? 'listItemClosed':'listItemOpened'}`} onClick={collapseClean}>Cast More</li>
+                                }
+                                {
+                                    wantToInstantiate &&
+                                        <li className="borderedFlexShadow90pW2 miniMarginTB">
+                                            <form className="miniMarginTB">
+                                                <label htmlFor="amount">Amount</label>
+                                                <select name="amount" onChange={(e) => setAmount(e.target.value)}>
+                                                    <option defaultValue="0">Please Select an amount</option>
+                                                    {
+                                                        amountArray.map(amount => {
+                                                            return (
+                                                                <option key={amount.id} value={amount.amount}>{amount.amount}</option>
+                                                            )
+                                                        })
+                                                    }
+                                                </select>
+                                            </form>
+                                            {
+                                                (amount > 0) &&
+                                                <div>
+                                                    {
+                                                        ((Number(jabFEE.costInstance) * amount) > hive)
+                                                        ? <p className="alertSpan textAlignedCenter">Amount greater than your current balance. <Link to={"/app/wallet"}>Please Top up Balance</Link>, to cast that amount of tokens.</p>
+                                                        :   <div>
+                                                            <p>Total:{Number(jabFEE.costInstance) * amount} {jabFEE.acceptedCur}</p>
+                                                            <button className="miniMarginTB minibtn" onClick={() => setShowInstantiator(true)}>Review</button>
+                                                            </div>
+                                                    }
+                                                </div>
+                                            }
+                                        </li>
+                                }
+                                {   (selected.account === userdata.username) &&
+                                    <li className={`standardLiHovered justifyContentSEvenly ${!wantToEdit ? 'listItemClosed':'listItemOpened'}`} onClick={() => setWantToEdit(!wantToEdit)}>Edit </li>
+                                }
+                                {
+                                    wantToEdit &&
+                                    <div className="borderedFlexShadow90pW2 miniMarginTB">
+                                        <div className="contentMiniMargins">
+                                            <li className="standardLiHovered" onClick={() => editNft("Authorized Issuing Account")}>Edit Issuing Accounts</li>
+                                            {/* TODO on edit token info: check on transaction to see if there is transaction>token_used && transaction>status = "ongoing" to prevent price edition */}
+                                            <li className="standardLiHovered" onClick={() => editNft("Edit Token Information")}>Edit Token Info</li>
+                                        </div>
+                                    </div>
+                                }
+                                {
+                                    (selected.account === userdata.username) &&
+                                    <li className="standardLiHovered" onClick={onSaleNft}>Put on sale</li>
+                                }
                                 <li>
                                     <div className="borderedFlexShadow90pW2 miniMarginTB">
-                                        <p className="contentMiniMargins warningTextXSmall">Actual Token Balance</p>
+                                        <p className="contentMiniMargins textSmallOrange">Actual Token Balance</p>
                                         <div className="contentMiniMargins">
                                             {/* for now i will handle it straight away from hive ssc */}
                                             {
                                                 <h2 className="noMargintop">{selectedInstances.length.toString()} {selectedInstances.length === 1 ? 'Token':'Tokens'}</h2>
                                             }
                                             {
+                                                (selectedInstances.length > 0) &&
                                                 <ul className="normalTextSmall standardUlColPlain90p">
-                                                    <li className="standardLiHovered">Send</li>
+                                                    <li onClick={() => setWantToSend(true)} className="standardLiHovered">Send</li>
+                                                    <li onClick={() => alert('TODO the options could be:\n1. Sell it back to owner for a cheaper price.\n2. Put in on the JAB market. The Market may be a place to buy and sell tokens.\n3. Sell it to JAB for a very cheap price. Also can be trade with JAB(for free promotions, special JAB tokens,etc). JAB could also put it on sale as "Week NFTs bargains"')} className="standardLiHovered">Send To JAB</li>
                                                 </ul>
                                             }
                                         </div>
@@ -503,16 +733,52 @@ const Tokensuser = () => {
                                 <li>
                                     {
                                         (selectedInstances.length > 0) &&
-                                        <div className="borderedFlexShadow90pW2 miniMarginTB">
-                                            <p className="contentMiniMargins warningTextXSmall">Danger Zone</p>
-                                            <ul className="standardUlColPlain contentMiniMargins">
-                                                <li className="standardLiHovered" onClick={() => setWantToBurn(true)}>Burn Tokens</li>
-                                            </ul>
+                                        <div className="borderedFlexShadow90pW2 miniMarginTB relativeDiv justTransitions">
+                                            <p className="contentMiniMargins warningTextSmall pointer hoveredAlert" onClick={() => setShowDangerZone(!showDangerZone)}>Danger Zone</p>
+                                            <Alerticon type={"filled"} />
+                                            {
+                                                showDangerZone &&
+                                                <ul className="standardUlColPlain contentMiniMargins">
+                                                    <li className="standardLiHovered" onClick={() => setWantToBurn(true)}>Burn Tokens</li>
+                                                    {
+                                                        (selected.account === userdata.username) &&
+                                                        <li className="standardLiHovered">Transfer Ownership</li>
+                                                    }
+                                                </ul>
+                                            }
                                         </div>
                                     }
                                 </li>
                             </ul>
                         </div>
+                        {
+                            showInstantiator && 
+                            <Abswrapper xtraClass={"justiAlig"}>
+                                <Instantiator cbCancel={closeInstantiator} 
+                                    userdata={userdata} nft={selected} amount={amount} 
+                                    jabFEE={jabFEE} ssc_id={ssc_test_id} nftEP={nftEP} 
+                                    cbOnFinish={successOp}
+                                />
+                            </Abswrapper>
+                        }
+                        {
+                            showEditor &&
+                            <Abswrapper xtraClass={"justiAlig"}>
+                                <Nfteditor userdata={userdata} nft={selectedFromHive} cbCancel={closeEditor} 
+                                    ssc_id={ssc_test_id} toEdit={toEdit} userEP={userEP} nftMongo={selected}
+                                    nftEP={nftEP} cbOnFinish={successOp} jabFEE={jabFEE}
+                                />
+                            </Abswrapper>
+                        }
+                        {
+                            wantToSend &&
+                            <Abswrapper xtraClass={"justiAlig"}>
+                                <Nftsender userdata={userdata} nft={selectedFromHive} cbCancel={closeSender} 
+                                    ssc_id={ssc_test_id} userEP={userEP}
+                                    nftEP={nftEP} cbOnFinish={successOp} nftInstances={selectedInstances}
+                                />
+                            </Abswrapper>
+                        }
                         {
                             wantToBurn &&
                             <Abswrapper xtraClass={"justiAlig"}>
@@ -529,6 +795,7 @@ const Tokensuser = () => {
                                                         <li key={`${token._id}-toBurn`} className="standardLiHovered" onClick={() => burnToken(token)}>
                                                             ID: {token._id} - Owned By: {token.ownedBy}
                                                             {/* TODO: add a loader when is trying to burn the token. */}
+                                                            {/* TODO: remove the token symbol from user>holding if he had only one of this one. */}
                                                         </li>
                                                     )
                                                 })
@@ -539,24 +806,45 @@ const Tokensuser = () => {
                             </Abswrapper>
                         }
                         <div className="standardDiv60Percent">
+                            <div className="standardDivRowFlexAutoH">
+                                <p className="extraMiniMarginsTB">Actual price: {selected.price} {jabFEE.acceptedCur}</p>
+                                <Btndisplayhiveusd amount={selected.price} xclassCSS={"extraMiniMarginsTB"} sideText={"Equivalent to:"} title={"Equivalent to: USD/Crypto"} />
+                            </div>
                             <p className="extraMiniMarginsTB">Symbol: {selected.symbol}</p>
-                            <p className="extraMiniMarginsTB">Price: {selected.price} HIVE</p>
+                            <div className="standardDivRowFlexAutoH">
+                                Owner: {selected.account === userdata.username ? 'You': <Btnoutlink link={`/portfoliouser?query=${selected.account}`} textLink={selected.account} />}
+                            </div>
                             <p className="extraMiniMarginsTB">Id: {selected.nft_id}</p>
-                            <p className="extraMiniMarginsTB">Created At: {formatDateTime(selected.createdAt)}</p>
                             {
-                                selected.updatedAt && <p className="extraMiniMarginsTB">Updated At: {formatDateTime(selected.updatedAt)}</p>
+                                (selected.account === userdata.username) &&
+                                <div>
+                                <p className="extraMiniMarginsTB">Created At: {formatDateTime(selected.createdAt)}</p>
+                                {selected.updatedAt && <p className="extraMiniMarginsTB">Updated At: {formatDateTime(selected.updatedAt)}</p>}
+                                </div>
                             }
                             <p className="extraMiniMarginsTB">For sale: {selected.for_sale ? 'Yes':'No'}</p>
-                            <p className="extraMiniMarginsTB">Actual price: {selected.price}</p>
                             <p className="extraMiniMarginsTB">Issued On: {selected.issued_On}</p>
                             <p className="extraMiniMarginsTB">Issued By: {selected.issuer}</p>
-                            <p className="extraMiniMarginsTB">Name: {selected.name}</p>
-                            <p className="extraMiniMarginsTB">Organization Name: {selected.orgName}</p>
                             {/* TODO: create a component called hivePrice that get the price from coinPrices component and show the icon, plus option as when clicked show price on hive/USD */}
-                            <p className="extraMiniMarginsTB">Product Name: {selected.productName}</p>
-                            <p className="extraMiniMarginsTB">Supply: {selected.supply}</p>
-                            <p className="extraMiniMarginsTB">Circulating Supply: {selected.circulatingSupply}</p>
-                            <p className="extraMiniMarginsTB">In Use: {selected.in_use ? 'Yes':'No'}</p>
+                            <p className="extraMiniMarginsTB">Name: {selectedFromHive.name}</p>
+                            <p className="extraMiniMarginsTB">Organization Name: {selectedFromHive.orgName}</p>
+                            <p className="extraMiniMarginsTB">Product Name: {selectedFromHive.productName}</p>
+                            <p className="extraMiniMarginsTB">Supply: {selectedFromHive.supply.toString()}</p>
+                            <p className="extraMiniMarginsTB">Circulating Supply: {selectedFromHive.circulatingSupply.toString()}</p>
+                            {
+                                selectedFromHive.maxSupply ? 
+                                <p className="extraMiniMarginsTB">Max Supply: {selectedFromHive.maxSupply.toString()}</p> : null
+                            }
+                            {
+                                (selected.account === userdata.username) &&
+                                <div>
+                                    <p className="extraMiniMarginsTB">Authorized Isssuing Accounts:{JSON.stringify(selectedFromHive.authorizedIssuingAccounts)}</p>
+                                    <p className="extraMiniMarginsTB">In Use: {selected.in_use ? 'Yes':'No'}</p>  
+                                </div> 
+                            }
+                            <div className="standardDivRowFlexAutoH">
+                                Url: {selected.url ? <Btnoutlink link={selected.url} textLink={selected.url} /> : "not set."}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -564,8 +852,8 @@ const Tokensuser = () => {
             {/* <h1>My Tokens</h1> */}
             {
                 loadingData && 
-                <div className="standardDivRowFlex100pX100pCentered">
-                    <Loader logginIn={true} typegif={"blocks"} />
+                <div className="standardDivRowFlex100pX100pCentered marginsTB">
+                    <Loader xtraClass={"marginsTB"} logginIn={true} typegif={"blocks"} />
                 </div>
             }
             {

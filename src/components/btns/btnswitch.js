@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Img from 'gatsby-image';
 import { useStaticQuery, graphql } from 'gatsby';
+import Btninfo from './btninfo';
 
 /**
  * Assign the project to an employee.
@@ -10,10 +11,12 @@ import { useStaticQuery, graphql } from 'gatsby';
  * @param {Boolean} showValueDevMode - If true show on console the actual value on each click.
  * @param {Boolean} initialValue - Value to start.
  * @param {String} title - Optional if you need to show as toolTip.
+ * @param {Boolean} addInfoBtn - Optional if you need to show the info icon + infoMsg.
+ * @param {String} infoMsg - Optional as the message to be shown when user hover the info icon.
  */
 
 const Btnswitch = (props) => {
-    const { xtraClassCSS, btnAction, sideText, showValueDevMode, initialValue, title } = props;
+    const { xtraClassCSS, btnAction, sideText, showValueDevMode, initialValue, title, addInfoBtn, infoMsg } = props;
 
     const data = useStaticQuery(graphql`
         query{
@@ -32,7 +35,7 @@ const Btnswitch = (props) => {
         initialValue = false ;
         if(showValueDevMode){ console.log(`Prop as initialValue not received, using false.`)}
     }else{
-        console.log(`Prop as initialValue received, using ${initialValue}.`)
+        if(showValueDevMode){console.log(`Prop as initialValue received, using ${initialValue}.`)};
     }
 
     const [clicked, setClicked] = useState(initialValue);
@@ -52,9 +55,14 @@ const Btnswitch = (props) => {
     },[clicked]);
 
     return (
-        <div className={`standardDivRowFullW justifyContentSpaced ${clicked ? null: 'addOFFSwitch'}`} title={title ? title : null}>
-            <p className="darkText">{sideText}</p>
-            <div className={`${xtraClassCSS !== null ? xtraClassCSS : null} btnSwitch marginTopRigthMin`} onClick={() => setClicked(!clicked)}>
+        <div className={`standardDivRowFullW ${xtraClassCSS} justifyContentSpaced ${clicked ? null: 'addOFFSwitch'}`} title={title ? title : null}>
+            <p className="darkText">
+                {sideText}
+                {
+                    (addInfoBtn === true) ? <Btninfo size={"mini"} msg={infoMsg} /> : null
+                }
+            </p>
+            <div className={`btnSwitch marginTopRigthMin`} onClick={() => setClicked(!clicked)}>
                 <Img fixed={data.sphere.childImageSharp.fixed} className={`imgSwitch ${clicked ? 'addLeft': 'addRight'}`} />
             </div>
         </div>

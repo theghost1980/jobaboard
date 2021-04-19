@@ -5,6 +5,9 @@ import { check, encode, formatDateTime } from '../utils/helpers';
 import Loader from '../components/loader';
 import { navigate } from 'gatsby';
 
+import { useDispatch } from 'react-redux';
+import { setStored } from '../features/socket/socketSlice';
+
 // import Img from 'gatsby-image';
 
 //TODO make this as a module in > utils
@@ -32,6 +35,7 @@ const UserProfile = () => {
     const userdata = check();
     const [loadingData, setLoadingData] = useState(true);
     const [uploadingData, setuploadingData] = useState(false);
+    const [following, setFollowing] = useState(null);
     //state to test the image uploading and then received here as response.secure_url
     // const [imageUploaded, setimageUploaded] = useState("");
 
@@ -54,6 +58,10 @@ const UserProfile = () => {
         file: File,
     });
 
+    //testing to set here the readDataLS of redux
+    const dispatch = useDispatch();
+    dispatch(setStored(true));
+
     /////////data fecthing PUT/GET////////
      ////////Fetching POST request to backend
      async function getData(url = '') {
@@ -61,20 +69,21 @@ const UserProfile = () => {
         method: 'GET', // *GET, POST, PUT, DELETE, etc.
         mode: 'cors', // no-cors, *cors, same-origin
         cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-        //   credentials: 'same-origin', // include, *same-origin, omit
         headers: {
-            // 'Content-Type': 'application/json'
             'Content-Type': 'application/json',
             'Accept': 'application/json',
             'x-access-token': userdata.token
         },
-        //   redirect: 'follow', // manual, *follow, error
-        //   referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-        // body: new URLSearchParams({
-        //         'username': username
-        //     }),
         });
         return response; 
+    };
+    async function getDataWH(url = '', headers = {}) {
+        const response = await fetch(url, {
+            method: 'GET',
+            mode: 'cors', 
+            headers: headers,
+        });
+        return response.json(); 
     };
     ////////END Fecthing GET to BE
     ///////PUT fetch = Update User data
@@ -269,6 +278,17 @@ const UserProfile = () => {
     /////////////////////////
     const mount = () => {
         console.log('mounted');
+        const headers = { 'x-access-token': userdata.token, 'tolookup': null, 'query': JSON.stringify({ following: 1 })};
+        getDataWH(userEP+"jabUserField",headers).then(response => {
+            console.log(response);
+            if(response.status === "sucess" && response.result.following.length > 0){
+                const _following = response.result.following;
+                if(_following.length === 1 && _following[0] === ""){
+                    return setFollowing(null);
+                }
+                setFollowing(response.result.following);
+            }
+        }).catch(error => console.log('Error asking for following field',error));
         //check for userprofile
         console.log(`Asking profile data from:${userdata.username}`);
         //TODO
@@ -277,7 +297,8 @@ const UserProfile = () => {
         .then(data => {
             data.json()
             .then(msg => {
-                // console.log(msg);
+                console.log('User profile');
+                console.log(msg);
                 //testing to set whole object as received
                 setProfile(msg);
                 setLoadingData(false);
@@ -337,6 +358,26 @@ const UserProfile = () => {
                                         <div className="standardFlexColBordered width90 justiAlig marginsTB justRounded">
                                             <p className="minimumMarginTB">Last Update on Profile:</p>
                                             <p className="minimumMarginTB">{formatDateTime(profile.updatedAt)}</p>
+                                        </div>
+                                    }
+                                    {   
+                                        following &&
+                                        <div className="standardFlexColBordered width90 marginsTB justRounded">
+                                            <div className="standardContentMargin">
+                                                <p className="minimumMarginTB">JABers I follow:</p>
+                                                <ul className="overflowYscroll justMaxHeight">
+                                                    {
+                                                        following.map(user => {
+                                                            return (
+                                                                user ?  <li key={`${user}-JABerIFollow`}>
+                                                                            <a href={`/portfoliouser?query=${user}`} className="aFlexAlignedCont" target="_blank" rel="noopener noreferrer">{user}</a>
+                                                                        </li> : null
+                                                            )
+                                                        })
+                                                    }
+                                                    
+                                                </ul>
+                                            </div>
                                         </div>
                                     }
                                 </div>

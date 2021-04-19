@@ -58,6 +58,8 @@ const Coinprices = () => {
                         .then(response => {
                             // console.log(response);
                             setCoins(response);
+                            //save into ls as this is public info no need to encode
+                            localStorage.setItem("coins",JSON.stringify(response));
                         })
                         .catch(error => {
                             console.log('Error getting coin prices, listcoins!',error);

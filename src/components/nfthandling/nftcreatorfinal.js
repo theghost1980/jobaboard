@@ -11,6 +11,7 @@ const client = new dhive.Client([ "https://api.hive.blog", "https://api.hiveking
 const privateKey = dhive.PrivateKey.fromString(process.env.GATSBY_secretJAB);
 const jabFEE = { fee: "0.002", currency: "HIVE", costInstance: "0.001", costCurr: "HIVE", acceptedCur: "HIVE"};
 const initialState = {
+    id: "",
     symbol: "",
     name: "D My NFT created in JAB",
     orgName: "JAB jobs and gigs on a Hive blockchain",
@@ -81,21 +82,30 @@ const Nftcreatorfinal = (props) => {
         });
         return response.json(); 
     };
-    function sendNFTBE(newft){
+    function sendNFTBE(){
         const formData = new FormData();
-        formData.append("nft_id", newft._id);
+        // the basic data we really need, all the rest will be handled directly with hive ssc.
+        console.log(`trying to add new nft id:${nft.id}`);
+
+        formData.append("nft_id", nft.id);
+        // formData.append("id_ext", id_ext);
         formData.append("account", userdata.username);
-        formData.append("symbol",newft.symbol);
-        formData.append("name",newft.name);
-        formData.append("orgName", newft.orgName);
-        formData.append("productName", newft.productName);
-        formData.append("price", nft.price);
-        formData.append("authorizedIssuingAccounts", JSON.stringify(newft.authorizedIssuingAccounts));
-        formData.append("issuer", userdata.username);
-        formData.append("supply", newft.supply);
-        formData.append("circulatingSupply", newft.circulatingSupply);
+        formData.append("symbol",nft.symbol);
         formData.append("createdAt", new Date);
-        sendPostBE(nfthandlermongoEP+"addNFTDB",formData, newft._id)
+        formData.append("price", nft.price);
+        formData.append("issuer", userdata.username);
+        formData.append("maxSupply", nft.maxSupply);
+        formData.append("name",nft.name);
+        formData.append("url",nft.url);
+        formData.append("orgName", nft.orgName);
+        formData.append("productName", nft.productName);
+        // end basic data
+
+        // formData.append("authorizedIssuingAccounts", JSON.stringify(newft.authorizedIssuingAccounts));
+        // formData.append("supply", newft.supply);
+        // formData.append("circulatingSupply", newft.circulatingSupply);
+        
+        sendPostBE(nfthandlermongoEP+"addNFTDB",formData, nft.id)
         .then(response => {
             console.log(response); //status, result
             if(response.status === "success"){
@@ -136,20 +146,23 @@ const Nftcreatorfinal = (props) => {
                                         //now we are sure, just check on the data, jic
                                         console.log(`Success on Issuing from: ${found[0].data.from} to: ${found[0].data.to}\nid: ${found[0].data.id}, symbol:${found[0].data.symbol}`);
                                         console.log('Final Step::::todo');
+                                        //testing to add the new Nft as this one is the instance itself so we can add it to mongoDB
+                                        sendNFTBE();
+
                                         updateOnSuccess();
                                         // here as we have instantiated we update the circulating supply to 1
-                                        const query = {
-                                            circulatingSupply: 1,
-                                            supply: 1,
-                                        }
-                                        console.log(`About to send:${JSON.stringify(query)} id:${newlyCreatedNFT.nft_id}`);
-                                        sendPostBEJH(nfthandlermongoEP+"updateNFTfield",query, newlyCreatedNFT.nft_id)
-                                        .then(response => {
-                                            console.log(response); //status, result
-                                            // if(response.status === "success"){
-                                            //     setNewlyCreatedNFT(response.result);
-                                            // }
-                                        }).catch(error => console.log('Error updating field on NFT to DB.',error));
+                                        // const query = {
+                                        //     circulatingSupply: 1,
+                                        //     supply: 1,
+                                        // }
+                                        // console.log(`About to send:${JSON.stringify(query)} id:${newlyCreatedNFT.nft_id}`);
+                                        // sendPostBEJH(nfthandlermongoEP+"updateNFTfield",query, newlyCreatedNFT.nft_id)
+                                        // .then(response => {
+                                        //     console.log(response); //status, result
+                                        //     // if(response.status === "success"){
+                                        //     //     setNewlyCreatedNFT(response.result);
+                                        //     // }
+                                        // }).catch(error => console.log('Error updating field on NFT to DB.',error));
                                         //clear states;
                                         clearStates()
                                     }
@@ -288,8 +301,10 @@ const Nftcreatorfinal = (props) => {
                 console.log(response);
                 //testing to instantiate here
                 instantiateNFT(response[0]);
+                //testing to add id as received and store it in the nftState.
+                setValueNFT("id",response[0]._id);
                 //add it here to mongoDB.
-                sendNFTBE(response[0]);
+                // sendNFTBE(response[0]);
                 //update the list for NFTs on this user.
                 updateIssued({});
             }else if(response.length === 0){
@@ -356,6 +371,8 @@ const Nftcreatorfinal = (props) => {
                 // TODO instead of just doing a transfer.
                 // let's exectute transfer + custom json at once and test this out to modify the logic.
                 // So in memo we will store the following:
+                // Important Note: placeing userdata.username as authorizedIssuingAccounts even when he is the owner is a must.
+                const authorizedIssuingAccounts = userdata.username === "jobaboard" ? [ "jobaboard"] : [ "jobaboard", userdata.username ];
                 const memo = nft.maxSupply !== "" ? {
                     "id": ssc_test_id,
                     "json": {
@@ -368,10 +385,10 @@ const Nftcreatorfinal = (props) => {
                             "productName": nft.productName,
                             "url": nft.url,
                             "maxSupply": nft.maxSupply,
-                            "authorizedIssuingAccounts": [ "jobaboard"],
+                            "authorizedIssuingAccounts": authorizedIssuingAccounts,
                         }
                     },
-                } : { "id": ssc_test_id, "json": {"contractName": "nft","contractAction": "create","contractPayload": {"symbol": nft.symbol,"name": nft.name,"orgName": nft.orgName,"productName": nft.productName,"url": nft.url,"authorizedIssuingAccounts": [ "jobaboard"],}},}
+                } : { "id": ssc_test_id, "json": {"contractName": "nft","contractAction": "create","contractPayload": {"symbol": nft.symbol,"name": nft.name,"orgName": nft.orgName,"productName": nft.productName,"url": nft.url,"authorizedIssuingAccounts": [ "jobaboard", userdata.username ],}},}
                 // addStateOP({ state: 'Waiting for transfer', data: {username: userdata.username, amount: nft.totalAmountPay, currency: jabFEE.acceptedCur, note: JSON.stringify(memo)} });
                 window.hive_keychain.requestTransfer(userdata.username, "jobaboard", nft.totalAmountPay.toString(), JSON.stringify(memo), jabFEE.acceptedCur, function(result){
                     const { message, success, error } = result;
@@ -539,7 +556,7 @@ const Nftcreatorfinal = (props) => {
             {
                 loadingData &&
                 <div className="standardDivRowFlex100pX100pCentered">
-                    <Loader logginIn={true} typegif={"blocks"} />
+                    <Loader xtraClass={"marginsTB"} logginIn={true} typegif={"blocks"} />
                 </div>
             }
             {
@@ -549,7 +566,7 @@ const Nftcreatorfinal = (props) => {
                         <img src={newlyCreatedNFT.thumb} />
                     </div>
                     <p>Symbol: {newlyCreatedNFT.symbol} / Price: {newlyCreatedNFT.price} HIVE</p>
-                    <p>Owner: {newlyCreatedNFT.account} / Token Id:{newlyCreatedNFT.nft_id}</p>
+                     <p>Owner: {newlyCreatedNFT.account} / Token Id:{newlyCreatedNFT.nft_id}</p>
                 </div>
                }
             {/* <input type="text" onChange={(e) => setTx(e.target.value)} />

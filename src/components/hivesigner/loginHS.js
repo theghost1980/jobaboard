@@ -27,7 +27,7 @@ const LoginHS = (props) => {
         query {
             logoHS: file(relativePath: {eq: "hivesigner.png"}) {
                 childImageSharp {
-                    fixed(width: 200) {
+                    fixed(width: 200, webpQuality: 70) {
                         ...GatsbyImageSharpFixed_withWebp
                     }
                 }

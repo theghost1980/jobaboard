@@ -109,6 +109,8 @@ const Callbackhs = (props) => {
             //         });
             //     }
             // })
+        }else{
+            navigate("/");
         }
     },[props.location.search]);
 

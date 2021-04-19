@@ -45,7 +45,8 @@ const Login = (props) => {
             keychainLogo: file(relativePath: {eq: "keychain_logo.png"}) {
                 childImageSharp {
                     fixed(width: 200) {
-                        ...GatsbyImageSharpFixed_withWebp
+                        # ...GatsbyImageSharpFixed_withWebp
+                        ...GatsbyImageSharpFixed_withWebp_noBase64
                     }
                 }
             }
@@ -196,7 +197,7 @@ const Login = (props) => {
                     localStorage.setItem("_NoneOfYourBusiness",JSONprofile);
                     successfulLogin(account,timestamp,msg);
                     if(banned){
-                        alert('You have been Banned. Please Contact the admins as you only have some limited features on this platform.!');
+                        alert('You have been Banned. Please Contact the admins as you only have some limited features on Job A Board.!');
                     }
                     // setData();
                     //From this point on, we can check:

@@ -4,6 +4,7 @@ import SubmenuRender from './submenurender';
 import Jobs from '../User/jobs/jobs';
 import Managejobs from '../User/jobs/managejobs';
 import Manageportfolio from '../User/jobs/manageportfolio';
+import Myorders from '../User/orders/myorders';
 import Jobix from '../User/jobs/jobix';
 import { check } from '../../utils/helpers';
 import { useStaticQuery, graphql, Link, navigate } from "gatsby"
@@ -115,6 +116,7 @@ const Userjobs = () => {
                     <li onClick={() => setSelected("jobs")}>New Job</li>
                     <li onClick={() => setSelected("managejobs")}>Manage Jobs</li>
                     <li onClick={() => setSelected("manageportfolio")}>Manage Portfolio</li>
+                    <li onClick={() => setSelected("myorders")}>My orders</li>
                     <li onClick={() => setSelected("jobix")}>Jobito Helper</li>
                 </ul>
             </div>
@@ -199,6 +201,10 @@ const Userjobs = () => {
             {
                 (selected === "manageportfolio") &&
                     <SubmenuRender path={`/app/manageportfolio`} component={Manageportfolio}/>
+            }
+            {
+                (selected === "myorders") &&
+                    <SubmenuRender path={`/app/myorders`} component={Myorders}/>
             }
             {
                 (selected === "jobix") &&
