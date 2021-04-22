@@ -55,18 +55,33 @@ const Navbar = (props) => {
     //graphql queries
     const data = useStaticQuery(graphql`
     query {
-        append_menu: allMongodbGatsbyCategory {
-            edges {
-                node {
-                    id
-                    image
-                    sub
-                    query
-                    name
-                    subtitle
-                    title
-                }
-            }
+        # append_menu: allMongodbGatsbyCategory {
+        #     edges {
+        #         node {
+        #             id
+        #             image
+        #             sub
+        #             query
+        #             name
+        #             subtitle
+        #             title
+        #         }
+        #     }
+        # }
+        append_menu: allMongodbGatsbyCategories(sort: {fields: name}) {
+          edges {
+              node {
+                  active
+                  id
+                  thumb
+                  image
+                  name
+                  query
+                  sub_category
+                  subtitle
+                  title
+              }
+          }
         }
         main_menu: allMongodbGatsbyMainMenu {
             edges {
@@ -539,22 +554,24 @@ const Navbar = (props) => {
                         {
                         data.append_menu.edges.map(({ node: itemM}) => {
                             return (
-                            <li key={itemM.id} className="ulParent">
-                                <div>{itemM.name}</div>
-                                <ul className="subMenuCatUL">
-                                {
-                                    itemM.sub.map(subItem => {
-                                    return (
-                                        <li key={`${itemM.id}-${subItem}`}>
-                                            <Link to={`/explore?category=${itemM.name}|sub_category=${subItem}`} className="subCatLink">
-                                                {subItem}
-                                            </Link>
-                                        </li>
-                                    )
-                                    })
-                                }
-                                </ul>
-                            </li>
+                                itemM.active ?
+                                <li key={itemM.id} className="ulParent">
+                                    <div>{itemM.name}</div>
+                                    <ul className="subMenuCatUL">
+                                    {
+                                        itemM.sub_category.map(subItem => {
+                                        return (
+                                            <li key={`${itemM.id}-${subItem}`} className="normalTextSmall">
+                                                <Link to={`/explore?category=${itemM.name}|sub_category=${subItem}`} className="subCatLink">
+                                                    {subItem}
+                                                </Link>
+                                            </li>
+                                        )
+                                        })
+                                    }
+                                    </ul>
+                                </li>
+                                : null
                             )
                         })
                         }
@@ -631,10 +648,10 @@ const Navbar = (props) => {
                     <div>
                         <Coinprices />
                         {/* TODO: must a component apart */}
-                        <div className="searchContainer">
+                        {/* <div className="searchContainer">
                             <input type="text" className="searchInput" placeholder="find your next job" />
                             <Img fixed={data.searchIcon.childImageSharp.fixed} className="imgSearch" />
-                        </div>
+                        </div> */}
                     </div>
                 </div>
                 {/* Testing to have socketBee wrapping the usermenu */}

@@ -12,6 +12,7 @@ import Btnoutlink from '../components/btns/btnoutlink';
 //hiveio/keychain
 import { isKeychainInstalled } from '@hiveio/keychain';
 import Loader from '../components/loader';
+import Btnprint from '../components/btns/btnprint';
 
 // TODO
 // We must see if we need to handle the jobpreviews as a page instead of a inner component, as
@@ -44,6 +45,7 @@ const Checkout = (props) => {
         note: String, //used for 'cancellation' or "anything else needed".
         nft_id: Number,
         nft_symbol: String,
+        nft_amount: Number, //represent the amount of NFTs the user will give/get, depending on order type. This field is important to know how many instances will be sent/received.
         nft_price_on_init: Number, //respresent the price when the order was emitted. In case we may want to allow users to change prices on their nft later on without affecting on going orders.
         job_id: String,
         job_title: String, //used to check if maybe the user placed the same order twice.
@@ -97,6 +99,7 @@ const Checkout = (props) => {
                 updateOrderState("sub_category", state.sub_category);
                 updateOrderState("escrow_type", state.escrow_type);
                 updateOrderState("job_type", state.job_type);
+                updateOrderState("nft_amount",state.paying_price);
                 //get the token price.
                 const query = { symbol: state.nft_symbol, account: null,};
                 console.log(query);
@@ -107,9 +110,9 @@ const Checkout = (props) => {
                         // we may add it to myHoldings
                         updateOrderState("nft_id", response.result[0].nft_id);
                         updateOrderState("nft_symbol", response.result[0].symbol);
-                        updateOrderState("nft_price_on_init",response.result[0].price);
-                        updateOrderState("sub_total", (response.result[0].price * state.paying_price));
-                        updateOrderState("total_amount", (response.result[0].price * state.paying_price));
+                        updateOrderState("nft_price_on_init",Number(response.result[0].price));
+                        updateOrderState("sub_total", (Number(response.result[0].price) * Number(state.paying_price)));
+                        updateOrderState("total_amount", (Number(response.result[0].price) * Number(state.paying_price)));
                     }
                 }).catch(error => console.log('Error asking for NFTs on this user from DB, mongo.',error));
             }else{
@@ -176,6 +179,10 @@ const Checkout = (props) => {
                 //send to Oplogger to write a log on ordersLogs
                 // TODO we must create it.
                 setLoadingData(false);
+            }else if(resultsOP.status === 'user_cancel'){
+                //send to Oplogger to write a log on ordersLogs
+                // TODO we must create it.
+                setLoadingData(false);
             }
         }
     }, [resultsOP]);
@@ -185,8 +192,8 @@ const Checkout = (props) => {
         if(isKeychainInstalled){
             setLoadingData(true);
             const memo = `Order of Gig/Job-${jobSelected._id} on Job A Board.`
-            const total_amount = Number(order.sub_total + order.extra_money).toFixed(3);
-            updateOrderState("total_amount", Number(total_amount));
+            const total_amount = Number(order.total_amount).toFixed(3);
+            // updateOrderState("total_amount", Number(total_amount));
 
             //just for testing now DELETE LATER
             // updateOrderState("tx_id", "AGGSHTESTEST");
@@ -226,7 +233,7 @@ const Checkout = (props) => {
 
                         //return result object as { status: 'cancelled_user', results: new Date().toString() }
                         setResultsOP({
-                            status: 'cancelled_user', results: new Date().toString(),
+                            status: 'user_cancel', results: new Date().toString(),
                         });
                     }
                 }else if (success){
@@ -253,11 +260,13 @@ const Checkout = (props) => {
     const addExtra = (cen) => {
         console.log(cen);
         if(order.total_amount){
-            const extra = 0.10 * order.sub_total;
-            if(cen){
-                updateOrderState("extra_money", extra);
-            }else if(!cen){
+            const extra = Number(0.10 * order.sub_total).toFixed(3);
+            if(cen && order.extra_money === 0){
+                updateOrderState("extra_money", Number(extra));
+                updateOrderState("total_amount", Number(order.sub_total) + Number(extra));
+            }else if(!cen && order.extra_money > 0){
                 updateOrderState("extra_money", 0);
+                updateOrderState("total_amount", Number(order.total_amount) - Number(extra));
             }
         }
     }
@@ -304,8 +313,10 @@ const Checkout = (props) => {
                     <p>Under any issue, do not hesitate our contact support by email or using the messaging system on JAB.</p>
                     <p>If you need you can print this information but a copy has been sent to your email.</p>
                     <p>Also it can be located within > Jobs > My Orders > (TODO LINK, FE,BE)</p>
+                    <p>Important: JAB is creating the tokens for you as we "speak". As soon as they are casted, you will receive a notification.</p>
                     <hr></hr>
-                    <div className="standardDivRowFullW">
+                    <div className="standardDivRowFullW relativeDiv">
+                        <Btnprint classCSS={"justAbsolutePos scaleHovered standardDivFlexPlain justRight30pTop10p justBorders justRounded"}/>
                         <div className="standardDiv60Percent">
                             <h2>Order ID: {results._id}</h2>
                             <h3>Order TxId on payment: {results.tx_id}</h3>
@@ -391,7 +402,7 @@ const Checkout = (props) => {
                                     order.extra_money > 0 &&
                                     <h4 className="justColorGray">Extra Fast Added as 10%: {order.extra_money}</h4>
                                 }
-                                <h2>Total to Pay: {order.sub_total + order.extra_money} HIVE</h2>
+                                <h2>Total to Pay: {order.total_amount} HIVE</h2>
                                 <button onClick={processPayment} className="justBackRed">Proceed with payment</button>
                             </div>
                         </div>

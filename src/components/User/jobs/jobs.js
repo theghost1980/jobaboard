@@ -44,15 +44,31 @@ const Jobs = (props) => {
                     }
                 }
             }
-            cats: allMongodbGatsbyCategory(sort: {fields: name}) {
+            # cats: allMongodbGatsbyCategory(sort: {fields: name}) {
+            #     totalCount
+            #         edges {
+            #             node {
+            #                 id
+            #                 sub
+            #                 name
+            #             }
+            #         }
+            # }
+            cats: allMongodbGatsbyCategories(sort: {fields: name}) {
                 totalCount
-                    edges {
-                        node {
-                            id
-                            sub
-                            name
-                        }
+                edges {
+                    node {
+                        active
+                        id
+                        thumb
+                        image
+                        name
+                        query
+                        sub_category
+                        subtitle
+                        title
                     }
+                }
             }
         }
     `);
@@ -375,7 +391,10 @@ const Jobs = (props) => {
 
     const handleSelectedCat = (event) => {
         const cat = event.target.value;
-        const _subCats = data.cats.edges.filter(({node: category}) => category.name === cat)[0].node.sub;
+        // old records
+        // const _subCats = data.cats.edges.filter(({node: category}) => category.name === cat)[0].node.sub;
+        // new records sub_category
+        const _subCats = data.cats.edges.filter(({node: category}) => category.name === cat)[0].node.sub_category;
         setSubCats(_subCats);
         setJobField("category",cat);
     }
@@ -446,7 +465,9 @@ const Jobs = (props) => {
                                 {
                                     data.cats.edges.map(({ node:cat }) => {
                                         return (
+                                            cat.active ?
                                             <option key={cat.id}>{cat.name}</option>
+                                            : null
                                         )
                                     })
                                 }

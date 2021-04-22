@@ -20,6 +20,12 @@ GatsbyImageSharpFluid_withWebp_tracedSVG */
 /* https://www.pexels.com/photo/black-man-in-elegant-suit-opening-door-of-yellow-taxi-5647625/ */
 /* https://www.npmjs.com/package/react-carousel-responsive */
 /* Photo by Andrea Piacquadio from Pexels https://www.pexels.com/photo/reception-desk-with-antique-hotel-bell-3771110/ */
+/* https://www.pexels.com/photo/man-in-a-black-t-shirt-and-hat-sketching-3693019/ */
+/* https://www.pexels.com/photo/women-s-red-and-black-floral-dress-1807128/ */
+/* https://www.pexels.com/photo/stylish-black-woman-in-hat-looking-away-6547287/ */
+/* https://www.pexels.com/photo/people-inside-strucure-449559/ */
+/* https://www.pexels.com/photo/two-white-printer-papers-near-macbook-on-brown-surface-590016/ */
+/* https://www.pexels.com/photo/photo-of-ipad-on-orange-fruits-927802/ */
 /* end credits */
 
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;500;600;700&display=swap');
@@ -27,6 +33,7 @@ GatsbyImageSharpFluid_withWebp_tracedSVG */
 /* root variables */
 :root {
     --marginBewteen-Objects: 15px;
+    --zindexTop: 20000;
 }
 
 html, body {
@@ -149,6 +156,16 @@ body::-webkit-scrollbar-thumb {
 }
 
 /* shared classes */
+.btnWhiteBackAbsClose {
+    display: flex;
+    width: 40px;
+    justify-content: center;
+    border: 1px solid orange;
+    border-radius: 8px;
+}
+.zIndexTop {
+    z-index: var(--zindexTop);
+}
 .width90 {
     width: 90% !important;
 }
@@ -213,6 +230,9 @@ body::-webkit-scrollbar-thumb {
 }
 .textColorContrast1 {
     color: rgb(160, 86, 86);
+}
+.textColorWhite {
+    color: white;
 }
 .trTablePortP {
     background: orange;
@@ -296,6 +316,12 @@ body::-webkit-scrollbar-thumb {
 }
 .justWidth100per{
     width: 100%;
+}
+.justWidthInherit {
+    width: inherit;
+}
+.justWidthAuto {
+    width: auto;
 }
 .standardUlColFullWMaxH300p {
     display: flex;
@@ -549,6 +575,11 @@ body::-webkit-scrollbar-thumb {
     transition: all .2s cubic-bezier(0.455, 0.03, 0.515, 0.955);
     cursor: pointer;
 }
+.standardLiHoveredRounded {
+    transition: all .2s cubic-bezier(0.455, 0.03, 0.515, 0.955);
+    cursor: pointer;
+    border-radius: 10px;
+}
 .btnMiniTextRed {
     font-size: x-small;
     background: #EA3546 !important;
@@ -675,6 +706,11 @@ body::-webkit-scrollbar-thumb {
     color: white;
     cursor: pointer;
 }
+.standardLiHoveredRounded:hover {
+    background: orange;
+    color: white;
+    cursor: pointer;
+}
 .divRightAlig {
     margin: auto !important;
 }
@@ -704,6 +740,13 @@ body::-webkit-scrollbar-thumb {
     list-style: none;
     width: 100%;
     height: auto;
+    font-size: small;
+    padding-inline-start: 0px;
+}
+.standardUlVerSmallPlain {
+    display: flex;
+    flex-direction: column;
+    list-style: none;
     font-size: small;
     padding-inline-start: 0px;
 }
@@ -793,6 +836,11 @@ body::-webkit-scrollbar-thumb {
 .justMaxHeight {
     max-height: 90px;
 }
+.jusBordersRounWhiteBack {
+    border: 1px solid black;
+    border-radius: 10px;
+    background: white;
+}
 .justMarginAuto {
     margin: auto;
 }
@@ -804,6 +852,9 @@ body::-webkit-scrollbar-thumb {
 }
 .justHeight400p {
     height: 400px;
+}
+.justHeight60p {
+    height: 60px;
 }
 .whiteBack {
     background: white;
@@ -1356,6 +1407,22 @@ body::-webkit-scrollbar-thumb {
     right: -120px;
     top: 0px;
 }
+.justRight30pTop10p {
+    right: -30px;
+    top: 10px;
+}
+.justRightm30pTopm50p {
+    right: 30px;
+    top: -50px;
+}
+.justRight50pTop10p {
+    right: 50px;
+    top: 10px;
+}
+.justRight0_0 {
+    right: 0px;
+    top: 0px;
+}
 .activeDisplay:hover .smallAbsDivDisNone120pPlain {
     display: flex;
 }
@@ -1574,6 +1641,9 @@ body::-webkit-scrollbar-thumb {
 }
 .justBorders {
     border: 1px solid orange;
+}
+.justSpaceAround {
+    justify-content: space-around;
 }
 .justshadows {
     box-shadow: 0px 1px 3px 1px orange;
@@ -1854,6 +1924,10 @@ body::-webkit-scrollbar-thumb {
     position: absolute;
     top: 0px;
     right: 0px;
+}
+.posCenterBottomm30{
+    left: 50%;
+    bottom: -30px;
 }
 .absInfoItem {
     display: flex;
@@ -2657,17 +2731,18 @@ footer {
 
 /* index page */
 .catBigUl {
-    padding-top: var(--marginBewteen-Objects);
-    padding-bottom: var(--marginBewteen-Objects);
+    padding-inline-start: 0px;
     list-style: none;
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    overflow-x: scroll;
-    /* padding-inline-start: 0px; */
+    justify-content: space-evenly;
+}
+.catBigUl li {
+    margin-bottom: var(--marginBewteen-Objects);
 }
   /* scrollbar */
-  .catBigUl::-webkit-scrollbar {
+  /* .catBigUl::-webkit-scrollbar {
     width: 1px;
     height: 5px;
   }
@@ -2675,15 +2750,20 @@ footer {
     background: white;
   }
   .catBigUl::-webkit-scrollbar-thumb {
-    /* background-color: var(--scrollbarBG); */
     border-radius: 6px;
     border: 1px solid orange;
-  }
+  } */
   /* end scrollbar */
 .imgContCat {
-    width: 275px;
-    height: 134px;
-    position: relative;
+    border-radius: 10px;
+    display: block;
+    width: 500px;
+    height: 300px;
+    transition: all .1s ease-in-out;
+}
+.imgContCat:hover{
+    transform: scale(1.02);
+    opacity: .9;
 }
 .catItemCont {
     cursor: pointer;
@@ -2697,16 +2777,16 @@ footer {
     z-index: 10000;
 }
 .imgCat {
+    border-radius: 10px;
     width: 100%;
     height: 100%;
 }
-.imgContCat > h3 {
+.imgContCat  h2 {
     position: absolute;
     bottom: 0px;
-    left: 8px;
+    left: 15px;
     color: white;
     text-shadow: 3px 3px 3px orange;
-    margin: 0 auto;
 }
 .content {
     margin-left: 10px;
@@ -2726,6 +2806,8 @@ footer {
     background: white;
     border: 1px solid orange;
     border-radius: 8px;
+    max-height: 400px;
+    overflow-y: scroll;
 }
 .subMenuCatUL > li {
     padding: 10px;

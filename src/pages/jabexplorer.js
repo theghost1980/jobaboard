@@ -76,6 +76,13 @@ const Jabexplorer = (props) => {
                      ...GatsbyImageSharpFixed_withWebp
                  }
              }
+         } 
+         searchIcon: file(relativePath: {eq: "search.png"}) {
+             childImageSharp {
+                 fixed(width: 20) {
+                     ...GatsbyImageSharpFixed_withWebp
+                 }
+             }
          }
     }
     `);
@@ -86,6 +93,7 @@ const Jabexplorer = (props) => {
     const [txToLookUp, setTxToLookUp] = useState(null);
     const [blockToTookUp, setBlockToTookUp] = useState(null);
     const [showBlockTrans, setShowBlockTrans] = useState(false);
+    const [searchInput, setSearchInput] = useState(null);
     // END new ones to organize later on
 
     const [resultQuery, setResultQuery] = useState([]);
@@ -225,6 +233,22 @@ const Jabexplorer = (props) => {
             }
         });  
     }
+    const checkInput = (event) => {
+        console.log('event.key',event.key);
+        console.log('event.keyCode', event.keyCode);
+        if(searchInput && (event.key === 'Enter' || event.keyCode === 13)){
+            //first detect tx as numbers - chars - no @ an not #
+            const firstChar = String(searchInput).substring(0,1);
+            if(firstChar === "#"){
+                //block
+            }else if(firstChar === "@"){
+                //username
+            }else{
+                //tx
+                getTx(searchInput);
+            }
+        }
+    }
     //END funtcions/CB
 
     //fecthing data
@@ -293,7 +317,20 @@ const Jabexplorer = (props) => {
     return (
         <Layout>
             <div className="exploreContainer marginBottom">
-                <h1>JAB block explorer</h1>
+                <div className="justifyContentSpaced aInlineFlexPlain">
+                    <h1>JAB block explorer</h1>
+                    <div className="justBorders justWidth30 textAlignedCenter justRounded justHeight60p">
+                        <div className="standardDivRowFullW justiAlig">
+                            <input type="text" onChange={(e) => setSearchInput(e.target.value)} 
+                                onKeyDown={checkInput}
+                            />
+                            <div onClick={checkInput} className="pointer">
+                                <Img fixed={data.searchIcon.childImageSharp.fixed} />
+                            </div>
+                        </div>
+                        <p className="textAlignedCenter xSmalltext">Search Tx/#Block/@Username (+Enter)</p>
+                    </div>
+                </div>
                 {
                     txToLookUp && !loadingQuery &&
                     <div>
@@ -321,6 +358,7 @@ const Jabexplorer = (props) => {
                             showBlockTrans &&
                             <div className="smallText">
                                 <table className="tablePortPublic">
+                                    <tbody>
                                     <tr className="trTablePortP">
                                         <th>Operation</th>
                                         <th>Transaction ID</th>
@@ -335,6 +373,7 @@ const Jabexplorer = (props) => {
                                         )
                                     })
                                 }
+                                </tbody>
                                 </table>
                             </div>
                         }

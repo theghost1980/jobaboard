@@ -12,6 +12,7 @@ import { selectNotifications } from '../../features/notifications/notiSlice';
 
 //testing to get context from socketbee
 import { Socket } from '../BeeChat/socketBee';
+import Sitesearch from '../interactions/sitesearch';
 // import {
 //     decrement,
 //     increment,
@@ -25,8 +26,10 @@ import { Socket } from '../BeeChat/socketBee';
 const UserMenu = (props) => {
     const userdata  = check();
     const [fixed, setFixed] = useState(false);
-    const [open, setOpen] = useState(false);
+    const [openNoti, setOpenNoti] = useState(false);
+    const [openSearch, setOpenSearch] = useState(false);
     const [topMiniMessage, setTopMiniMessage] = useState(null);
+    const [actualMenu, setActualMenu] = useState("");
     //testing react-redux
     // const count = useSelector(selectCount);
     const newmessages = useSelector(selectNotifications);
@@ -114,6 +117,13 @@ const UserMenu = (props) => {
                         ...GatsbyImageSharpFixed_withWebp
                     }
                 }
+            } 
+            searchIcon: file(relativePath: {eq: "search.png"}) {
+                childImageSharp {
+                    fixed(width: 35) {
+                        ...GatsbyImageSharpFixed_withWebp
+                    }
+                }
             }
         }
     `);
@@ -140,33 +150,33 @@ const UserMenu = (props) => {
     return (
             <div className="userMenuContainer">
                 <ul className={`ulMenuOptionUser ${fixed ? `makeFixeduserMenu` : null}`}>
-                    <Link to="/app/profile" className="gralLink">
+                    <Link to="/app/profile" className="gralLink" onClick={() => setActualMenu("Profile")}>
                         <li className="menuOptionLi">
                             <Img fixed={data.profileIcon.childImageSharp.fixed} className="imgOptionsUser" />
                         </li>
                     </Link>
-                    <Link to="/app/wallet" className="gralLink">
+                    <Link to="/app/wallet" className="gralLink" onClick={() => setActualMenu("Wallet")}>
                         <li className="menuOptionLi">
                             <Img fixed={data.walletIcon.childImageSharp.fixed} className="imgOptionsUser" />
                         </li>
                     </Link>
-                    <Link to="/app/tokens" className="gralLink">
+                    <Link to="/app/tokens" className="gralLink" onClick={() => setActualMenu("NFTs")}>
                         <li className="menuOptionLi">
                             <Img fixed={data.tokensIcon.childImageSharp.fixed} className="imgOptionsUser"  />
                         </li>
                     </Link>
-                    <Link to="/app/jobs" className="gralLink">
+                    <Link to="/app/jobs" className="gralLink" onClick={() => setActualMenu("Jobs")}>
                         <li className="menuOptionLi">
                             <Img fixed={data.jobsIcon.childImageSharp.fixed} className="imgOptionsUser"  />
                         </li>
                     </Link>
-                    <Link to="/nftmarket" className="gralLink">
+                    <Link to="/nftmarket" className="gralLink" onClick={() => setActualMenu("NFT Market")}>
                         <li className="menuOptionLi">
                             <Img fixed={data.market.childImageSharp.fixed} className="imgOptionsUser"  />
                         </li>
                     </Link>
                     {/* TODO make the settings option to set chat as flyer or fixed. */}
-                    <Link to="/app/beechatfixed" className="gralLink">
+                    <Link to="/app/beechatfixed" className="gralLink" onClick={() => setActualMenu("Beechat")}>
                         <li className="menuOptionLi relativeDiv">
                             <Img fixed={data.chatIcon.childImageSharp.fixed} className="imgOptionsUser"  />
                             {
@@ -181,7 +191,7 @@ const UserMenu = (props) => {
                     </Link>
                     {
                     (userdata.usertype === "admin") &&
-                        <Link to="/app/adminpanel" className="gralLink">
+                        <Link to="/app/adminpanel" className="gralLink" onClick={() => setActualMenu("Admin panel")}>
                             <li className="menuOptionLi">
                                 <Img fixed={data.adminPanelLogo.childImageSharp.fixed} className="imgOptionsUser" />
                             </li>
@@ -190,14 +200,28 @@ const UserMenu = (props) => {
                     {/* <li>
                         <Notifications username={userdata.username} token={userdata.token}/>
                     </li> */}
-                    <li className={`menuOptionLi ${open ? 'selectedMenu': null}`} className="gralLink">
+                    <li className={`menuOptionLi ${openNoti ? 'selectedMenu': null}`} className="gralLink">
                         {/* TODO make the settings option to set chat as flyer or fixed. */}
-                        <div onClick={() => setOpen(!open)}>
+                        <div onClick={() => setOpenNoti(!openNoti)}>
                             <Img fixed={data.notiIcon.childImageSharp.fixed} className="imgOptionsUser"  />
                         </div>
                     </li>
+                    <li className={`menuOptionLi ${openSearch ? 'selectedMenu': null}`} className="gralLink">
+                        <div onClick={() => setOpenSearch(!openSearch)}>
+                            <Img fixed={data.searchIcon.childImageSharp.fixed} className="imgOptionsUser"  />
+                        </div>
+                    </li>
+                    {
+                        fixed && actualMenu !== '' &&
+                        <p className="marginLeft textColorWhite">On: {actualMenu}</p>
+                    }
                 </ul>
-                <div className={open ? 'openNoti': 'closedNoti'}>
+                <div className={openSearch ? 'openNoti': 'closedNoti'}>
+                    <Sitesearch 
+                        fixedBellowUM={fixed ? 'makeMeFixed60px jusBordersRounWhiteBack' : null} 
+                    />
+                </div>
+                <div className={openNoti ? 'openNoti': 'closedNoti'}>
                     <Notifications 
                         username={userdata.username} 
                         token={userdata.token} 

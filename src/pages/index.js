@@ -13,18 +13,33 @@ const Index = () => {
     //graphql queries
     const data = useStaticQuery(graphql`
     query {
-      append_menu: allMongodbGatsbyCategory {
-        edges {
-          node {
-            id
-            image
-            sub
-            query
-            name
-            subtitle
-            title
+      # append_menu: allMongodbGatsbyCategory {
+      #   edges {
+      #     node {
+      #       id
+      #       image
+      #       sub
+      #       query
+      #       name
+      #       subtitle
+      #       title
+      #     }
+      #   }
+      # }
+      append_menu: allMongodbGatsbyCategories(sort: {fields: name}) {
+          edges {
+              node {
+                  active
+                  id
+                  thumb
+                  image
+                  name
+                  query
+                  sub_category
+                  subtitle
+                  title
+              }
           }
-        }
       }
     }`);
 
@@ -35,22 +50,25 @@ const Index = () => {
           <div className="mainCarouselExtCont">
             <MainCarousel />
           </div>
+          {/* TODO important: Modify the old cats but the new one in a separate component */}
           <h1>What is Lorem Ipsum?</h1>
           <p>Simple dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</p>
-          <ul className="catBigUl">
+          <ul className="catBigUl marginsTB">
             {
               data.append_menu.edges.map(({ node: item}) => {
                 return (
-                  <li key={item.id} className="catItemCont">
+                  item.active ?
+                  <li key={item.id}>
                     <Link to={`/explore?category=${item.name}|sub_category=none`}>
-                      <div className="imgContCat">
+                      <div className="imgContCat relativeDiv">
                         <img src={item.image} className="imgCat" alt={`${item.name}-${item.id}`} />
-                        <h3>{item.name}</h3>
+                        <h2 className="justAbsolutePos">{item.name}</h2>
                       </div>
                     </Link>
                     {/* <p className="content">{item.title}</p>
                     <p className="content">{item.subtitle}</p> */}
                   </li>
+                  : null
                 )
               })
             }

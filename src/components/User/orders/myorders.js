@@ -3,6 +3,7 @@ import { getStoredField, formatDateTime, check } from '../../../utils/helpers';
 import Btnoutlink from '../../btns/btnoutlink';
 import Loader from '../../loader';
 import Orderoptions from './ordersoptions';
+import Btnprint from '../../btns/btnprint';
 
 //constants
 const orderEP = process.env.GATSBY_orderEP;
@@ -73,6 +74,7 @@ const Myorders = () => {
                 myOrders && !loadingData &&
                 <div className="smallText">
                     <table className="tablePortPublic">
+                        <tbody>
                         <tr className="trTablePortP">
                             <th>__TxID__</th>
                             <th>Status</th>
@@ -101,6 +103,7 @@ const Myorders = () => {
                             )
                         })
                     }
+                    </tbody>
                     </table>
                     {
                         selectedOrder &&
@@ -112,7 +115,8 @@ const Myorders = () => {
                                 </div>
                             </h2>
                             <hr></hr>
-                            <div className="standardDiv60Percent">
+                            <div className="standardDiv60Percent relativeDiv">
+                                <Btnprint classCSS={"justAbsolutePos scaleHovered standardDivFlexPlain justRight30pTop10p justBorders justRounded"}/>
                                 <h2>Order ID: {selectedOrder._id}</h2>
                                 <h3>Order TxId on payment: 
                                     <Btnoutlink link={`/jabexplorer?tx_id=${selectedOrder.tx_id}`}
@@ -124,11 +128,23 @@ const Myorders = () => {
                                 <p>JABer on this Gig/Job: {selectedOrder.username_employee}</p>
                                 <p>Category: {selectedOrder.category_job}</p>
                                 <p>NFT used for this Order: {selectedOrder.nft_symbol}.</p>
+                                {
+                                    selectedOrder.nft_amount ? <p>Nft payed on this order: {selectedOrder.nft_amount}</p>
+                                        :   <p>Made on previuos version :|</p>
+                                }
                                 <p>Total payed: {selectedOrder.total_amount} in {jabFEE.acceptedCur}</p>
                                 {
                                     selectedOrder.days_to_complete ?
                                     <p>Days to complete: {selectedOrder.days_to_complete}.</p>
                                     : <p className="warningTextSmall">Warning. This Job/Gig do not have Days to complete, review this with the provider and make a note if possible, before processing it.</p>
+                                }
+                                {
+                                    selectedOrder.special_requirements
+                                    && <p>Special Needs: {selectedOrder.special_requirements}</p>
+                                }
+                                {
+                                    selectedOrder.note
+                                    && <p>Note: {selectedOrder.note}</p>
                                 }
                             </div>
                         </div>
