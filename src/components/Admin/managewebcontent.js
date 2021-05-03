@@ -1,19 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { check } from '../../utils/helpers';
+import { check, formatDateTime } from '../../utils/helpers';
 import Btnclosemin from '../btns/btncloseMin';
 import Btnswitch from '../btns/btnswitch';
 import Menuhover from '../interactions/menuhover';
 import Loader from '../loader';
 import Fullsizeimg from '../interactions/fullsizeimg';
 import Tablinator from '../interactions/tablinator';
+import Blogeditor from '../Blog/blogeditor';
+import ImageUploader from "react-images-upload";
+import Imageselector from '../interactions/imageselector';
+
+//TODO important: as soon as we test using the @sexosentido account
+//add @jobaboard as the account.
 
 //constants
 const buildHook = process.env.GATSBY_buildHook;
 const adminEP = process.env.GATSBY_adminEP;
 const itemsMenu = [
         {title: 'Manage Categories', cbProp: 'manageCat', subMenu: [ 'List Categories', 'Add New'],},
-        {title: 'Manage Platform', cbProp: 'managePlat', subMenu: [ 'List Options TODO', 'Fire a Rebuild Hook']},
-        {title: 'Logs', cbProp: 'manageLogs', subMenu: [ 'List Logs']},
+        {title: 'Manage Platform', cbProp: 'managePlat', subMenu: [ 'List Options TODO', 'Blog @sexosentido', 'Manage Image Bank CDN', 'Fire a Rebuild Hook']},
+        {title: 'Logs', cbProp: 'manageLogs', subMenu: [ 'List Logs - TODO']},
 ]
 const initialResponse = { status: '', message: '', result: '',};
 {/* <li>List actual: Categories and sub cats.</li>
@@ -38,7 +44,7 @@ const initialResponse = { status: '', message: '', result: '',};
 // link: Boolean,
 // active: Boolean,
 
-const Managewebcontent = () => {
+const Managewebcontent = (props) => {
     const initialCat = {
         name: "", 
         title: "",
@@ -61,6 +67,114 @@ const Managewebcontent = () => {
     })
     const [category, setCategory] = useState(initialCat)
     const [option, setOption] = useState("");
+
+    // TODO: organize and move as components all the posible parts
+    //images handlers
+    const [imagesBE, setImagesBE] = useState([]);
+    const [imagesToBe, setImagesToBe] = useState({
+        files: [File],
+        title: '', //optional if needed for later.
+        relatedTo: [''], //optional to define a bit more than tags if needed.
+        tags: [''], //mandatory.
+        createdAt: Date,
+        updateAt: Date, //for now not in use maybe later.
+    })
+    const [resetImgUp, setResetImgUp] = useState(false);// to reset the imageUploader
+    const [showUploaderImg, setShowUploaderImg] = useState(false);
+    const [needThumbs, setNeedThumbs] = useState(false);
+    const [showPreviewImgs, setShowPreviewImgs] = useState(false);
+    const [selectedImg, setSelectedImg] = useState(null);
+    const [dimmImgSelected, setDimmImgSelected] = useState({
+        width: '', height: '', unit: 'pixels',
+    })
+    //functions/CB for images handlers
+    const onDrop = picture => {
+        console.log(picture);
+        // setResetImgUp(!resetImgUp);
+        updateValue("imageC", 'files',picture);
+    };
+    const sendImages = (event) => {
+        event.preventDefault();
+        // if(imagesToBe.tags.length === 0){ return alert('Mandatory fields, add them all please.')};
+        if(imagesToBe.files.length !== 0){
+            setLoadingData(true);
+            const formdata = new FormData();
+            for (const file of imagesToBe.files) {
+                formdata.append('file', file);
+                console.log(file);
+            };
+            formdata.append("tags", JSON.stringify(imagesToBe.tags)); //to be parsed on BE.
+            formdata.append("createdAt", new Date());
+            if(imagesToBe.relatedTo.length > 0){
+                formdata.append("relatedTo", JSON.stringify(imagesToBe.relatedTo)); //to be parsed on BE.
+            }
+            if(imagesToBe.title !== ''){
+                formdata.append("title", imagesToBe.title);
+            }
+            const headers = {'x-access-token': userdata.token, 'createthumbs': needThumbs };
+            postData(adminEP+"uploadImgsToBank",formdata,headers)
+            .then(response => {
+                console.log(response);
+                if(response.status === 'sucess'){
+                    alert('Collection added succesfully. Updating List.');
+                    // setResponse({ status: response.status, result: response.result, message: 'New Collection to Image Bank created.' });
+                    setLoadingData(false);
+                    setShowUploaderImg(false);
+                    getAllImages();
+                    // setTimeout(() => setResponse(initialResponse),6000);
+                }
+            }).catch(error => {
+                console.log('Error uploading collection to BE.',error);
+                setLoadingData(false);
+            });
+        }
+    }
+    function getAllImages(){
+        const headers = { 'x-access-token': userdata.token, 'filter': JSON.stringify({}), 'limit': 0, 'sort': JSON.stringify({}) };
+        getData(adminEP+"getImgBank",headers)
+        .then(response => {
+            console.log(response);
+            if(response.status === 'sucess'){
+                setImagesBE(response.result);
+            }
+        })
+        .catch(err => {
+            console.log('Error while fetching data from BE - admins', err);
+        })
+    }
+    function getFileName(image = String){
+        const lastSlash = String(image).lastIndexOf("/");
+        const subLast = String(image).substring(lastSlash + 1,String(image).length);
+        const extFile = String(subLast).split(".")[1];
+        return subLast + " Ext: " + extFile;
+    }
+    const deleteImg = () => {
+        const answer = window.confirm("Are you sure to remove this image from JAB DB?\nnote:for now the image will still be on cloudinary waiting for admins manual review.");
+        if(answer){
+            const headers = { 'x-access-token': userdata.token, 'filter': JSON.stringify({ _id: selectedImg._id }) };
+            postData(adminEP+"deleteImgOnBank",{},headers)
+            .then(response => {
+                console.log(response);
+                if(response.status === 'sucess'){
+                    alert('Image has been removed from JAB DB.');
+                    getAllImages();
+                    setSelectedImg(null);
+                }
+            }).catch(error => console.log('Error on deletion of img on BE.',error));
+        }
+    }
+    function getDimmensionsImg(event){
+        const hImgSelected = event.target.height;
+        const wImgSelected = event.target.width;
+        setDimmImgSelected({
+            width: wImgSelected, height: hImgSelected, unit: 'Pixels(px)'
+        })
+    }
+    //END functions/CB for images handlers
+    useEffect(() => {//to load on init
+        getAllImages();
+    },[]);
+    //End images handlers
 
     //functions/CB
     const clickedOnMenu = (menu) => {
@@ -171,6 +285,9 @@ const Managewebcontent = () => {
             // if(name === "sub_category") { console.log(val)};
             // console.log(`setting name:${name},value:${val} - ${typeof val}`);
             setCategory(prevState => { return {...prevState, [name]: val}});
+        }else if(item === "imageC"){
+            console.log('Setting now on imageC:',value);
+            setImagesToBe(prevState => { return {...prevState, [name]: value}});
         }
     }
     const deleteCat = (catId) => {
@@ -310,15 +427,13 @@ const Managewebcontent = () => {
     //END load on every state change
     return (
         <div className="standardContentMargin">
-            <ul>
-                <li>TODO here</li>
-                <li>As an option to handle the blog.</li>
-                <li>Use the editor u did and the admin signs with his key to post blog posts under the desinged tags</li>
-                <li>JAB-annoucements -> goes into all dashboards</li>
-                <li>JAB-admins -> goes into admins and so on.</li>
-                <li>JAB-promo -> index page and so on.</li>
-            </ul>
             <Menuhover items={itemsMenu} clickedSubItemCB={clickedOnMenu} xtraclassCSS={"jusBordersRounWhiteBack"}/>
+            {
+                option === "Blog @sexosentido" &&
+                <div>
+                    <Blogeditor />
+                </div>
+            }
             {
                 option === "List Categories" && categories &&
                 <div>
@@ -468,6 +583,106 @@ const Managewebcontent = () => {
                             <button type="button" onClick={() => setShowEditor(false)}>close</button>
                         </div>
                     </form>
+                </div>
+            }
+            {
+                option === "Manage Image Bank CDN" &&
+                <div>
+                    <ul>
+                        <li>Options Here.</li>
+                        <li>List Images on CDN, using the mongoDB Schema.</li>
+                        <li>Edit/Delete images.</li>
+                        <li>Add new images to bank.</li>
+                        <li>All this images will be used, for now on Blog. Later on the whole platform.</li>
+                    </ul>
+                    {
+                        (imagesBE.length > 0) &&
+                        <div>
+                            {/* <Btnswitch xtraClassCSS={"justAligned"} sideText={'Make it faster, show not preview images, just names.'}
+                                initialValue={showPreviewImgs} btnAction={(cen) => setShowPreviewImgs(cen)}
+                            />
+                            <ul className="standardULImagesRow overflowXscroll">
+                                {
+                                    imagesBE.map(image => {
+                                        return (
+                                            <li key={image._id} className="scaleHovered pointer" onClick={() => setSelectedImg(image)}>
+                                                {
+                                                    showPreviewImgs ?
+                                                    <img src={image.image} className="miniImageJobs" />
+                                                    : <p>{getFileName(image.image)}</p>
+                                                }
+                                            </li>
+                                        )
+                                    })
+                                }
+                            </ul>
+                            <p>Total Images on Bank: {imagesBE.length}</p> */}
+                            <Imageselector token={userdata.token} btnAction={(image) => setSelectedImg(image)}/>
+                            {
+                                selectedImg &&
+                                <div className="relativeDiv">
+                                    <Btnclosemin btnAction={() => setSelectedImg(null)}/>
+                                    <div>
+                                        <img src={selectedImg.image} onLoad={(e) => getDimmensionsImg(e)} className="justWidth100per" />
+                                        {
+                                            selectedImg.thumb ? <img src={selectedImg.thumb} /> : <p>Thumb not set yet.</p>
+                                        }
+                                        {
+                                            (dimmImgSelected.width !== '') &&
+                                            <p>Dimensions: W:{dimmImgSelected.width} H:{dimmImgSelected.height} on {dimmImgSelected.unit}</p>
+                                        }
+                                    </div>
+                                    <p>Title: {selectedImg.title}</p>
+                                    <p>Filename: {getFileName(selectedImg.image)}</p>
+                                    <p>Tags: {selectedImg.tags.join(" #")}</p>
+                                    <p>Related To: {selectedImg.relatedTo.join(" ,")}</p>
+                                    <p>Created At: {formatDateTime(selectedImg.createdAt)}</p>
+                                </div>
+                            }
+                        </div>
+                    }
+                    {/* { "acknowledged" : true, "deletedCount" : 1 } */}
+                    <div className="standardDisplayJusSpaceAround ">
+                        <button onClick={() => setShowUploaderImg(!showUploaderImg)}>Upload New</button>
+                        <button onClick={deleteImg}>Delete</button>
+                    </div>
+                    {
+                        showUploaderImg &&
+                        <div className={`marginsTB ${loadingData ? 'disableDiv2': null}`}>
+                            <ImageUploader
+                                {...props}
+                                // key={resetImgUp}
+                                withIcon={true}
+                                buttonText="Choose images"
+                                onChange={onDrop}
+                                imgExtension={[".jpg", ".gif", ".png", ".gif", ".jpeg"]}
+                                maxFileSize={5242880}
+                                withPreview={true}
+                                name="imagesUploader-third-party"
+                            />
+                            <form className="formVertFlex" onSubmit={sendImages}>
+                                <label htmlFor="tags">Tags for this Collection</label>
+                                <textarea name="tags" onChange={(e) => updateValue("imageC",e.target.name,String(e.target.value).split(","))}
+                                    placeholder="Separate each Tag using a coma, i.e: Trees,bushes,blog" required
+                                />
+                                <label htmlFor="title">Title for Collection</label>
+                                <input type="text" name="title" onChange={(e) => updateValue("imageC",e.target.name,e.target.value)}
+                                    required
+                                />
+                                <label htmlFor="relatedTo">Related To:</label>
+                                <input type="text" name="relatedTo" onChange={(e) => updateValue("imageC",e.target.name,String(e.target.value).split(","))}
+                                    placeholder="Separate each RelatedTo using a coma, i.e: Trees,bushes,blog" required
+                                />
+                                <Btnswitch xtraClassCSS={"justAligned"} sideText={`I need thumbs for each image.  ${needThumbs ? 'Now active': 'Not active'}`} initialValue={needThumbs}
+                                    btnAction={(cen) => setNeedThumbs(cen)} showValueDevMode={true}
+                                />
+                                <div className="standardDisplayJusSpaceAround ">
+                                    <button type="button" onClick={() => setShowUploaderImg(false)}>cancel</button>
+                                    <button type="submit">Submit</button>
+                                </div>
+                            </form>
+                        </div>
+                    }
                 </div>
             }
             {

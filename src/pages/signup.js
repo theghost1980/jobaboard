@@ -7,6 +7,7 @@ import { Link, useStaticQuery, graphql } from 'gatsby';
 import { Typewriter } from 'react-typewriting-effect'
 import 'react-typewriting-effect/dist/index.css'
 import Blockchainobserver from '../components/blockchainobserver';
+import BtnOutLink from '../components/btns/btnoutlink';
 //end typewriter effect
 
 const Signup = () => {
@@ -62,6 +63,9 @@ const Signup = () => {
                 <div className="blockChainObserver">
                     <Blockchainobserver testingData={false} showBlocks={false}/>
                     <p>We are showing you each 4 seconds. But in fact, a new block is created every 2 seconds. Amazing Right?</p>
+                    <BtnOutLink toolTip={"Check our own Hive Block explorer."}
+                        textLink={"New tab, new blocks."} link={"/jabexplorer?tx_id=default"}
+                    />
                 </div>
                 <div className="divRowSignUp">
                     {/* benefits section */}

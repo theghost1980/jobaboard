@@ -13,6 +13,8 @@ import Absscreenwrapper from '../absscreenwrapper';
 import Previewjob from './jobs/previewjob';
 import Menujobs from './jobs/menujobs';
 import Loader from '../loader';
+import Visualizator from '../Blog/visualizator';
+
 //constants
 const jobEP = process.env.GATSBY_jobEP;
 //end constants
@@ -112,18 +114,31 @@ const Userjobs = () => {
             {/* jobs menu absolute on top */}
             <div className="menuJobsContainer">
                 <ul className="ulJobMenu">
-                    <li onClick={goIndexJobUpdate}>Job Dashboard</li>
-                    <li onClick={() => setSelected("jobs")}>New Job</li>
-                    <li onClick={() => setSelected("managejobs")}>Manage Jobs</li>
-                    <li onClick={() => setSelected("manageportfolio")}>Manage Portfolio</li>
-                    <li onClick={() => setSelected("myorders")}>My orders</li>
-                    <li onClick={() => setSelected("jobix")}>Jobito Helper</li>
+                    <li className={`${selected === "" ? 'activeSelected justMiniPadding justMiniRounded': null}`} onClick={goIndexJobUpdate}>Job Dashboard</li>
+                    <li className={`${selected === "jobs" ? 'activeSelected justMiniPadding justMiniRounded': null}`} onClick={() => setSelected("jobs")}>New Job</li>
+                    <li className={`${selected === "managejobs" ? 'activeSelected justMiniPadding justMiniRounded': null}`} onClick={() => setSelected("managejobs")}>Manage Jobs</li>
+                    <li className={`${selected === "manageportfolio" ? 'activeSelected justMiniPadding justMiniRounded': null}`} onClick={() => setSelected("manageportfolio")}>Manage Portfolio</li>
+                    <li className={`${selected === "myorders" ? 'activeSelected justMiniPadding justMiniRounded': null}`} onClick={() => setSelected("myorders")}>My orders</li>
+                    <li className={`${selected === "jobix" ? 'activeSelected justMiniPadding justMiniRounded': null}`} onClick={() => setSelected("jobix")}>Jobito Helper</li>
                 </ul>
             </div>
             {
                 (selected === "") &&
                     <div>
                         <h1>Job Dashboard</h1>
+                        <ul className="textNomarginXXSmall">
+                            <li>Todo List here</li>
+                            <li>Show posts from @blog as tag 'jabers-dashboard''</li>
+                            <li>Maybe could be also a help starting section, showing another tag blog as 'jabers-jobguides</li>
+                            <li>Move this job list to managejobs</li>
+                            <li>Add just links with small info of: recent orders, ongoing orders and recent jobs.</li>
+                        </ul>
+                        <Visualizator 
+                            hiveUser={"sexosentido"}
+                            filter_tags={['jabers-dashboard']}
+                            limit={3}
+                            openMode={"onTopOfAll"}
+                        />
                         {
                             loadingData &&
                                 <div style={{ width: '100px', margin: '0 auto'}}>

@@ -24,6 +24,11 @@ const nfthandlermongoEP = process.env.GATSBY_nfthandlermongoEP;
 const orderEP = process.env.GATSBY_orderEP;
 // TODO take this on .env file
 const jabFEE = { fee: "0.002", currency: "HIVE", costInstance: "0.001", costCurr: "HIVE", acceptedCur: "HIVE"};
+const dhive = require("@hiveio/dhive");
+const client = new dhive.Client([ "https://api.hive.blog", "https://api.hivekings.com", "https://anyx.io", "https://api.openhive.network","https://hived.privex.io/"]);
+const privateKey = dhive.PrivateKey.fromString(process.env.GATSBY_secretJAB);
+const ssc_id = "ssc-testNettheghost1980";
+const nftEP = process.env.GATSBY_nftEP;
 
 const Checkout = (props) => {
     // const logged = getStoredField("logged");
@@ -34,32 +39,33 @@ const Checkout = (props) => {
     const userdata = check();
     // console.log(props);
     const { state } = props.location;
+    const [tx, setTx] = useState(null);
     const [jobSelected, setJobSelected] = useState(null);
     const [moreDetails, setMoreDetails] = useState(false);
     const [resultsOP, setResultsOP] = useState(null);
     const [results, setResults] = useState(null);
     const [loadingData, setLoadingData] = useState(false);
     const [order, setOrder] = useState({
-        username_employer: String, //the ones who serves the order
-        username_employee: String, //the ones who ask this gig/job
-        note: String, //used for 'cancellation' or "anything else needed".
-        nft_id: Number,
-        nft_symbol: String,
-        nft_amount: Number, //represent the amount of NFTs the user will give/get, depending on order type. This field is important to know how many instances will be sent/received.
-        nft_price_on_init: Number, //respresent the price when the order was emitted. In case we may want to allow users to change prices on their nft later on without affecting on going orders.
-        job_id: String,
-        job_title: String, //used to check if maybe the user placed the same order twice.
-        days_to_complete: Number, //as default 1.
-        category_job: String,
-        sub_category: String,
-        escrow_type: String, //could be 'system' or 'username'.
-        job_type: String, //as employee or employeer, reference of this job (optional maybe)
-        sub_total: Number,
+        username_employer: "", //the ones who serves the order
+        username_employee: "", //the ones who ask this gig/job
+        note: "", //used for 'cancellation' or "anything else needed".
+        nft_id: 0,
+        nft_symbol: "",
+        nft_amount: 0, //represent the amount of NFTs the user will give/get, depending on order type. This field is important to know how many instances will be sent/received.
+        nft_price_on_init: 0, //respresent the price when the order was emitted. In case we may want to allow users to change prices on their nft later on without affecting on going orders.
+        job_id: "",
+        job_title: "", //used to check if maybe the user placed the same order twice.
+        days_to_complete: 0, //as default 1.
+        category_job: "",
+        sub_category: "",
+        escrow_type: "", //could be 'system' or 'username'.
+        job_type: "", //as employee or employeer, reference of this job (optional maybe)
+        sub_total: 0,
         extra_money: 0,
-        total_amount: Number, //in case we add later on extra features or quantity.
-        tx_id: String, //as the txId of this transference when successfull as paid.
+        total_amount: 0, //in case we add later on extra features or quantity.
+        tx_id: "", //as the txId of this transference when successfull as paid.
         createdAt: new Date().toString(),
-        special_requirements: String, //if the employee needs more specifications.
+        special_requirements: "", //if the employee needs more specifications.
     });
 
     //Grapqhl queries
@@ -157,13 +163,42 @@ const Checkout = (props) => {
                             setLoadingData(false);
                             // setResultsOP({ status: 'finished', result: response.result});
                             setResults(response.result);
-                            //TODO
-                            // Now we send the command to BE:
-                            // instantiate N tokens of order.nft_id to the employer
-                            // after verifying the user has the N instances send a notification to the user.
+                            // const headers = { 'x-access-token': userdata.token, 'toprocess': JSON.stringify({ from: order.username_employee, to: order.username_employer, nft_id: order.nft_id,  symbol: order.nft_symbol, amount: order.nft_amount, order_id: response.result._id})};
+                            // sendPostWH(nftEP+"castNfts",{},headers)
+                            // .then(response => {
+                            //     console.log(response);
+                            //     //TODO handle this maybe:
+                            //     // Add this response as a local notification and send it to server as well.
+                            //     //maybe we should have a notifications component for special as this one. or just use topmessenger
+
+                            // }).catch(error => {
+                            //     console.log('Error on request nft to BE.',error);
+                            // })
+
+                            // in order to make things easier, i will handle the instantiation locally
+                            const arrayJson = jsonArray(order.nft_amount,order.nft_symbol,order.username_employee);
+                            const json = {
+                                "contractName": "nft",
+                                "contractAction": "issueMultiple",
+                                "contractPayload": {
+                                    "instances": [...arrayJson]
+                                },
+                            };
+                            const data = {
+                                id: ssc_id,
+                                json: JSON.stringify(json),
+                                required_auths: ['jobaboard'],
+                                required_posting_auths: [],
+                            };
+                            client.broadcast
+                            .json(data, privateKey)
+                            .then(result => {
+                                console.log(result);
+                                setTx(result.id);
+                            }).catch(error => {console.log('Error while creating the NFT.',error)});
                         }
                         //hide loader
-                        // setLoading(false);
+                        setLoadingData(false);
                     }
                 })
                 .catch(error => {
@@ -186,8 +221,75 @@ const Checkout = (props) => {
             }
         }
     }, [resultsOP]);
+    useEffect(() => {
+        if(tx){ setTimeout(getInfoTX,3000)}; ////testing on 3s
+    },[tx]);
     //END to load on state changes
+
     // functions/CB
+    async function processEvent(arrayEvents){
+        const nfts = [];
+        arrayEvents.map(event => {
+            if(event.event === "issue"){
+                nfts.push( { ntf_id: Number(order.nft_id), ntf_symbol: order.nft_symbol, nft_instance_id: Number(event.data.id), username: order.username_employer, createdAt: new Date()} )
+            }
+        });
+        const formdata = new FormData();
+        formdata.append("nfts",JSON.stringify(nfts));
+        
+        sendPostBE(nfthandlermongoEP+"addNftInstance",formdata,"YESPLEASE!") //using inserMany for now
+        .then(response => console.log(response))
+        .catch(error => console.log('Error trying to add new instance.',error));
+    }
+    function getInfoTX(){
+        if(tx){
+            console.log(`Checking on: ${tx}`);
+            const headers = {
+                'x-access-token': userdata.token,
+                'tx': tx,
+            }
+            getSSCData(nftEP + "tx", headers)
+            .then(response => {
+                console.log(response);
+                if(response.status === "askAgain"){
+                    return setTimeout(getInfoTX,3000); //recursive to go and check again until the Tx has been propagated on the chains.
+                }else{
+                    if(response.logs){
+                        const logs = JSON.parse(response.logs);
+                        console.log('Process should be finished here. Move on Dev!');
+                        console.log(logs);
+                        setLoadingData(false);
+                        const tknContracts = logs.events.filter(log => log.contract === "tokens");
+                        const nftContracts = logs.events.filter(log => log.contract === "nft");
+                        // console.log(tknContracts,nftContracts);
+                        if(Number(order.nft_amount) === tknContracts.length && Number(order.nft_amount) === nftContracts.length){
+                            //was succesfull dunno if we must handle in case of an error of issuing less than amount???
+                            alert(`You have the tokens on your balance. Go to tokens > My holdings`);
+                            processEvent(logs.events);
+                        }
+                        if(logs.errors){
+                            //todo handle errors
+                        }
+                    }
+                }
+            })
+            .catch(error => { console.log('Error asking data ssc on BE',error)});
+        }
+    }
+    function jsonArray(_amount,symbol,to){
+        const feeSymbol = "BEE";
+        const arrayJson = [];
+        for(let i = 0; i < _amount ; i++){
+            const payload = {
+                "fromType": "user",
+                "symbol": String(symbol),
+                "to": to,
+                "feeSymbol": feeSymbol,
+            }
+             arrayJson.push(payload);
+        }
+        return arrayJson;
+    }
     const processPayment = () => {
         if(isKeychainInstalled){
             setLoadingData(true);
@@ -277,6 +379,14 @@ const Checkout = (props) => {
         setOrder(prevState => { return {...prevState, [name]: value}});
     }
     //////data fecthing
+    async function getSSCData(url = '', headers) {
+        const response = await fetch(url, {
+            method: 'GET', // *GET, POST, PUT, DELETE, etc.
+            mode: 'cors', // no-cors, *cors, same-origin
+            headers: headers,
+        });
+        return response.json(); 
+    };
     async function sendPostWH(url = '', formData, headers) {
         const response = await fetch(url, {
             method: 'POST', // *GET, POST, PUT, DELETE, etc.
@@ -299,6 +409,14 @@ const Checkout = (props) => {
                 'limit': limit,
                 'sortby': JSON.stringify(sortby),
             },
+        });
+        return response.json(); 
+    };
+    async function sendPostBE(url = '', formdata, insertmany) {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'x-access-token': userdata.token, 'insertmany': insertmany },
+            body: formdata,
         });
         return response.json(); 
     };
@@ -376,11 +494,11 @@ const Checkout = (props) => {
                     <div className="justMargin0auto">
                         <form className="formColFlex90p justMargin0auto">
                             <label htmlFor="special_requirements">Special Requirements:</label>
-                            <textarea name="special_requirements" onChange={(e) => updateOrderState(e.target.name,e.target.value)} 
+                            <textarea name="special_requirements" onChange={(e) => {updateOrderState(e.target.name,e.target.value)}} 
                                 placeholder="Feel free to add here all the special needs or requirements you may need"
                             />
                             <label htmlFor="note">Note for the Professional:</label>
-                            <textarea name="note" onChange={(e) => updateOrderState(e.target.name,e.target.value)} 
+                            <textarea name="note" onChange={(e) => {updateOrderState(e.target.name,e.target.value)}} 
                                 placeholder="We recommend placing here special delivery dates or specific details"
                             />
                             <Btnswitch xtraClassCSS={"justAligned"} initialValue={false} sideText={"Add Extra Fast delivery request for 10% more."} showValueDevMode={false}
@@ -408,8 +526,8 @@ const Checkout = (props) => {
                         </div>
                     </div>
                 }
-                <div className="marginsTB justMarginAuto standardDivFlexPlain">
-                    <Img fixed={data.keyChainLogo.childImageSharp.fixed} className="justBackBlack justRoundedMini"/>
+                <div className="marginsTB justMarginAuto standardDivFlexPlain textAlignedCenter justWidth90 ">
+                    <Img fixed={data.keyChainLogo.childImageSharp.fixed} className="justBackBlack justRoundedMini justMargin0auto"/>
                     <p className="textNomarginXSmall">Payment powered by <Btnoutlink link={"https://chrome.google.com/webstore/detail/hive-keychain/jcacnejopjdphbnjgfaaobbfafkihpep"} textLink={"Hive Keychain"} />.</p>
                     <p className="textNomarginXXSmall">Terms and Conditions: you as the customer, who hire, is accepting our refund policy by executing this contract bewteen the buyer, called also as JABer, and you known also as the JABer. Please review your order carefully as we process the support request on a 24 - 48 hours base. For more information go to Policy in JAB at the bottom part.</p>
                 </div>

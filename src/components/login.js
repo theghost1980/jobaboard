@@ -235,6 +235,15 @@ const Login = (props) => {
         loginUser();
     };
 
+    const actionByEnter = (event) => {
+        if(event.key === 'Enter' || event.keyCode === 13){
+            if(account){
+                setLogginIn(true);
+                loginUser();
+            }
+        }
+    }
+
     return (
         <div className={`loginCont ${logginIn ? 'addAutoW': null }`} id="loginContainer">
                 {
@@ -245,7 +254,8 @@ const Login = (props) => {
                             <div>
                                 <h2>Log in Options</h2>
                                 <input type="text" id="username" placeholder="@username here please"
-                                onChange={(event) => setAccount(event.target.value)}
+                                    onChange={(event) => setAccount(event.target.value)}
+                                    onKeyDown={actionByEnter}
                                 />
                                 <div id="btnLogin" onClick={loginByClick}>
                                     <Img fixed={data.keychainLogo.childImageSharp.fixed} className="keyChainImg" />

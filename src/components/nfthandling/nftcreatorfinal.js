@@ -4,6 +4,7 @@ import Loader from '../../components/loader';
 import Btnswitch from '../../components/btns/btnswitch';
 //hiveio/keychain
 import {keychain, isKeychainInstalled, hasKeychainBeenUsed} from '@hiveio/keychain';
+import Btninfo from '../btns/btninfo';
 
 //constants
 const dhive = require("@hiveio/dhive");
@@ -31,6 +32,7 @@ const ssc_test_id = "ssc-testNettheghost1980";
 //using main live BE
 const nfthandlermongoEP = process.env.GATSBY_nfthandlermongoEP;
 const nftEP = process.env.GATSBY_nftEP;
+const userEP = process.env.GATSBY_userEP;
 // end using main live BE
 
 const Nftcreatorfinal = (props) => {
@@ -48,6 +50,7 @@ const Nftcreatorfinal = (props) => {
     const formRef = useRef();
     const [loadingData, setLoadingData] = useState(false);
     const [logTx, setLogTx] = useState(null);
+    const [dataLogs, setDataLogs] = useState(null);
     const userdata = check();
 
     //functions/CB//////
@@ -60,14 +63,14 @@ const Nftcreatorfinal = (props) => {
         });
         return response.json(); 
     };
-    async function sendPostBE(url = '', data, id) {
+    async function sendPostBE(url = '', formdata, id) {
         const response = await fetch(url, {
             method: 'POST',
             headers: {
                 'x-access-token': userdata.token,
                 'id': id
             },
-            body: data,
+            body: formdata,
         });
         return response.json(); 
     };
@@ -82,6 +85,13 @@ const Nftcreatorfinal = (props) => {
         });
         return response.json(); 
     };
+    async function sendPostPlain(url = '', headers) {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: headers,
+        });
+        return response.json(); 
+    };
     function sendNFTBE(){
         const formData = new FormData();
         // the basic data we really need, all the rest will be handled directly with hive ssc.
@@ -92,7 +102,7 @@ const Nftcreatorfinal = (props) => {
         formData.append("account", userdata.username);
         formData.append("symbol",nft.symbol);
         formData.append("createdAt", new Date);
-        formData.append("price", nft.price);
+        formData.append("price", Number(nft.price));
         formData.append("issuer", userdata.username);
         formData.append("maxSupply", nft.maxSupply);
         formData.append("name",nft.name);
@@ -128,14 +138,14 @@ const Nftcreatorfinal = (props) => {
                 if(response.status === "askAgain"){
                     return setTimeout(getInfoTX,3000);
                 }else{
-                    if(response.logs){
+                    //check the logs
+                    if(response.logs && response.logs !== "{}"){
                         const logs = JSON.parse(response.logs);
                         console.log(logs);
-                        //check the logs
                         if(logs.events && logs.events.length > 0){ //means tokens submitted successfully so we can check
                             // addStateOP({ state: 'Sucess Token Created.', data: { log: JSON.stringify(logTx.events)} });
                             if(tx.step === 1){
-                                findNft({ issuer: userdata.username, symbol: nft.symbol});
+                                findNft({ issuer: 'jobaboard', symbol: nft.symbol});
                             }else if(tx.step === 2){
                                 if(logs.events.length === 2){
                                     //verify the nft contract it says transfer
@@ -145,26 +155,24 @@ const Nftcreatorfinal = (props) => {
                                     if(found.length === 1){
                                         //now we are sure, just check on the data, jic
                                         console.log(`Success on Issuing from: ${found[0].data.from} to: ${found[0].data.to}\nid: ${found[0].data.id}, symbol:${found[0].data.symbol}`);
-                                        console.log('Final Step::::todo');
-                                        //testing to add the new Nft as this one is the instance itself so we can add it to mongoDB
-                                        sendNFTBE();
-
-                                        updateOnSuccess();
-                                        // here as we have instantiated we update the circulating supply to 1
-                                        // const query = {
-                                        //     circulatingSupply: 1,
-                                        //     supply: 1,
-                                        // }
-                                        // console.log(`About to send:${JSON.stringify(query)} id:${newlyCreatedNFT.nft_id}`);
-                                        // sendPostBEJH(nfthandlermongoEP+"updateNFTfield",query, newlyCreatedNFT.nft_id)
+                                        //here as the user has the instance we add it to its user.nfts array
+                                        const nftID = found[0].data.id;
+                                        const user_nft = { ntf_id: nft.id, ntf_symbol: nft.symbol, nft_instance_id: nftID,}
+                                        setDataLogs(user_nft);
+                                        // const headers = { 'x-access-token': userdata.token, 'query': JSON.stringify({ $push: { nfts: user_nft } }), 'toupdateon': null};
+                                        // sendPostPlain(userEP+"updateUserField", headers)
                                         // .then(response => {
-                                        //     console.log(response); //status, result
-                                        //     // if(response.status === "success"){
-                                        //     //     setNewlyCreatedNFT(response.result);
-                                        //     // }
-                                        // }).catch(error => console.log('Error updating field on NFT to DB.',error));
-                                        //clear states;
-                                        clearStates()
+                                        //     console.log('User updated with a new nft in user.nfts, please check!');
+                                        //     console.log(response);
+                                        // }).catch(error => {
+                                        //     console.log('Error updating nfts field on user!',error);
+                                        // });
+                                        //Here we must transferOwnership to user and add a 3rd step.
+                                        transferONft(userdata.username,nft.symbol);
+                                        //testing to add the new Nft as this one is the instance itself so we can add it to mongoDB
+                                        // sendNFTBE();
+                                        // updateOnSuccess();
+                                        // clearStates()
                                     }
                                 }
                             }
@@ -193,7 +201,7 @@ const Nftcreatorfinal = (props) => {
                                 client.broadcast.transfer(data,privateKey)
                                 .then(result => {
                                     console.log(result);
-                                    alert(`Look like someone took already that NFT symbol, we have sent the funds back to your wallet. Please check after 2 minutes.\nTake note of this txid:${result.id}`);
+                                    alert(`Looks like someone took already that NFT symbol, we have sent the funds back to your wallet. Please check after 2 minutes.\nTake note of this txid:${result.id}`);
                                     //here we must reload component to prevent any issue or stealing from user.
                                     // TODO handle how to reload this as a component.
                                     // maybe a key as state??? as we did on the picture loader???
@@ -206,6 +214,19 @@ const Nftcreatorfinal = (props) => {
                                 });
                             }
                         }
+                    }else{
+                        console.log('No logs received!!');
+                        if(tx.step === 3){
+                            console.log('Step 3!!');
+                            if(response.action === "transferOwnership"){
+                                //we add the new instance on mongoDB
+                                sendPostNewInstance();
+                                alert('You have a new NFT!'); 
+                                sendNFTBE();
+                                updateOnSuccess();
+                                clearStates()
+                            }
+                        }
                     }
                 }
             })
@@ -214,6 +235,57 @@ const Nftcreatorfinal = (props) => {
                 clearStates()
             });
         }
+    }
+    async function sendPostNewInstance(){
+        if(dataLogs){
+            // username: String,
+            // ntf_id: Number, 
+            // ntf_symbol: String, 
+            // nft_instance_id: Number,
+            // burned: {
+            //     type: Boolean,
+            //     default: false,
+            // }, 
+            // price: Number, //to be set/updated first on hive, then here. Ideally to handle this only on marketPlace.
+            // priceSymbol: String, // defined by system or user, we will see later on.
+            // on_sale: {
+            //     type: Boolean,
+            //     default: false,
+            // },
+            // createdAt: Date,
+            // updatedAt: Date,
+            // { ntf_id: nft.id, ntf_symbol: nft.symbol, nft_instance_id: nftID,}
+            const formdata = new FormData();
+            formdata.append("username",userdata.username);
+            formdata.append("ntf_id", Number(dataLogs.ntf_id));
+            formdata.append("ntf_symbol",dataLogs.ntf_symbol);
+            formdata.append("nft_instance_id",Number(dataLogs.nft_instance_id));
+            formdata.append("createdAt",new Date());
+            sendPostBE(nfthandlermongoEP+"addNftInstance",formdata,0)
+            .then(response => console.log(response))
+            .catch(error => console.log('Error trying to add new instance.',error));
+        }else{
+            console.log('Fatal error. The new instance data is not been set! DEV Check!');
+        }
+    }
+    function transferONft(to,nft_symbol){
+        const json = [{
+                "contractName": "nft",
+                "contractAction": "transferOwnership",
+                "contractPayload": {
+                    "symbol": nft_symbol,
+                    "to": to
+                }
+        }];
+        const data = { id: ssc_test_id, json: JSON.stringify(json), required_auths: ['jobaboard'], required_posting_auths: [],};
+        client.broadcast.json(data, privateKey)
+        .then(result => {
+            console.log(result);
+            const tx = result.id;
+            setTx({txid: tx, step: 3});
+        }).catch(error => {
+            console.log('Error while transfering ownership.',error);
+        });
     }
     const changeInput = (event) => {
         //TODO validations to be done on the react-form-handler
@@ -348,106 +420,185 @@ const Nftcreatorfinal = (props) => {
     }
     //END handing to instantiate
 
-    // handling for createNFT
-    const createNFT = (event) => {
-        // testing validations for now so
+    //new method as we will broadcast witj jab
+    const createNFTJAB = (event) => {
         event.preventDefault();
-        // VERY important TODO check on validations and test them
         if(isKeychainInstalled){
             if(!sameSymbol && nft.symbol !== ""){
                 setDisableDiv(true);
                 setLoadingData(true);
-                // addStateOP({ state: 'Init NFT Creation', data: JSON.stringify(nft)});
                 const str = `\nSymbol: ${nft.symbol}\nName: ${nft.name}\nOrganization: ${nft.orgName}\nProduct Name: ${nft.productName}\nUrl: ${nft.url}\nMax Supply: ${nft.maxSupply === "" ? 'Unlimited': nft.maxSupply}\nPrice for each of your tokens:${nft.price} ${jabFEE.acceptedCur}\nAbout to create:${nft.amountInstances} tokens.`
                 const answer = window.confirm(`Please check the current features of your token:${str}\nDo you agree to proceed?`);
                 if(!answer){ 
-                    // addStateOP({ state: 'User choose to not continue OP.', data: {} });
+                    // TODO: addStateOP({ state: 'User choosed not to continue OP.', data: {} });
                     setDisableDiv(false);
                     setLoadingData(false);
                     return console.log('User Cancelled NFT creation');
-                }
-                //we continue with transfer and so on...
-                // TODO: where to handle the mongoDB formdata? now or as soon as we verify from hive server as TxId done???
-                // TODO instead of just doing a transfer.
-                // let's exectute transfer + custom json at once and test this out to modify the logic.
-                // So in memo we will store the following:
-                // Important Note: placeing userdata.username as authorizedIssuingAccounts even when he is the owner is a must.
-                const authorizedIssuingAccounts = userdata.username === "jobaboard" ? [ "jobaboard"] : [ "jobaboard", userdata.username ];
-                const memo = nft.maxSupply !== "" ? {
-                    "id": ssc_test_id,
-                    "json": {
-                        "contractName": "nft",
-                        "contractAction": "create",
-                        "contractPayload": {
-                            "symbol": nft.symbol,
-                            "name": nft.name,
-                            "orgName": nft.orgName,
-                            "productName": nft.productName,
-                            "url": nft.url,
-                            "maxSupply": nft.maxSupply,
-                            "authorizedIssuingAccounts": authorizedIssuingAccounts,
-                        }
-                    },
-                } : { "id": ssc_test_id, "json": {"contractName": "nft","contractAction": "create","contractPayload": {"symbol": nft.symbol,"name": nft.name,"orgName": nft.orgName,"productName": nft.productName,"url": nft.url,"authorizedIssuingAccounts": [ "jobaboard", userdata.username ],}},}
-                // addStateOP({ state: 'Waiting for transfer', data: {username: userdata.username, amount: nft.totalAmountPay, currency: jabFEE.acceptedCur, note: JSON.stringify(memo)} });
-                window.hive_keychain.requestTransfer(userdata.username, "jobaboard", nft.totalAmountPay.toString(), JSON.stringify(memo), jabFEE.acceptedCur, function(result){
-                    const { message, success, error } = result;
-                    console.log(result);
-                    if(!success){
-                        if(error !== "user_cancel"){
-                            setDisableDiv(false);
-                            setLoadingData(false);
-                            setMoreDetails(false);
-                            const { error, cause, data } = result.error;
-                            if( cause.name && cause.name === "RPCError"){
-                                // addStateOP({ state: 'Fatal Error', data: { error: JSON.stringify(result.error)} });
-                                //TODO: send this data to OPLOGGER.
-                                // OPLOGGER must be a component that:
-                                // - receives the log/op/errors as props
-                                // - test connectivity on BE(we must code an EP as /PING on public maybe || adminEP) to get "OK"
-                                // - send the log to mongoDB.
-                                // - it may has additional features to activate on BE as:
-                                //      - send log to support or send special message/email to admins
-                                // - receives the log id + success msg from BE
+                }else{//we ask for transfer
+                    const memo = `Creating my NFT on JAB Symbol:${nft.symbol} on ${new Date().toString()}`
+                    window.hive_keychain.requestTransfer(userdata.username, "jobaboard", nft.totalAmountPay.toString(), JSON.stringify(memo), jabFEE.acceptedCur, function(result){
+                        const { message, success, error } = result;
+                        console.log(result);
+                        if(!success){
+                            if(error !== "user_cancel"){
+                                setDisableDiv(false);
+                                setLoadingData(false);
+                                setMoreDetails(false);
+                                const { error, cause, data } = result.error;
+                                if( cause.name && cause.name === "RPCError"){
+                                    // addStateOP({ state: 'Fatal Error', data: { error: JSON.stringify(result.error)} });
+                                    //TODO: handle this shit
+                                }
+                                return console.log('Error while transfering', message);
+                            }else if(error === "user_cancel"){
+                                // addStateOP({ state: 'User cancelled before transfer.', data: { date: new Date().toString()} }); 
+                                console.log('User click on cancel!');
+                                setDisableDiv(false);
+                                setLoadingData(false);
+                                setMoreDetails(false);
                             }
-                            // TODO send the log as well and register the event.
-                            // TODO: ALL this process must finish presenting to user
-                            // - A msg that "His/her funds are safe as we have registered it" & "Take note of the system log, in case support contacts you during the next 24 hrs."
-                            // - A final msg as "You may continue doing the same operation and we will send your money back as soon as possible or contact support if any available".
-                            return console.log('Error while transfering', message);
-                        }else if(error === "user_cancel"){
-                            // addStateOP({ state: 'User cancelled before transfer.', data: { date: new Date().toString()} }); 
-                            console.log('User click on cancel!');
-                            setDisableDiv(false);
-                            setLoadingData(false);
-                            setMoreDetails(false);
-                        }
-                    }else if (success){
-                        const { type, memo, amount, currency, username } = result.data;
-                        if( type === "transfer" && 
-                            amount === nft.totalAmountPay.toString() && 
-                            memo === memo 
-                            && username === userdata.username && currency === jabFEE.costCurr){ 
-                        }
-                        // addStateOP({ state: 'Sucess transferred funds', data: {} });
-                        console.log('Executed successfully. Now check to continue dev work!!!',result.result.id);
-                        setTx({ txid: result.result.id, step: 1});
-                    };
-                });
+                        }else if (success){
+                            const { type, memo, amount, currency, username } = result.data;
+                            if( type === "transfer" && 
+                                amount === nft.totalAmountPay.toString() && 
+                                memo === memo 
+                                && username === userdata.username && currency === jabFEE.costCurr){ 
+                            }
+                            // addStateOP({ state: 'Sucess transferred funds', data: {} });
+                            //now we broadcast the NFthing
+                            const json = {
+                                "contractName": "nft",
+                                "contractAction": "create",
+                                "contractPayload": {
+                                    "symbol": nft.symbol,
+                                    "name": nft.name,
+                                    "orgName": nft.orgName,
+                                    "productName": nft.productName,
+                                    "url": nft.url,
+                                    "maxSupply": nft.maxSupply,
+                                    "authorizedIssuingAccounts": [ "jobaboard", userdata.username ],
+                                }
+                            }; 
+                            const data = {
+                                id: ssc_test_id,
+                                json: JSON.stringify(json),
+                                required_auths: ['jobaboard'],
+                                required_posting_auths: [],
+                            };
+                            client.broadcast
+                            .json(data, privateKey)
+                            .then(result => {
+                                console.log(result);
+                                setTx({ txid: result.id, step: 1});
+                            }).catch(error => {console.log('Error while creating the NFT.',error)});
+                        };
+                    });
+                }
             }
         }else{
-            // addStateOP({ state: 'Hive KeyChain not ready on browser!', data: { date: new Date().toString()} });
-            alert('To proceed you must install Hive KeyChain and enable it on your browser, please follow the next steps.');
-            setDisableDiv(false);
-            setLoadingData(false);
-            setMoreDetails(false);
-            // TODO show next steps.
-            // This may be a component as well. We could call it: stepper. So we may pass:
-            // Video, image src and so on to guide the user to a specific action
-            // it could be stored in a dictionary.
-        }
-    }
-    // END handling for createNFT
+            alert('If Hive Key Chain is installed, click on its icon on the browser bar to active it, if not installed check the link.');
+        };
+    };
+    // OLD method handling for createNFT
+    // const createNFT = (event) => {
+    //     // testing validations for now so
+    //     event.preventDefault();
+    //     // VERY important TODO check on validations and test them
+    //     if(isKeychainInstalled){
+    //         if(!sameSymbol && nft.symbol !== ""){
+    //             setDisableDiv(true);
+    //             setLoadingData(true);
+    //             // addStateOP({ state: 'Init NFT Creation', data: JSON.stringify(nft)});
+    //             const str = `\nSymbol: ${nft.symbol}\nName: ${nft.name}\nOrganization: ${nft.orgName}\nProduct Name: ${nft.productName}\nUrl: ${nft.url}\nMax Supply: ${nft.maxSupply === "" ? 'Unlimited': nft.maxSupply}\nPrice for each of your tokens:${nft.price} ${jabFEE.acceptedCur}\nAbout to create:${nft.amountInstances} tokens.`
+    //             const answer = window.confirm(`Please check the current features of your token:${str}\nDo you agree to proceed?`);
+    //             if(!answer){ 
+    //                 // addStateOP({ state: 'User choose to not continue OP.', data: {} });
+    //                 setDisableDiv(false);
+    //                 setLoadingData(false);
+    //                 return console.log('User Cancelled NFT creation');
+    //             }
+    //             //we continue with transfer and so on...
+    //             // TODO: where to handle the mongoDB formdata? now or as soon as we verify from hive server as TxId done???
+    //             // TODO instead of just doing a transfer.
+    //             // let's exectute transfer + custom json at once and test this out to modify the logic.
+    //             // So in memo we will store the following:
+    //             // Important Note: placeing userdata.username as authorizedIssuingAccounts even when he is the owner is a must.
+    //             const authorizedIssuingAccounts = userdata.username === "jobaboard" ? [ "jobaboard"] : [ "jobaboard", userdata.username ];
+    //             const memo = nft.maxSupply !== "" ? {
+    //                 "id": ssc_test_id,
+    //                 "json": {
+    //                     "contractName": "nft",
+    //                     "contractAction": "create",
+    //                     "contractPayload": {
+    //                         "symbol": nft.symbol,
+    //                         "name": nft.name,
+    //                         "orgName": nft.orgName,
+    //                         "productName": nft.productName,
+    //                         "url": nft.url,
+    //                         "maxSupply": nft.maxSupply,
+    //                         "authorizedIssuingAccounts": authorizedIssuingAccounts,
+    //                     }
+    //                 },
+    //             } : { "id": ssc_test_id, "json": {"contractName": "nft","contractAction": "create","contractPayload": {"symbol": nft.symbol,"name": nft.name,"orgName": nft.orgName,"productName": nft.productName,"url": nft.url,"authorizedIssuingAccounts": [ "jobaboard", userdata.username ],}},}
+    //             // addStateOP({ state: 'Waiting for transfer', data: {username: userdata.username, amount: nft.totalAmountPay, currency: jabFEE.acceptedCur, note: JSON.stringify(memo)} });
+    //             window.hive_keychain.requestTransfer(userdata.username, "jobaboard", nft.totalAmountPay.toString(), JSON.stringify(memo), jabFEE.acceptedCur, function(result){
+    //                 const { message, success, error } = result;
+    //                 console.log(result);
+    //                 if(!success){
+    //                     if(error !== "user_cancel"){
+    //                         setDisableDiv(false);
+    //                         setLoadingData(false);
+    //                         setMoreDetails(false);
+    //                         const { error, cause, data } = result.error;
+    //                         if( cause.name && cause.name === "RPCError"){
+    //                             // addStateOP({ state: 'Fatal Error', data: { error: JSON.stringify(result.error)} });
+    //                             //TODO: send this data to OPLOGGER.
+    //                             // OPLOGGER must be a component that:
+    //                             // - receives the log/op/errors as props
+    //                             // - test connectivity on BE(we must code an EP as /PING on public maybe || adminEP) to get "OK"
+    //                             // - send the log to mongoDB.
+    //                             // - it may has additional features to activate on BE as:
+    //                             //      - send log to support or send special message/email to admins
+    //                             // - receives the log id + success msg from BE
+    //                         }
+    //                         // TODO send the log as well and register the event.
+    //                         // TODO: ALL this process must finish presenting to user
+    //                         // - A msg that "His/her funds are safe as we have registered it" & "Take note of the system log, in case support contacts you during the next 24 hrs."
+    //                         // - A final msg as "You may continue doing the same operation and we will send your money back as soon as possible or contact support if any available".
+    //                         return console.log('Error while transfering', message);
+    //                     }else if(error === "user_cancel"){
+    //                         // addStateOP({ state: 'User cancelled before transfer.', data: { date: new Date().toString()} }); 
+    //                         console.log('User click on cancel!');
+    //                         setDisableDiv(false);
+    //                         setLoadingData(false);
+    //                         setMoreDetails(false);
+    //                     }
+    //                 }else if (success){
+    //                     const { type, memo, amount, currency, username } = result.data;
+    //                     if( type === "transfer" && 
+    //                         amount === nft.totalAmountPay.toString() && 
+    //                         memo === memo 
+    //                         && username === userdata.username && currency === jabFEE.costCurr){ 
+    //                     }
+    //                     // addStateOP({ state: 'Sucess transferred funds', data: {} });
+    //                     console.log('Executed successfully. Now check to continue dev work!!!',result.result.id);
+    //                     setTx({ txid: result.result.id, step: 1});
+    //                 };
+    //             });
+    //         }
+    //     }else{
+    //         // addStateOP({ state: 'Hive KeyChain not ready on browser!', data: { date: new Date().toString()} });
+    //         alert('To proceed you must install Hive KeyChain and enable it on your browser, please follow the next steps.');
+    //         setDisableDiv(false);
+    //         setLoadingData(false);
+    //         setMoreDetails(false);
+    //         // TODO show next steps.
+    //         // This may be a component as well. We could call it: stepper. So we may pass:
+    //         // Video, image src and so on to guide the user to a specific action
+    //         // it could be stored in a dictionary.
+    //     }
+    // }
+    // // END handling for createNFT
     //end functions/CB//
 
     //useeffects to load once///
@@ -506,17 +657,19 @@ const Nftcreatorfinal = (props) => {
                 <Btnswitch btnAction={(cen) => receivedFromSwitch(cen)} sideText={"Edit Details"} initialValue={false} showValueDevMode={true} />
                 <div>
                     {/* { errors.price && <span>Price, Must be a number with only dots.</span>} */}
-                    <form onSubmit={createNFT} ref={formRef}>
+                    <form onSubmit={createNFTJAB} ref={formRef}>
                         <div className="standardFormHor relativeDiv colorX">
                             <label htmlFor="symbol">Token's Symbol:</label>
                             <input name="symbol" type="text" onChange={changeInput} defaultValue={nft.symbol} 
                                 className={sameSymbol ? 'alertInput': null}
                                 required pattern="[A-Z]{1,10}" title="Uppercase letters only, max length of 10."
                             />
-                            <label htmlFor="price">Price:(on {jabFEE.acceptedCur})</label>
+                            <label htmlFor="price">
+                                Price:(on {jabFEE.acceptedCur}) <Btninfo msg={"This is the price on the NFT definition. You can sell it if you want. Also, later on you can set prices on each Nft you have separatly."} size={"mini"}/>
+                            </label>
                             <input name="price" type="text" defaultValue={nft.price.toString()} 
-                                onChange={(e)=> setValueNFT(e.target.name,Number(e.target.value))} 
-                                required pattern="[0-9,]{1,21}" title="Just numbers and commas please. between 1 and 9,999,999,999."
+                                onChange={(e)=> setValueNFT(e.target.name,e.target.value)} 
+                                required pattern="[0-9.]{1,21}" title="Just numbers and dot please. 21 number lenght."
                             />
                             {/* <span className="validity"></span> TODO */}
                         </div>

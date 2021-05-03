@@ -21,6 +21,13 @@ import Nftsender from '../nfthandling/nftsender';
 import Btninfo from '../btns/btninfo';
 import Btnoutlink from '../btns/btnoutlink';
 import Alerticon from '../icons/alerticon';
+import Nftburner from '../nfthandling/nftburner';
+import Btnswitch from '../btns/btnswitch';
+import Tokentabulator from '../nfthandling/subcomponents/tokentabulator';
+import Nftimporter from '../nfthandling/subcomponents/nftimporter';
+import Marketenabler from '../nfthandling/subcomponents/marketenabler';
+import Menuside from '../interactions/menuside';
+import Recordnator from '../interactions/recordnator';
 //testing SSCjs library
 // const SSC = require('sscjs');
 // const ssc = new SSC('http://185.130.45.130:5000/');
@@ -47,6 +54,7 @@ const amountArray = [
     {id: 'A-9', amount: 9},
     {id: 'A-10', amount: 10},
 ]
+const devMode = true;
 
 // IMportant TODO when creating the sale of a token.
 // 1. A user wants to a NFT.
@@ -70,7 +78,7 @@ const Tokensuser = () => {
     const [ownedTokens, setOwnedTokens] = useState([]);
     const [noowned, setNoowned] = useState(false);
     const [createToken, setCreateToken] = useState(false);
-    const [nfts, setNfts] = useState(null);
+    const [nfts, setNfts] = useState([]);
     const [existsNft, setExistsNft] = useState(false);
     const [loadingData, setLoadingData] = useState(true); //by default on init
     const [loadingInstances, setLoadingInstances] = useState(false);
@@ -90,13 +98,21 @@ const Tokensuser = () => {
     const [wantToInstantiate, setWantToInstantiate] = useState(false);
     const [amount, setAmount] = useState(0);
     const [showInstantiator, setShowInstantiator] = useState(false);
+    const [showImporter, setShowImporter] = useState(false);
     const [showEditor, setShowEditor] = useState(false);
     const [wantToEdit, setWantToEdit] = useState(false);
     const [wantToSend, setWantToSend] = useState(false);
+    const [wantToSell, setWantToSell] = useState(false);
     const [selectedFromHive, setselectedFromHive] = useState(null);
     const [showDangerZone, setShowDangerZone] = useState(false);
+    const [showMarketEnabler, setShowMarketEnabler] = useState(false);
     const [toEdit, setToEdit] = useState("");
     const [authEditingAcc, setAuthEditingAcc] = useState(null);
+    const [showIconsHoldings, setShowIconsHoldings] = useState(false);
+    const [fireUpdateNfts, setFireUpdateNfts] = useState(false);
+    const [fireUpdateInstances, setFireUpdateInstances] = useState(false);
+    const [selectedNft_Instance, setSelectedNft_Instance] = useState(null);
+    const [showNftDefinition, setShowNftDefinition] = useState(false);
     //init forms-hooks
     const { register, handleSubmit, errors } = useForm();
     // on load
@@ -105,8 +121,9 @@ const Tokensuser = () => {
 
     // to load once on first render
     useEffect(() => {
-        updateNFTs();
-        updateHoldings();
+        updateAll();
+        // updateHoldings();
+        // getUserField({ nfts: 1 },null);
     }, []);
     // END to load once on first render
 
@@ -145,32 +162,71 @@ const Tokensuser = () => {
                 setLoadingData(false);
             });
         }
-    }, [selected])
+    }, [selected]);
     useEffect(() => {
         if(tx){
             //testing on 3s
             setTimeout(getInfoTX,3000);
         }
     }, [tx]);
+    // useEffect(() => {
+    //     if(nfts){
+    //         console.log(nfts);
+    //     }
+    // },[nfts])
     // end to execute on each set
 
     // functions/CB
     // function addIntoHoldings(value){
     //     setMyHoldings(prevState => [ ...prevState, value]);
     // }
+    function updateAll(){
+        updateNFTs();
+        updateInstances();
+        updateHiveBalance();
+    }
+    function updateHiveBalance(){
+        setLoadingData(true);
+        client.database.getAccounts([userdata.username])
+        .then(result => {
+            console.log(result);
+            if(result.length > 0 && result[0].balance){
+                const hives = Number(result[0].balance.split(' HIVE')[0]).toFixed(3);
+                if(hives > 1){
+                    setCanCreate(true);
+                    setHive(hives);
+                }else{
+                    setCanCreate(false);
+                    setHive("0.00");
+                }
+                setLoadingData(false);
+            }
+        })
+        .catch(error => { console.log('Error while querying user on DHIVE.',error)});
+    }
+    function updateInstances(){ //get all instances on mongoDB
+        const query = { username: userdata.username };
+        sendGETBEJustH(nfthandlermongoEP+"getNFTInstancesQuery",query,0, { symbol: 1 })
+        .then(response => {
+            console.log(response);
+            setMyHoldings(response.result);
+            setLoadingData(false);
+        })
+        .catch(error => console.log('Error getting data BE.',error));
+    }
     function getInfoTX(){
         if(tx){
             getSSCDataTX(nftEP + "tx", tx)
             .then(response => {
-                console.log(response);
+                // console.log(response);
                 if(response.status === "askAgain"){
                     return setTimeout(getInfoTX,3000);
                 }else{
                     //{"events":[{"contract":"nft","event":"burn","data":{"account":"theghost1980","ownedBy":"u","unlockedTokens":{},"unlockedNfts":[],"symbol":"APII","id":"1"}}]}
-                    console.log(response);
+                    // console.log(response);
                     if(response.logs){
                         const logs = JSON.parse(response.logs);
-                        console.log(logs.events);
+                        // console.log(logs.events);
                         if(logs.events.length === 1 && logs.events[0].event === "burn"){
                             //burned. show message to user
                             setWantToBurn(false);
@@ -194,27 +250,31 @@ const Tokensuser = () => {
         console.log('Updating NFTs');
         updateNFTs();
     }
-    // const getNftAuthAcc = () => {
-
-    // }
-    function updateHoldings(){
-        //we must check on holding so we can bring all the tokens he holds.
+    function getUserField(field = {},storeTo){
         const headers = { 
             'x-access-token': userdata.token, 
-            'query': JSON.stringify({ holding: 1 }),
+            'query': JSON.stringify(field), //{ holding: 1}
             'tolookup': null,
         }; //as if you need to lookup for user just fill the header tolookup
-        getDataWH(userEP+"jabUserField",headers).then(response => {
+        getDataWH(userEP+"jabUserField",headers)
+        .then(response => {
             console.log(response);
+        }).catch(error => console.log(`Error getting ${field} for user on BE.`,error));
+    }
+    function updateHoldings(){
+        //we must check on holding so we can bring all the tokens he holds.
+        const headers = { 'x-access-token': userdata.token, 'query': JSON.stringify({ holding: 1 }),'tolookup': null, }; //as if you need to lookup for user just fill the header tolookup
+        getDataWH(userEP+"jabUserField",headers).then(response => {
+            // console.log(response);
             if(response.status === "sucess" && response.result.holding.length > 0){
                 //now search on the info of this nft on mongo.
                 // testing the in operator query = { quantity: { $in: [20, 50] } } // i.e { symbol: { $in: [..._holding] } }
                 const _holding = response.result.holding;
-                console.log(`Searching on:${JSON.stringify(_holding)} BE for ${userdata.username}`);
+                // console.log(`Searching on:${JSON.stringify(_holding)} BE for ${userdata.username}`);
                 const query = { nft_id: null, symbol: { $in: [..._holding] }, account: null,};
                 sendGETBEJustH(nfthandlermongoEP + "getNFTquery",query,0, { "null": null })
                 .then(response => {
-                    console.log(response);
+                    // console.log(response);
                     if(response.status === 'sucess' && response.result.length > 0){
                         // we may add it to myHoldings
                         setMyHoldings(response.result);
@@ -224,6 +284,27 @@ const Tokensuser = () => {
         }).catch(error => {
             console.log('Error asking for holding field',error);
         });
+        //new method using the user.nfts as the final that containts each instance the user has
+        const headers2 = { 'x-access-token': userdata.token, 'query': JSON.stringify({ nfts: 1 }),'tolookup': null, }; //as if you need to lookup for user just fill the header tolookup
+        getDataWH(userEP+"jabUserField",headers2)
+        .then(response => {
+            console.log(response);
+            if(response.status === "sucess"){
+                const _nfts = response.result.nfts.map(nft => {
+                    return nft.ntf_symbol;
+                });
+                console.log('We should look into:',_nfts);
+                // const query = { nft_id: null, symbol: { $in: [..._holding] }, account: null,};
+                // sendGETBEJustH(nfthandlermongoEP + "getNFTquery",query,0, { "null": null })
+                // .then(response => {
+                //     // console.log(response);
+                //     if(response.status === 'sucess' && response.result.length > 0){
+                //         // we may add it to myHoldings
+                //         setMyHoldings(response.result);
+                //     }
+                // }).catch(error => console.log('Error asking for NFTs on this user from DB, mongo.',error));
+            }
+        }).catch(error => { console.log('Error asking for user.nfts field',error)});
     }
     function updateNFTs(){
         const query = {
@@ -240,27 +321,33 @@ const Tokensuser = () => {
             console.log(response);
             if(response.status === 'sucess'){
                 setMyNFTsMongo(response.result);
+                setNfts([]);
+                response.result.map(nft => updateNftArray('created', nft));
+                setLoadingData(false);
             }
         }).catch(error => console.log('Error asking for NFTs on this user from DB, mongo.',error));
     }
     const onSaleNft = () => {
-        if(selected && !selected.for_sale){
-            // TODO a component abs on top to show the loader while we load data or do something
-            // TODO add the logic so the same component can be used to toogle on_sale
-            // maybe with a cool down to prevent abuse or "fooling around"
-            const query = {
-                for_sale: true,
-                updatedAt: new Date().toString(),
-            }
-            sendPostBEJH(nfthandlermongoEP+"updateNFTfield",query, selected.nft_id)
-            .then(response => {
-                console.log(response); //status, result
-                if(response.status === "sucess"){
-                    setSelected(response.result);
+        const answer = window.confirm('This option will set the NFT definition on sale just in JAB.\nDo we proceed?');
+        if(answer){
+            if(selected && !selected.for_sale){
+                // TODO a component abs on top to show the loader while we load data or do something
+                // TODO add the logic so the same component can be used to toogle on_sale
+                // maybe with a cool down to prevent abuse or "fooling around"
+                const query = {
+                    for_sale: true,
+                    updatedAt: new Date().toString(),
                 }
-                // todo some kind of component that show messages smoothly on top of everything
-                // maybe we can just improve the topmessenger.
-            }).catch(error => console.log('Error updating field on NFT to DB.',error));
+                sendPostBEJH(nfthandlermongoEP+"updateNFTfield",query, selected.nft_id)
+                .then(response => {
+                    console.log(response); //status, result
+                    if(response.status === "sucess"){
+                        setSelected(response.result);
+                    }
+                    // todo some kind of component that show messages smoothly on top of everything
+                    // maybe we can just improve the topmessenger.
+                }).catch(error => console.log('Error updating field on NFT to DB.',error));
+            }
         }
     }
 
@@ -268,58 +355,55 @@ const Tokensuser = () => {
         setShowCreator(true);
         setSelected(null);
     }
-    function burnToken(token){
-        // TODO: play with the logic on, if this token is been used on a job?
-        // I guess in_use can serve to "transfers" maybe but cannot see the logic yet.
-        if(isKeychainInstalled){
-            const answer = window.confirm('You are about to Burn 1 token. Shall we proceed?');
-            if(answer){
-                console.log(`To burn:${token._id}`);
-                const jsonData = {
-                            "contractName": "nft",
-                            "contractAction": "burn",
-                            "contractPayload": {
-                                "nfts": [ {"symbol": String(selected.symbol), "ids": [ String(token._id) ]} ]
-                            }
-                }
-                const msg = `To burn 1 ${selected.symbol}`;
-                window.hive_keychain.requestCustomJson(userdata.username, ssc_test_id, "Active", JSON.stringify(jsonData), msg, function(result){
-                    const { message, success, error } = result;
-                    console.log(result);
-                    if(!success){
-                        if(error !== "user_cancel"){
-                            const { error, cause, data } = result.error;
-                            console.log('Error while trying to burn NFT.', message);
-                        }else if(error === "user_cancel"){
-                            // addStateOP({ state: 'User cancelled before transfer.', data: { date: new Date().toString()} }); 
-                            console.log('User cancelled burning!');
-                        }
-                    }else if (success){
-                        //check on this txId to analize results.
-                        setTx(result.result.id);
-                        console.log('Checking TX!',result.result.id);
-                        // TODO: send log to loggerOP
-                    };
-                });
-            }else{
-                console.log('Token Burning cancelled. Send this to loggerOps');
-            }
-        }
-    }
+    // function burnToken(token){
+    //     // TODO: play with the logic on, if this token is been used on a job?
+    //     // I guess in_use can serve to "transfers" maybe but cannot see the logic yet.
+    //     if(isKeychainInstalled){
+    //         const answer = window.confirm('You are about to Burn 1 token. Shall we proceed?');
+    //         if(answer){
+    //             console.log(`To burn:${token._id}`);
+    //             const jsonData = {
+    //                         "contractName": "nft",
+    //                         "contractAction": "burn",
+    //                         "contractPayload": {
+    //                             "nfts": [ {"symbol": String(selected.symbol), "ids": [ String(token._id) ]} ]
+    //                         }
+    //             }
+    //             const msg = `To burn 1 ${selected.symbol}`;
+    //             window.hive_keychain.requestCustomJson(userdata.username, ssc_test_id, "Active", JSON.stringify(jsonData), msg, function(result){
+    //                 const { message, success, error } = result;
+    //                 console.log(result);
+    //                 if(!success){
+    //                     if(error !== "user_cancel"){
+    //                         const { error, cause, data } = result.error;
+    //                         console.log('Error while trying to burn NFT.', message);
+    //                     }else if(error === "user_cancel"){
+    //                         // addStateOP({ state: 'User cancelled before transfer.', data: { date: new Date().toString()} }); 
+    //                         console.log('User cancelled burning!');
+    //                     }
+    //                 }else if (success){
+    //                     //check on this txId to analize results.
+    //                     setTx(result.result.id);
+    //                     console.log('Checking TX!',result.result.id);
+    //                     // TODO: send log to loggerOP
+    //                 };
+    //             });
+    //         }else{
+    //             console.log('Token Burning cancelled. Send this to loggerOps');
+    //         }
+    //     }
+    // }
     const successOp = () => {
         console.log('Called from ChilDo!')
-        updateNFTs();
-        if(myHoldings.length > 0){
-            //update them as well
-            updateHoldings();
-        }
-        // const selec = selected;
+        //new one to update on tokentabulator
+        setFireUpdateNfts(!fireUpdateNfts);
+        setFireUpdateInstances(!fireUpdateInstances);
+        updateAll();
         setSelected(null); //testing this "trick" to see it will update the 2 nft states :P
         setselectedFromHive(null);
         // setSelected(selec); //results: it works but it make the whole 2 components to re-render dunno how nice is that????
         //for now let's close any of the options so the user can select again what to do.
         closeAllOthers();
-        // setShowInstantiator(false);
     }
     function closeAllOthers(){
         setShowInstantiator(false);
@@ -349,6 +433,14 @@ const Tokensuser = () => {
     const editNft = (toEdit) => {
         setToEdit(toEdit);
         setShowEditor(true);
+    }
+    function updateNftArray(type,item){
+        if(type === 'created'){
+            item.type = type;
+            setNfts(prevState => [ ...prevState, item ])
+        }else{
+            setNfts(prevState => [ ...prevState, item ]);
+        }
     }
     // END functions/CB
 
@@ -386,163 +478,134 @@ const Tokensuser = () => {
         return response.json(); 
     };
     // end data fecthing
-    useEffect(() => {
-        setLoadingData(true);
-        client.database.getAccounts([userdata.username])
-        .then(result => {
-            console.log(result);
-            if(result.length > 0 && result[0].balance){
-                const hives = Number(result[0].balance.split(' HIVE')[0]).toFixed(3);
-                if(hives > 1){
-                    setCanCreate(true);
-                    setHive(hives);
-                }else{
-                    setCanCreate(false);
-                    setHive("0.00");
-                }
-            }
-        })
-        .catch(error => { console.log('Error while querying user on DHIVE.',error)});
 
-        // show user's owned tokens if any
-        // .properties.isPremium.authorizedEditingAccounts
-        // ssc.find("nft", "nfts", { issuer: "jobaboard", "properties.isPremium.authorizedEditingAccounts": userdata.username } , null, 0, [], (err, result) => {
-        //     if(err) return console.log('Error asking state on New NFT Instance - SSCjs',err);
-        //     console.log(result);
-        //     if(result.length > 0){
-        //         setOwnedTokens(result);
-        //     }else{
-        //         setNoowned(true);
-        //     }
-        //     setLoadingData(false);
-        // });
-        getSSCData(nftEP+"allNFTs",{ issuer: "jobaboard", "properties.isPremium.authorizedEditingAccounts": userdata.username })
-        .then(response =>{
-            if(response.result === 'error'){ 
-                console.log('Error from BE', response.error) 
-                setLoadingData(false);};
-            if(response.length > 0){
-                setOwnedTokens(response);
-            }else{
-                setNoowned(true);
-            }
-            setLoadingData(false);
-        })
-        // Bring NFTs list and set a state.
-        // ssc.find('nft','nfts', { }, 1000, 0 , [], (err, result) => {
-        //     if(err) return console.log('Error fetching on SSCjs - nft>nfts',err);
-        //     // console.log('List nfts created by etherchest');
-        //     console.log(result);
-        //     setNfts(result);
-        // });
-        // So when the user type the symbol, it says of exists or not.
-        // this can saves us some fecthings later on.
-        // ----> ???
-    },[])
-
-    const refreshNfts = () => {
-        // ssc.find("nft", "nfts", { issuer: "jobaboard", "properties.isPremium.authorizedEditingAccounts": userdata.username } , null, 0, [], (err, result) => {
-        //     if(err) return console.log('Error asking state on New NFT Instance - SSCjs',err);
-        //     console.log(result);
-        //     if(result.length > 0){
-        //         setOwnedTokens(result);
-        //     }else{
-        //         setNoowned(true);
-        //     }
-        //     setLoadingData(false);
-        // });
-        getSSCData(nftEP+"allNFTs",{ issuer: "jobaboard", "properties.isPremium.authorizedEditingAccounts": userdata.username })
-        .then(response => {
-            if(response.error){ 
-                console.log('Error fetching data from BE',response.error);
-                setLoadingData(false);
-            }else if(response.length > 0){
-                setOwnedTokens(response);
-            }else if(response.length === 0){
-                setNoowned(true);
-            }
-            setLoadingData(false);
-        })
+    function getThumb(nftId){
+        return nfts.filter(item => item.nft_id === nftId)[0].thumb
     }
 
-    const closeMe = () => {
-        setCreateToken(!createToken);
-    }
+    // useEffect(() => {
+    //     setLoadingData(true);
+    //     client.database.getAccounts([userdata.username])
+    //     .then(result => {
+    //         console.log(result);
+    //         if(result.length > 0 && result[0].balance){
+    //             const hives = Number(result[0].balance.split(' HIVE')[0]).toFixed(3);
+    //             if(hives > 1){
+    //                 setCanCreate(true);
+    //                 setHive(hives);
+    //             }else{
+    //                 setCanCreate(false);
+    //                 setHive("0.00");
+    //             }
+    //             setLoadingData(false);
+    //         }
+    //     })
+    //     .catch(error => { console.log('Error while querying user on DHIVE.',error)});
+    // },[])
 
-    const cancelTokenCreation = () => {
-        setPayload(null);
-        setReviewing(false);
-        setCreateToken(!createToken);
-    }
+    // const refreshNfts = () => {
+    //     // ssc.find("nft", "nfts", { issuer: "jobaboard", "properties.isPremium.authorizedEditingAccounts": userdata.username } , null, 0, [], (err, result) => {
+    //     //     if(err) return console.log('Error asking state on New NFT Instance - SSCjs',err);
+    //     //     console.log(result);
+    //     //     if(result.length > 0){
+    //     //         setOwnedTokens(result);
+    //     //     }else{
+    //     //         setNoowned(true);
+    //     //     }
+    //     //     setLoadingData(false);
+    //     // });
+    //     getSSCData(nftEP+"allNFTs",{ issuer: "jobaboard", "properties.isPremium.authorizedEditingAccounts": userdata.username })
+    //     .then(response => {
+    //         if(response.error){ 
+    //             console.log('Error fetching data from BE',response.error);
+    //             setLoadingData(false);
+    //         }else if(response.length > 0){
+    //             setOwnedTokens(response);
+    //         }else if(response.length === 0){
+    //             setNoowned(true);
+    //         }
+    //         setLoadingData(false);
+    //     })
+    // }
+
+    // const closeMe = () => {
+    //     setCreateToken(!createToken);
+    // }
+
+    // const cancelTokenCreation = () => {
+    //     setPayload(null);
+    //     setReviewing(false);
+    //     setCreateToken(!createToken);
+    // }
 
     //handling the form data as create the token
-    const onSubmit = (data) => {
-        if(!reviewing){
-            alert('Please review carefully the data to print onto the Blockchain.\nWhen ready send.');
-            setReviewing(true);
-            setPayload(data);
-            console.log(data);
-        }
-    };
+    // const onSubmit = (data) => {
+    //     if(!reviewing){
+    //         alert('Please review carefully the data to print onto the Blockchain.\nWhen ready send.');
+    //         setReviewing(true);
+    //         setPayload(data);
+    //         console.log(data);
+    //     }
+    // };
 
-    const checkLength = (event) => {
-        setNameLenght(event.target.value.length);
-    }
+    // const checkLength = (event) => {
+    //     setNameLenght(event.target.value.length);
+    // }
 
-    const findInstances = (_nft) => {
-        setSelectedNFT(null);
-        setLoadingInstances(true);
-        // ssc.find("nft", `${_nft.symbol}instances`, { account: userdata.username } , null, 0, [], (err, result) => {
-        //     if(err){
-        //         setLoadingInstances(false);
-        //         return console.log('Error asking state on User NFT Instance - SSCjs',err);
-        //     } 
-        //     // console.log(result);
-        //     if(result.length > 0){
-        //         setSelectedNFT(result);
-        //     }else{
-        //         //no issued yet, show user that and invite him to instantiate or sell the token.... Ideas..more ideas...
-        //         setnoInstancesOfNFT(true);
-        //     }
-        //     setLoadingInstances(false);
-        // });
-        console.log(_nft.symbol);
-        getSSCDataTable(nftEP+"allInstances",`${_nft.symbol}`,"instances",{ account: userdata.username })
-        .then(response => {
-            if(response.error){console.log('Error fetching data from BE',response.error);};
-            if(response.length > 0){
-                console.log(response);
-                setSelectedNFT(response);
-            }else if(response.length === 0){
-                setnoInstancesOfNFT(true);
-            }
-            setLoadingInstances(false);
-        })
-        .catch(error => console.log('Error fetching Data',error));
-    }
+    // const findInstances = (_nft) => {
+    //     setSelectedNFT(null);
+    //     setLoadingInstances(true);
+    //     // ssc.find("nft", `${_nft.symbol}instances`, { account: userdata.username } , null, 0, [], (err, result) => {
+    //     //     if(err){
+    //     //         setLoadingInstances(false);
+    //     //         return console.log('Error asking state on User NFT Instance - SSCjs',err);
+    //     //     } 
+    //     //     // console.log(result);
+    //     //     if(result.length > 0){
+    //     //         setSelectedNFT(result);
+    //     //     }else{
+    //     //         //no issued yet, show user that and invite him to instantiate or sell the token.... Ideas..more ideas...
+    //     //         setnoInstancesOfNFT(true);
+    //     //     }
+    //     //     setLoadingInstances(false);
+    //     // });
+    //     console.log(_nft.symbol);
+    //     getSSCDataTable(nftEP+"allInstances",`${_nft.symbol}`,"instances",{ account: userdata.username })
+    //     .then(response => {
+    //         if(response.error){console.log('Error fetching data from BE',response.error);};
+    //         if(response.length > 0){
+    //             console.log(response);
+    //             setSelectedNFT(response);
+    //         }else if(response.length === 0){
+    //             setnoInstancesOfNFT(true);
+    //         }
+    //         setLoadingInstances(false);
+    //     })
+    //     .catch(error => console.log('Error fetching Data',error));
+    // }
 
-    const checkSymbolName = (nft) => {
-        if(nfts && nfts.length > 0){
-            const NFT = String(nft).toUpperCase();
-            // console.log(`Checking:${NFT}`);
-            //we check if symbol already exists
-            const matchedNFT = nfts.filter(nft => nft.symbol === String(NFT).toLocaleUpperCase());
-            if(matchedNFT.length > 0){
-                setExistsNft(true);
-            }else{
-                setExistsNft(false);
-            }
-        }
-    }
+    // const checkSymbolName = (nft) => {
+    //     if(nfts && nfts.length > 0){
+    //         const NFT = String(nft).toUpperCase();
+    //         // console.log(`Checking:${NFT}`);
+    //         //we check if symbol already exists
+    //         const matchedNFT = nfts.filter(nft => nft.symbol === String(NFT).toLocaleUpperCase());
+    //         if(matchedNFT.length > 0){
+    //             setExistsNft(true);
+    //         }else{
+    //             setExistsNft(false);
+    //         }
+    //     }
+    // }
 
-    function goCreateNFT(){
-        setCreateToken(!createToken);
-        // const element = document.getElementById("nftCreatorJAB");
-        // element.scrollIntoView({block: "start", behavior: "smooth"});
-        if(!createToken){
-            window.scrollTo(0, 900);
-        }
-    }
+    // function goCreateNFT(){
+    //     setCreateToken(!createToken);
+    //     // const element = document.getElementById("nftCreatorJAB");
+    //     // element.scrollIntoView({block: "start", behavior: "smooth"});
+    //     if(!createToken){
+    //         window.scrollTo(0, 900);
+    //     }
+    // }
 
     //////////data fecthing BE////////////
     async function getSSCDataTX(url = '',tx) {
@@ -582,10 +645,20 @@ const Tokensuser = () => {
     };
     //////////////////////////////////////
 
+    const settingSelected = (item,type) => {
+        if(devMode) { console.log(item,type) };
+        if(type === "nft_definition"){
+            setSelected(item)
+        }else{
+            //set instance.
+            setSelectedNft_Instance(item);
+        }
+    } 
+
     return (
         <div className="userTokensContainer">
             {/* list all user's tokens from DB */}
-            {
+            {/* {
                 (myNFTsMongo.length > 0) &&
                 <div>
                     <h1 className="relativeDiv">My Creations<Btninfo msg={'These are all the NFTs you have created.'} /> </h1>
@@ -608,49 +681,98 @@ const Tokensuser = () => {
                         }
                     </ul>
                 </div>
-            }
-            {
-                (myHoldings.length > 0) &&
-                <div>
-                    <h1>My Holdings<Btninfo msg={'These are all the Tokens you hold.'} /> </h1>
-                    <p>Click on one of the tokens to present details and options bellow.</p>
-                    <ul className="standardUlRowFlexPlain overflowXscroll">
-                        {
-                            myHoldings.map(token => {
-                                return (
-                                    <li key={token._id} className="pointer hoveredBordered miniMarginLeft" onClick={() => setSelected(token)}>
-                                        <div className="textAlignedCenter">
-                                            <div>
-                                                <img src={token.thumb} className="smallImage" />
-                                            </div>
-                                            <p className="xSmalltext">Symbol: {token.symbol}</p>
-                                            <p className="xSmalltext">Price: {token.price} HIVE</p>
-                                        </div>
-                                    </li>
-                                )
-                            })
-                        }
-                    </ul>
-                </div>
-            }
+            } */}
+            <Tokentabulator cbSendItem={(item,type) => settingSelected(item,type)} userdata={userdata}
+                tradeCointBalance={hive ? { coin: 'HIVE', balance: hive} : { coin: 'HIVE', balance: 0 }}
+                fireAnUpdateNfts={fireUpdateNfts}
+            />
+            <ul className="textNomarginXXSmall">
+                <li>Todo Here</li>
+                <li>Add fo definitions the Enable Market option, so the user can configure as they want, also let him know all the pros/cons</li>
+                <li>On my holdings: fix the selected so it will bring all th info about the Instance + icon + a button to show extra info about nft definition.</li>
+                <li>On holdings: add the options for instance as: send, send to JAB, send to market(put on sale), burn.</li>
+            </ul>
             {
                 !loadingData &&
                 <div>
-                    <ul>
-                        <li>My Hive Balance: {hive ? hive.toString() : '0.0'}</li>
+                    <ul className="standardUlHorMini justSpaceAround">
                         <li>
                             {
                                 hive > 1 ? <button onClick={showCreatorHideRest}>Create Token</button> : <button>Top Up</button>
                             }
                         </li>
+                        <li>
+                            <button onClick={() => setShowImporter(true)}>Import Token</button>
+                        </li>
+                        <li>
+                            <button onClick={() => alert('Idea: Maybe we can allow users to remove a token from JAB if they want to use somewhere else. This requires special checks as notBeingUsed, no currentOrders, and so on.')}>Remove Token from JAB</button>
+                        </li>
                     </ul>
                 </div>
+            }
+            {
+                showImporter && 
+                <Nftimporter cbOnSucess={successOp} jabFEE={jabFEE} userdata={userdata} 
+                    closeCB={() => setShowImporter(false)} 
+                    ssc_test_id={ssc_test_id} devMode={true}
+                />
             }
             {
                 showCreator && 
                 <div className="relativeDiv">
                     <Btnclosemin classCSS={"absDivColSmall"} btnAction={closeAndUpdateNFTs}/>
                     <Nftcreatorfinal updateOnSuccess={successOp} />
+                </div>
+            }
+            {
+                selectedNft_Instance && !selected &&
+                <div className="relativeDiv marginsTB borderTPGroove">
+                    <Btnclosemin classCSS={"pointer"} btnAction={() => setSelectedNft_Instance(null)} />
+                    <div className="standardDivRowFullW">
+                        <div className="standardDiv30Percent">
+                            <img src={selectedNft_Instance.image} className="imageMedium" />
+                            <Menuside 
+                                clickedSubItemCB={(item) => console.log('Clicked on:', item)}
+                                items={[
+                                    { id: 'men-Jab-Instance-1', title: 'Send Token', hasSubMenu: false, clickeable: true },
+                                    { id: 'men-Jab-Instance-2', title: 'Send to JAB', hasSubMenu: false, clickeable: true },
+                                    { id: 'men-Jab-Instance-3', title: 'Sell on Market', hasSubMenu: false, clickeable: true },
+                                    { id: 'men-Jab-Instance-3', title: 'Burn Token', hasSubMenu: false, clickeable: true },
+                                ]}
+                            />
+                        </div>
+                        <div className="standardDiv70Percent">
+                            <Recordnator 
+                                item={selectedNft_Instance}
+                                toShow={[
+                                    { field:'nft_instance_id', type: 'Number', link: false },
+                                    { field:'ntf_symbol', type: 'String', link: false },
+                                    { field:'createdAt', type: 'Date', link: false },
+                                    { field:'updatedAt', type: 'Date', link: false },
+                                ]}
+                            />
+                            <Btnswitch xtraClassCSS={"justAligned"} sideText={"Show me its definition bellow."} initialValue={false} btnAction={(cen) => setShowNftDefinition(cen)}/>
+                            {
+                                showNftDefinition &&
+                                <Recordnator 
+                                    item={selectedNft_Instance.nft_definition}
+                                    toShow={[
+                                        { field:'issuer', type: 'String', link: false },
+                                        { field:'issued_On', type: 'String', link: false },
+                                        { field:'account', type: 'String', link: false },
+                                        { field:'createdAt', type: 'Date', link: false },
+                                        { field:'updatedAt', type: 'Date', link: false },
+                                        { field:'market_enabled', type: 'Boolean', link: false },
+                                        { field:'nft_id', type: 'Number', link: false },
+                                        { field:'price', type: 'Number', link: false },
+                                        { field:'for_sale', type: 'Boolean', link: false },
+                                        { field:'url', type: 'String', link: true },
+                                    ]}
+                                    miniSizes={true}
+                                />
+                            }
+                        </div>
+                    </div>
                 </div>
             }
             {
@@ -710,7 +832,22 @@ const Tokensuser = () => {
                                 }
                                 {
                                     (selected.account === userdata.username) &&
-                                    <li className="standardLiHovered" onClick={onSaleNft}>Put on sale</li>
+                                    // <li className="standardLiHovered" onClick={onSaleNft}>Put on sale</li>
+                                    <li className={`standardLiHovered justifyContentSEvenly ${!wantToSell ? 'listItemClosed':'listItemOpened'}`} onClick={() => setWantToSell(!wantToSell)}>Sale Options</li>
+                                }
+                                {
+                                    wantToSell &&
+                                    <div className="borderedFlexShadow90pW2 miniMarginTB">
+                                        <div className="contentMiniMargins">
+                                            { selected && !selected.market_enabled &&
+                                                <li className="standardLiHovered justAligned" onClick={() => setShowMarketEnabler(true)}>
+                                                    Enable Sales on NFT <Btninfo xclassCSS={"textColorBlack"} size={"mini"}  msg={"This option allows you to enable the market for the selected NFT definition. By doing this any user that owns one of this tokens, will be able to place sell orders on the MarketPlace."}/>
+                                                </li>
+                                            }
+                                            {/* TODO on edit token info: check on transaction to see if there is transaction>token_used && transaction>status = "ongoing" to prevent price edition */}
+                                            <li className="standardLiHovered" onClick={onSaleNft}>Sell just in JAB</li>
+                                        </div>
+                                    </div>
                                 }
                                 <li>
                                     <div className="borderedFlexShadow90pW2 miniMarginTB">
@@ -720,13 +857,16 @@ const Tokensuser = () => {
                                             {
                                                 <h2 className="noMargintop">{selectedInstances.length.toString()} {selectedInstances.length === 1 ? 'Token':'Tokens'}</h2>
                                             }
+                                            <ul className="normalTextSmall standardUlColPlain90p">
+                                            <li className="standardLiHovered" onClick={() => alert('TODO. We open a new tab, to show transactions on this NFT and its instances.')}>Review History of {selected.symbol}</li>
                                             {
                                                 (selectedInstances.length > 0) &&
-                                                <ul className="normalTextSmall standardUlColPlain90p">
-                                                    <li onClick={() => setWantToSend(true)} className="standardLiHovered">Send</li>
-                                                    <li onClick={() => alert('TODO the options could be:\n1. Sell it back to owner for a cheaper price.\n2. Put in on the JAB market. The Market may be a place to buy and sell tokens.\n3. Sell it to JAB for a very cheap price. Also can be trade with JAB(for free promotions, special JAB tokens,etc). JAB could also put it on sale as "Week NFTs bargains"')} className="standardLiHovered">Send To JAB</li>
-                                                </ul>
+                                                    <div>
+                                                        <li onClick={() => setWantToSend(true)} className="standardLiHovered">Send</li>
+                                                        <li onClick={() => alert('TODO the options could be:\n1. Sell it back to owner for a cheaper price.\n2. Put in on the JAB market. The Market may be a place to buy and sell tokens.\n3. Sell it to JAB for a very cheap price. Also can be trade with JAB(for free promotions, special JAB tokens,etc). JAB could also put it on sale as "Week NFTs bargains"')} className="standardLiHovered">Send To JAB</li>
+                                                    </div>
                                             }
+                                            </ul>
                                         </div>
                                     </div>
                                 </li>
@@ -734,8 +874,10 @@ const Tokensuser = () => {
                                     {
                                         (selectedInstances.length > 0) &&
                                         <div className="borderedFlexShadow90pW2 miniMarginTB relativeDiv justTransitions">
-                                            <p className="contentMiniMargins warningTextSmall pointer hoveredAlert" onClick={() => setShowDangerZone(!showDangerZone)}>Danger Zone</p>
-                                            <Alerticon type={"filled"} />
+                                            <div className="standardDivRowPlain justAligned">
+                                                <p className="contentMiniMargins warningTextSmall pointer hoveredAlert" onClick={() => setShowDangerZone(!showDangerZone)}>Danger Zone</p>
+                                                <Alerticon type={"filled"} typeDiv={"notAbsolute"}/>
+                                            </div>
                                             {
                                                 showDangerZone &&
                                                 <ul className="standardUlColPlain contentMiniMargins">
@@ -757,7 +899,7 @@ const Tokensuser = () => {
                                 <Instantiator cbCancel={closeInstantiator} 
                                     userdata={userdata} nft={selected} amount={amount} 
                                     jabFEE={jabFEE} ssc_id={ssc_test_id} nftEP={nftEP} 
-                                    cbOnFinish={successOp}
+                                    cbOnFinish={successOp} devMode={true}
                                 />
                             </Abswrapper>
                         }
@@ -781,6 +923,23 @@ const Tokensuser = () => {
                         }
                         {
                             wantToBurn &&
+                            <Nftburner userdata={userdata} closeCB={() => setWantToBurn(false)}
+                                selectedInstances={selectedInstances} ssc_test_id={ssc_test_id}
+                                selected={selected} 
+                            />
+                        }
+                        {
+                            showMarketEnabler && 
+                            <Marketenabler 
+                                closeCB={() => setShowMarketEnabler(false)}
+                                userdata={userdata} selectedNft={selected}
+                                ssc_test_id={ssc_test_id}
+                                nftEP={nftEP} nfthandlermongoEP={nfthandlermongoEP}
+                                devMode={true}
+                            />
+                        }
+                        {/* {
+                            wantToBurn &&
                             <Abswrapper xtraClass={"justiAlig"}>
                                 <div className="standardDiv60Percent relativeDiv justBorders justRounded justbackground marginAuto">
                                     <Btnclosemin classCSS={"closeBtnAbs"} btnAction={() => setWantToBurn(false)} />
@@ -794,8 +953,6 @@ const Tokensuser = () => {
                                                     return (
                                                         <li key={`${token._id}-toBurn`} className="standardLiHovered" onClick={() => burnToken(token)}>
                                                             ID: {token._id} - Owned By: {token.ownedBy}
-                                                            {/* TODO: add a loader when is trying to burn the token. */}
-                                                            {/* TODO: remove the token symbol from user>holding if he had only one of this one. */}
                                                         </li>
                                                     )
                                                 })
@@ -804,7 +961,7 @@ const Tokensuser = () => {
                                     </div>
                                 </div>
                             </Abswrapper>
-                        }
+                        } */}
                         <div className="standardDiv60Percent">
                             <div className="standardDivRowFlexAutoH">
                                 <p className="extraMiniMarginsTB">Actual price: {selected.price} {jabFEE.acceptedCur}</p>
@@ -823,6 +980,7 @@ const Tokensuser = () => {
                                 </div>
                             }
                             <p className="extraMiniMarginsTB">For sale: {selected.for_sale ? 'Yes':'No'}</p>
+                            <p className="extraMiniMarginsTB">Market Enabled: {selected.market_enabled ? 'Yes':'No'}</p>
                             <p className="extraMiniMarginsTB">Issued On: {selected.issued_On}</p>
                             <p className="extraMiniMarginsTB">Issued By: {selected.issuer}</p>
                             {/* TODO: create a component called hivePrice that get the price from coinPrices component and show the icon, plus option as when clicked show price on hive/USD */}

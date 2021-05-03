@@ -33,7 +33,7 @@ const Alerticon = (props) => {
     const typeChoosenSource = type === "filled" ? data.alertIconFilled.childImageSharp.fixed
             : data.alertIconOutline.childImageSharp.fixed;
     return (
-        <div className={`${typeDiv ? '': 'absDivRow10_5'} ${xclassCSS}`}>
+        <div className={`${typeDiv ? 'iconBlock25p': 'absDivRow10_5'} ${xclassCSS}`}>
             <Img fixed={typeChoosenSource} />
         </div>
     )

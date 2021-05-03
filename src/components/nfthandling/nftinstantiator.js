@@ -4,6 +4,14 @@ import {keychain, isKeychainInstalled, hasKeychainBeenUsed} from '@hiveio/keycha
 import Btnclosemin from '../btns/btncloseMin';
 import Loader from '../loader';
 
+//constants
+const dhive = require("@hiveio/dhive");
+const client = new dhive.Client([ "https://api.hive.blog", "https://api.hivekings.com", "https://anyx.io", "https://api.openhive.network","https://hived.privex.io/"]);
+const privateKey = dhive.PrivateKey.fromString(process.env.GATSBY_secretJAB);
+const userEP = process.env.GATSBY_userEP;
+const nfthandlermongoEP = process.env.GATSBY_nfthandlermongoEP;
+//end constants
+
 /**
  * This component allows user to:
  * -> Detect if actual user is following the presented user. If not, allow user to follow/unfollow on hive.
@@ -16,14 +24,32 @@ import Loader from '../loader';
  * @param {Object} jabFEE - Object that contains all the fee, price per instance, etc.
  * @param {String} ssc_id - The ssc id that will listen to this transaction. 2 Options: 1: "ssc-testNettheghost1980" 2: "main"
  * @param {String} nftEP - The EP on BE to get the TX info || execute operations on NFT BE handle.
+ * @param {Boolean} devMode optional, if true show props and console.log on important steps.
  */
 
 const Instantiator = (props) => {
-    const { userdata, nft, amount, cbOnFinish, cbCancel, jabFEE, ssc_id, nftEP} = props;
+    const { userdata, nft, amount, cbOnFinish, cbCancel, jabFEE, ssc_id, nftEP, devMode} = props;
     const [set_onNoti, setSet_onNoti] = useState(false);
     const [tx, setTx] = useState(null);
     const [message, setMessage] = useState(null);
     const [working, setWorking] = useState(false);
+
+    //load on init
+    useEffect(() => {
+        if(devMode){
+            console.log('Props Received from parent:');
+            console.log('userdata',userdata);
+            console.log('nft',nft);
+            console.log('amount',amount);
+            console.log('cbOnFinish',cbOnFinish);
+            console.log('cbCancel',cbCancel);
+            console.log('jabFEE',jabFEE);
+            console.log('ssc_id',ssc_id);
+            console.log('nftEP',nftEP);
+        }
+    },[]);
+    //END load on init
+
     // functions/CB
     const setOnNoti = () => {
         setSet_onNoti(!set_onNoti);
@@ -41,6 +67,29 @@ const Instantiator = (props) => {
              arrayJson.push(payload);
         }
         return arrayJson;
+    }
+    async function processEvent(arrayEvents){
+        const nfts = [];
+        arrayEvents.map(event => {
+            if(event.event === "issue"){
+                nfts.push(
+                    { ntf_id: Number(nft.nft_id), ntf_symbol: nft.symbol, nft_instance_id: Number(event.data.id), username: userdata.username, createdAt: new Date()}
+                )
+            }
+        });
+        // const headers = { 'x-access-token': userdata.token, 'query': JSON.stringify({ $push: { nfts: nfts } }), 'toupdateon': null};
+        // sendPostPlain(userEP+"updateUserField", headers)
+        // .then(response => {
+        //     console.log('User updated with a new issued nfts in user.nfts, please check!',response);
+        // }).catch(error => { console.log('Error updating nfts field on user!',error)});
+
+        //using inserMany for now
+        const formdata = new FormData();
+        formdata.append("nfts",JSON.stringify(nfts));
+        
+        sendPostBE(nfthandlermongoEP+"addNftInstance",formdata,"YESPLEASE!")
+        .then(response => console.log(response))
+        .catch(error => console.log('Error trying to add new instance.',error));
     }
     function getInfoTX(){
         if(tx){
@@ -71,6 +120,7 @@ const Instantiator = (props) => {
                             //was succesfull dunno if we must handle in case of an error of issuing less than amount???
                             alert(`We casted ${amount} ${nft.symbol} Token(s)`);
                             setMessage(`We casted ${amount} ${nft.symbol} Token(s)`);
+                            processEvent(logs.events);
                             cbOnFinish();
                         }
                         if(logs.errors){
@@ -111,6 +161,21 @@ const Instantiator = (props) => {
         });
         return response.json(); 
     };
+    async function sendPostPlain(url = '', headers) {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: headers,
+        });
+        return response.json(); 
+    };
+    async function sendPostBE(url = '', formdata, insertmany) {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'x-access-token': userdata.token, 'insertmany': insertmany},
+            body: formdata,
+        });
+        return response.json(); 
+    };
     // //////END fecthing data functions
     // end functions/CB
 
@@ -119,18 +184,9 @@ const Instantiator = (props) => {
         if(isKeychainInstalled){
             setWorking(true);
             const amountToPay = (Number(jabFEE.costInstance) * amount).toFixed(3).toString();
-            const json = jsonArray(amount);
-            const memo = {
-                "id": ssc_id,
-                "json": {
-                    "contractName": "nft",
-                    "contractAction": "issueMultiple",
-                    "contractPayload": {
-                        "instances": [ ...json ]
-                    },
-                },
-            };
-            window.hive_keychain.requestTransfer(userdata.username, "jobaboard", amountToPay, JSON.stringify(memo), jabFEE.acceptedCur, function(result){
+            const arrayJson = jsonArray(amount);
+            const memo = `Casting ${amount} of my ${nft.symbol} ${amount > 1 ? 'tokens':'token'} at ${new Date().toString()}`;
+            window.hive_keychain.requestTransfer(userdata.username, "jobaboard", amountToPay, memo, jabFEE.acceptedCur, function(result){
                 const { message, success, error } = result;
                 console.log(result);
                 if(!success){
@@ -139,18 +195,8 @@ const Instantiator = (props) => {
                         if( cause.name && cause.name === "RPCError"){
                             // addStateOP({ state: 'Fatal Error', data: { error: JSON.stringify(result.error)} });
                             //TODO: send this data to OPLOGGER.
-                            // OPLOGGER must be a component that:
-                            // - receives the log/op/errors as props
-                            // - test connectivity on BE(we must code an EP as /PING on public maybe || adminEP) to get "OK"
-                            // - send the log to mongoDB.
-                            // - it may has additional features to activate on BE as:
-                            //      - send log to support or send special message/email to admins
-                            // - receives the log id + success msg from BE
                         }
                         // TODO send the log as well and register the event.
-                        // TODO: ALL this process must finish presenting to user
-                        // - A msg that "His/her funds are safe as we have registered it" & "Take note of the system log, in case support contacts you during the next 24 hrs."
-                        // - A final msg as "You may continue doing the same operation and we will send your money back as soon as possible or contact support if any available".
                         setWorking(false);
                         return console.log('Error while transfering', message);
                     }else if(error === "user_cancel"){
@@ -165,9 +211,28 @@ const Instantiator = (props) => {
                         memo === memo 
                         && username === userdata.username && currency === jabFEE.costCurr){ 
                     }
-                    // addStateOP({ state: 'Sucess transferred funds', data: {} });
+                    // addStateOP({ state: 'Sucess transferred funds', data: { txId: result.result.id, ...} });
                     console.log('Executed successfully. Now check to continue dev work!!!',result.result.id);
-                    setTx(result.result.id);
+                    //now we instantiate with JAB
+                    const json = {
+                        "contractName": "nft",
+                        "contractAction": "issueMultiple",
+                        "contractPayload": {
+                            "instances": [...arrayJson]
+                        },
+                    };
+                    const data = {
+                        id: ssc_id,
+                        json: JSON.stringify(json),
+                        required_auths: ['jobaboard'],
+                        required_posting_auths: [],
+                    };
+                    client.broadcast
+                    .json(data, privateKey)
+                    .then(result => {
+                        console.log(result);
+                        setTx(result.id);
+                    }).catch(error => {console.log('Error while creating the NFT.',error)});
                 };
             });
         }else{
@@ -178,9 +243,9 @@ const Instantiator = (props) => {
     // END to handle the operation
 
     // calling on each change of state
-    useEffect(() => {
-        console.log(set_onNoti);
-    }, [set_onNoti]);
+    // useEffect(() => {
+    //     console.log(set_onNoti);
+    // }, [set_onNoti]);
     useEffect(() => {
         if(tx){
             //testing on 3s

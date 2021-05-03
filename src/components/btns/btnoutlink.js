@@ -7,10 +7,11 @@ import { useStaticQuery, graphql } from 'gatsby';
  * @param {String} link - path to navigate to
  * @param {String} textLink - Text/Message to display on link.
  * @param {String} xclassCSS - Optional The css Extra class.
+ * @param {String} toolTip - Optional as the tool tip text you may need to show.
  */
 
 const Btnoutlink = (props) => {
-    const { link, textLink, xclassCSS, } = props;
+    const { link, textLink, xclassCSS, toolTip } = props;
 
     const data = useStaticQuery(graphql`
         query{
@@ -34,7 +35,9 @@ const Btnoutlink = (props) => {
     // };
 
     return (
-        <a href={link} className={`aInlineFlexPlain activeDisplay pointer relativeDiv ${xclassCSS}`} target="_blank" rel="noopener noreferrer">
+        <a href={link} className={`aInlineFlexPlain activeDisplay pointer relativeDiv ${xclassCSS}`} target="_blank" rel="noopener noreferrer"
+            title={toolTip}
+        >
             &nbsp;{textLink}
             <div className="smallAbsDivDisNone120pPlain justRight120pTop0p animFade">
                 <Img fixed={data.externalIcon.childImageSharp.fixed} />

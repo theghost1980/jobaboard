@@ -29,6 +29,7 @@ import { useDispatch, useSelector } from 'react-redux';
 // import { selectProfile } from '../features/userprofile/profileSlice';
 import { isKeychainInstalled, keychain } from '@hiveio/keychain';
 import { setStored } from '../features/socket/socketSlice';
+import { setValueOnProfile, selectProfile } from '../features/userprofile/profileSlice';
 // end testing 
 
 //hivesigner SDK + init
@@ -184,10 +185,10 @@ const Navbar = (props) => {
         alert('You have been Banned. Please Contact the admins as you only have some limited features on this platform.!\nTODO: Show this more nicely in a component bellow logo.');
     }
 
-    // // testing profile redux here
-    // const _profile = useSelector(selectProfile);
-    // console.log(_profile);
-    // // end testing
+    // testing profile redux here
+    const _profile = useSelector(selectProfile);
+    console.log('Value read on navigating_on:',_profile.navigating_on);
+    // end testing
 
     // console.log(userdata);
     //state constants/vars
@@ -198,7 +199,7 @@ const Navbar = (props) => {
     // const [socket, setSocket] = useState(null);
 
     // //testing react/redux
-    // const dispatch = useDispatch();
+    const dispatch = useDispatch();
     // // end testing
 
     //end state constants/vars
@@ -547,52 +548,66 @@ const Navbar = (props) => {
     // const newmessages = getStoredField("newmessages");
     // console.log(`newmessages actual value:${newmessages}`);
 
+    //functions/CB
+    //testing to add navigating_on into redux on each user clicked on Menu
+    const navigateToApp = (goingTo) => {
+        console.log('User wants to go to:',goingTo);
+        //TODO save into redux
+        dispatch(setValueOnProfile({ type: "navigating_on", value: goingTo}));
+      }
+      //END testing to add navigating_on into redux on each user clicked on Menu
+      //END functions/CB
+
     return (
             <nav>
-                <div className={`menuBottomNav`}>
-                    <ul className="menuBottomNavUl">
-                        {
-                        data.append_menu.edges.map(({ node: itemM}) => {
-                            return (
-                                itemM.active ?
-                                <li key={itemM.id} className="ulParent">
-                                    <div>{itemM.name}</div>
-                                    <ul className="subMenuCatUL">
-                                    {
-                                        itemM.sub_category.map(subItem => {
-                                        return (
-                                            <li key={`${itemM.id}-${subItem}`} className="normalTextSmall">
-                                                <Link to={`/explore?category=${itemM.name}|sub_category=${subItem}`} className="subCatLink">
-                                                    {subItem}
-                                                </Link>
-                                            </li>
-                                        )
-                                        })
-                                    }
-                                    </ul>
-                                </li>
-                                : null
-                            )
-                        })
-                        }
-                    </ul>
-                </div>
+                {
+                    (_profile.navigating_on !== "Marketplace") 
+                    &&
+                    <div className={'menuBottomNav'}>
+                        <ul className="menuBottomNavUl">
+                            {
+                            data.append_menu.edges.map(({ node: itemM}) => {
+                                return (
+                                    itemM.active ?
+                                    <li key={`${itemM.id}-${itemM.query}`} className="ulParent">
+                                        <div key={`${itemM.id}-ULDIV`}>{itemM.name}</div>
+                                        <ul className="subMenuCatUL" key={`${itemM.id}-ULJAB`}>
+                                        {
+                                            itemM.sub_category.map(subItem => {
+                                            return (
+                                                <li key={`${itemM.id}-${subItem}`} className="normalTextSmall">
+                                                    <Link onClick={() => navigateToApp("explore")} to={`/explore?category=${itemM.name}|sub_category=${subItem}`} className="subCatLink">
+                                                        {subItem}
+                                                    </Link>
+                                                </li>
+                                            )
+                                            })
+                                        }
+                                        </ul>
+                                    </li>
+                                    : null
+                                )
+                            })
+                            }
+                        </ul>
+                    </div>
+                }
 
                 <div className="navbarRow">
-                    <Link to="/">
+                    <Link onClick={() => navigateToApp("home")} to="/">
                         <div className="logoSVGCont">
                             {/* <img src={data.logoColor.publicURL} className="logoSVG" /> */}
                             <Img fluid={data.logoColor.childImageSharp.fluid} className="logoSVG" loading="eager" />
                         </div>
                     </Link>
-                    <ul id="mainMenu">
+                    <ul id="mainMenu" className="justPaddingRight20p">
                     {
                         data.main_menu.edges.map(({ node: menuItem }) => {
                         return (
                             <li key={`${menuItem.id}`} className={`${(menuItem.hideOnLoggin && userdata.logged) ? 'hideOnLoggin': null}`}>
                             {
                                 menuItem.link ?
-                                <Link to={`${menuItem.inner_link}`}>{menuItem.title}</Link>
+                                <Link onClick={() => navigateToApp(menuItem.title)} to={`${menuItem.inner_link}`}>{menuItem.title}</Link>
                                 : (userdata.logged)  ? 
                                                 <div className="profilePicCont" onClick={() => setMenuUserClicked(!menuUserClicked)}> 
                                                 <img src={userdata.profilePicUrl} className="profilePic" alt="user jobaboard crypto job board" />
@@ -604,6 +619,7 @@ const Navbar = (props) => {
                                                         return (
                                                             <li key={`${usermenu.id}`}>
                                                                 <Link to={`${usermenu.inner_link}`}
+                                                                    onClick={() => navigateToApp(usermenu.title)}
                                                                 >
                                                                 {usermenu.title}
                                                                 </Link>

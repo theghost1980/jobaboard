@@ -22,6 +22,7 @@ export const profileSlice = createSlice({
     currentchatid: "",
     newmessages: "", 
     authbee: false,
+    navigating_on: "", //related to where the user is now to apply changes on components. I.e: navBar.js
   },
   reducers: { 
     setProfile: (state, action) => {

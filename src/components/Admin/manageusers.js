@@ -13,8 +13,8 @@ import Tablinator from '../interactions/tablinator';
 const userEP = process.env.GATSBY_userEP;
 const adminEP = process.env.GATSBY_adminEP;
 const itemsMenu = [
-    {title: 'User', cbProp: 'manageUsers', subMenu: [ 'List All Users', 'Filter Options'],},
-    {title: 'User Logs', cbProp: 'manageLogs', subMenu: [ 'List All user Logs', 'Filter Options']},
+    {title: 'User', cbProp: 'manageUsers', subMenu: [ 'List All Users'],},
+    {title: 'User Logs', cbProp: 'manageLogs', subMenu: [ 'List All user Logs']},
 ]
 //end constants
 
@@ -55,6 +55,7 @@ const Manageusers = () => {
     });
     const [loadingData, setLoadingData] = useState(false);
     const [userLogs, setUserLogs] = useState(null);
+    const [allUserLogs, setAllUserLogs] = useState(null);
     const [loadingExtraData, setLoadingExtraData] = useState(false);
     //end new ones
 
@@ -112,20 +113,15 @@ const Manageusers = () => {
         });
     }
 
-    const getLogs = () => {
+    function getAllUsersLogs(){
         getDataWT(adminEP+"alllogs",userdata.token)
         .then(response => {
-            console.log(response);
+            // console.log(response);
             if(response.length > 0){
-                setLogs(response);
-                setShowLog(true);
-            }else{
-                console.log('Something happend. Call crypto-police.',response);
-            }
+                setAllUserLogs(response);
+            };
         })
-        .catch(err => {
-            console.log('Error while fetching data from logs!',err);
-        })
+        .catch(err => { console.log('Error while fetching data from logs!',err)});
     };
 
     /////////DATA fecthing////////////
@@ -170,17 +166,17 @@ const Manageusers = () => {
         }
     };
 
-   const closeActions = () => setAction(null);
-
    //to load on init
    useEffect(() => {
     getUsers();
+    getAllUsersLogs();
    },[]);
    //END to load on init
 
     return (
         <div className="standardContentMargin">
             <Menuhover items={itemsMenu} clickedSubItemCB={(opt) => setOption(opt)} xtraclassCSS={"jusBordersRounWhiteBack"}/>
+            <hr></hr>
             {
                 loadingData &&
                 <div className="standardDiv30Percent justMargin0auto">
@@ -189,13 +185,33 @@ const Manageusers = () => {
             }
             {
                 (option === "List All Users") && users &&
-                <Tablinator toShow={['username','usertype','banned','email']} items={users} devMode={false} clickedSubItemCB={(item) => setSelectedUser(item)}/>
+                <div className="relativeDiv">
+                    <Btnclosemin btnAction={() => setOption("")} classCSS={"closeBtnAbs"}/>
+                    {/* <div>
+                        <label htmlFor="accountSearch">Search: </label>
+                        <input name="accountSearch" type="text" onChange={lookUpUser} />
+                    </div> */}
+                    <Tablinator toShow={['username','usertype','banned','email']} 
+                        items={users} devMode={false} clickedSubItemCB={(item) => setSelectedUser(item)}
+                        titleTable={"User List"}
+                    />
+                </div>
+            }
+            {
+                (option === "List All user Logs") && allUserLogs &&
+                <div className="relativeDiv">
+                    <Btnclosemin btnAction={() => setOption("")} classCSS={"closeBtnAbs"}/>
+                    <Tablinator toShow={['createdAt','event','ipaddress','username','usertype']} 
+                        items={allUserLogs} devMode={false} clickedSubItemCB={(item) => console.log(item)}
+                        titleTable={"User Logs"} xclassCSS={"justHeight500pOverY"}
+                    />
+                </div>
             }
             {
                 selectedUser &&
                 <div className="standardFlex100AutoH border1pxRounded relativeDiv">
                     <div className="standardContentMargin">
-                        <div className="standardDivRowFullW">
+                        <div className="standardDivRowFullW justifyContentSpacedAro">
                             <div>
                                 <img src={selectedUser.avatar} className="miniAvatar" />
                             </div>
@@ -209,7 +225,7 @@ const Manageusers = () => {
                                 }
                             </div>
                         </div>
-                        <div className="standardDivRowFullW">
+                        <div className="standardDivRowFullW justifyContentSpacedAro">
                             <div className="smallText">
                                 <div className="standardFlexColBordered width90 justiAlig marginsTB justRounded">
                                     <p className="minimumMarginTB">JAB Member Since:</p>
@@ -272,15 +288,16 @@ const Manageusers = () => {
                         userLogs &&
                         <div className="relativeDiv marginsTB">
                             <Btnclosemin classCSS="closeBtnAbs zIndexTop whiteBack" btnAction={() => setUserLogs(null)} />
-                            <Tablinator xclassCSS={"marginsTB"}
+                            <Tablinator xclassCSS={"marginsTB justHeight300pOverY"}
                                 toShow={['createdAt','event','ipaddress','username']} 
+                                titleTable={"User Logs"}
                                 items={userLogs} devMode={false} clickedSubItemCB={(item) => console.log(item)}
                             />
                         </div>
                     }
                 </div>
             }
-            <ul className="standardUlHor">
+            {/* <ul className="standardUlHor">
                 <li key="menu-UserAdmin-1">
                     <button onClick={listUsers}>List All</button>
                     {
@@ -299,7 +316,7 @@ const Manageusers = () => {
                         showLogs && <button className="btnMiniTextRed marginLeft" onClick={() => setShowLog(false)}>close</button>
                     }
                 </li>
-            </ul>
+            </ul> */}
             <hr className="borderBottom" />
             <div className="standardDivRowFullW">
             

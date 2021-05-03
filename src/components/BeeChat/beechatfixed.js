@@ -17,6 +17,7 @@ import Btnactionwithconf from '../../components/btns/btnactionwconf';
 import Notificationicon from '../../components/icons/notificationicon';
 import Logotext from '../../components/icons/logotext';
 import Btnswitch from '../../components/btns/btnswitch';
+import Btnactionicon from '../btns/btnactionicon';
 
 //constants
 const beechatEP = "https://beechat.hive-engine.com/api/";
@@ -371,6 +372,11 @@ const Beechatfixed = () => {
                                         }
                                     </div>
                                 </ul>
+                                <div className="standardDivFlexPlain justWH35 justMargin0auto miniMarginTB justiAlig">
+                                    <Btnactionicon xclassCSS={"standardDivFlexPlain pointer justWH35 justMargin0auto miniMarginTB justiAlig"} typeIcon={"refresh"} btnAction={() => console.log('Click on refresh!')}
+                                        title={"Force a reconnect if any errors on chat! TODO"}
+                                    />
+                                </div>
                                 <div onClick={() => getAllData(localStorage.getItem("bToken"))}>
                                     <Logotext xclassCSS={"standardDivRow90W justiAlig textXSmallOrange"} text={"Powered By Beechat Hive"} logo={"beechat"} typeDiv={"notAbsolute"} />
                                 </div>
@@ -397,7 +403,7 @@ const Beechatfixed = () => {
                         <p>finish all this part + mail mode if needed</p>
                         <p>Move all this part as anotehr component</p>
                     {
-                        settings &&
+                        settings && settings.dm &&
                         <ul className="standardUlVerSmall">
                             <li>
                                 Direct Messages: Only received from friends

@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { useStaticQuery, graphql, Link } from "gatsby"
 import Img from 'gatsby-image';
 import Mesaggertop from '../../messages/mesaggertop';
+import Btnoutlink from '../../btns/btnoutlink';
 
 // constants
 const portfolio_EP = process.env.GATSBY_portfolioEP;
@@ -338,9 +339,9 @@ const Manageportfolio = () => {
     return (
         <div className="managePortfolioContainer justBottomMargin">
             <h2>My portfolio</h2>
-            <p>
-                <Link to={`/portfoliouser?query=${userdata.username}`}>Check Live</Link>
-            </p>
+            <div className="marginsTB">
+                <Btnoutlink link={`/portfoliouser?query=${userdata.username}`} textLink={"Check Live/New tab."} toolTip={"It will open your portfolio on a new window tab"}/>
+            </div>
             {
                 loadingData &&
                     <div className="standardDivRowFlex100pX100pCentered">

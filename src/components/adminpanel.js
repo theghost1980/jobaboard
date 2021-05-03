@@ -266,9 +266,6 @@ const AdminPanel = () => {
                     >
                         NFTs
                     </li>
-                    <li className="standardLink">
-                        Escrow System ASK?
-                    </li>
                     {/* <li>
                         <button onClick={listUsers}>List all Users</button>
                     </li>

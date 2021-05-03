@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useStaticQuery, graphql } from "gatsby"
 import Img from 'gatsby-image';
-import axios from 'axios';
 
 //components
 import Layout from '../components/layout';
@@ -13,12 +12,17 @@ import { check, formatDateTime } from '../utils/helpers';
 import Jobresult from '../components/User/jobs/subcomponents/jobresult';
 import Btnswitch from '../components/btns/btnswitch';
 import hive from '@hiveio/hive-js';
+import Blockchainobserver from '../components/blockchainobserver';
+import Btncollapse from '../components/btns/btncollapse';
+import Charter from '../components/interactions/charter';
 hive.config.set('alternative_api_endpoints',[ "https://api.hive.blog", "https://api.hivekings.com", "https://anyx.io", "https://api.openhive.network","https://hived.privex.io/"]);
 
 //constants
 const jobEP = process.env.GATSBY_jobEP;
 const nftEP = process.env.GATSBY_nftEP;
-
+const pingAPI = "https://api.coingecko.com/api/v3/ping"; //"accept: application/json"
+const dataHive = "https://api.coingecko.com/api/v3/coins/hive?tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false";
+const apiEPChart = "https://api.coingecko.com/api/v3/coins/hive/market_chart?vs_currency=usd&days=30&interval=daily";
 //end constants
 
 // TODO: pass the current category/sub category as context so the page
@@ -79,7 +83,7 @@ const Jabexplorer = (props) => {
          } 
          searchIcon: file(relativePath: {eq: "search.png"}) {
              childImageSharp {
-                 fixed(width: 20) {
+                 fixed(width: 28) {
                      ...GatsbyImageSharpFixed_withWebp
                  }
              }
@@ -90,10 +94,20 @@ const Jabexplorer = (props) => {
 
     // new ones to organize later on
     const query  = props.location.search;
+    //TODO find out why the typying is so slow!!!
+
     const [txToLookUp, setTxToLookUp] = useState(null);
     const [blockToTookUp, setBlockToTookUp] = useState(null);
     const [showBlockTrans, setShowBlockTrans] = useState(false);
-    const [searchInput, setSearchInput] = useState(null);
+    const [searchInput, setSearchInput] = useState("");
+    const [queryType, setQueryTyoe] = useState({
+        type:'default', //options: default as empty not assigned, or tx_id,block,username.
+        query: '',
+    })
+    const [showBObs, setShowBObs] = useState(false);
+    const [showInfoHive, setShowInfoHive] = useState(false);
+    const [hiveDataCG, setHiveDataCG] = useState(null);
+    const [charData, setCharData] = useState(null);
     // END new ones to organize later on
 
     const [resultQuery, setResultQuery] = useState([]);
@@ -161,6 +175,31 @@ const Jabexplorer = (props) => {
         getTx(q);
     }
 
+    function loadDataCG(){
+        fetch(pingAPI) //ping the server to see if it is online
+        .then(response => {
+            // console.log(response);
+            if(response.status === 200){
+                fetch(dataHive) //ask market Data
+                .then(response => {
+                    const data = response.json()
+                    data.then(response => {
+                        console.log(response);
+                        setHiveDataCG(response);
+                    }).catch(error => console.log('Error getting data coins from CoingGecko',error));
+                }).catch(error => console.log('Error getting Coins data from CoingGecko.',error));
+                fetch(apiEPChart) //ask for Chart Data.
+                .then(response => {
+                    const data = response.json()
+                    data.then(response => {
+                        console.log(response);
+                        setCharData(response);
+                    }).catch(error => console.log('Error getting data charts from CoingGecko',error));
+                }).catch(error => console.log('Error getting charts data from CoingGecko.',error));
+            }
+        }).catch(error => console.log('Error getting CoingGecko Data.',error));
+    }
+
     // to load on each change of state
     useEffect(() => {
         if(defaultQuery){
@@ -191,16 +230,26 @@ const Jabexplorer = (props) => {
     //search jobs 
     useEffect(() => {
         if(query){
-            setLoadingQuery(true);
             var passedQ = {
                 tx_id: "",
             }
             const cleanQ = decodeURI(query);
             console.log(cleanQ);
-
             const tx_id = cleanQ.split("?tx_id=")[1];
             console.log('To find tx_id:',tx_id);
-            sendQuery(tx_id);
+            if(tx_id === "default" || tx_id === null){
+                //load default explorer
+                console.log('Load the default explorer!');
+                setShowBObs(true);
+                setQueryTyoe({ type: 'default', query: 'none'});
+                //testing to get all latest transactions
+                // hive.api.callAsync('condenser_api.get_accounts', [['mahdiyari']])
+                //     .then((res) => console.log(res))
+
+            }else{
+                setLoadingQuery(true);
+                sendQuery(tx_id);
+            }
         }
     },[query]);
 
@@ -209,6 +258,7 @@ const Jabexplorer = (props) => {
         // if(!query){ //so it can show the lastest blocks live. On my case on the test node, later on on main hive.
         //     setDefaultQuery('jabexplorer?tx_id=null');
         // }
+        loadDataCG();
     }, []);
     //END to load on init
 
@@ -234,9 +284,12 @@ const Jabexplorer = (props) => {
         });  
     }
     const checkInput = (event) => {
-        console.log('event.key',event.key);
-        console.log('event.keyCode', event.keyCode);
-        if(searchInput && (event.key === 'Enter' || event.keyCode === 13)){
+        // console.log(event);
+        // console.log('event.key',event.key);
+        // console.log('event.keyCode', event.keyCode);
+        if(searchInput && (event.key === 'Enter' || event.keyCode === 13 || event === "searchBtn")){
+            // TODO fix all this to make it pair with what you did for defaults
+            // also validate to make the search if a valid input.
             //first detect tx as numbers - chars - no @ an not #
             const firstChar = String(searchInput).substring(0,1);
             if(firstChar === "#"){
@@ -247,6 +300,14 @@ const Jabexplorer = (props) => {
                 //tx
                 getTx(searchInput);
             }
+        }
+    }
+    const itemClickedToquery = (type,item) => {
+        console.log(`Clicked from BCH Ob: ${type},${item}`);
+        if(type === "block"){
+            getBlock(item.blockNumber)
+        }else if(type === "txId"){ //not using for now as we must make user wait for 2 minutes trans.
+            getTx(String(item.transactionId));
         }
     }
     //END funtcions/CB
@@ -317,20 +378,66 @@ const Jabexplorer = (props) => {
     return (
         <Layout>
             <div className="exploreContainer marginBottom">
-                <div className="justifyContentSpaced aInlineFlexPlain">
-                    <h1>JAB block explorer</h1>
-                    <div className="justBorders justWidth30 textAlignedCenter justRounded justHeight60p">
-                        <div className="standardDivRowFullW justiAlig">
-                            <input type="text" onChange={(e) => setSearchInput(e.target.value)} 
-                                onKeyDown={checkInput}
-                            />
-                            <div onClick={checkInput} className="pointer">
-                                <Img fixed={data.searchIcon.childImageSharp.fixed} />
+                <div className="standardDivRowFullWNH justAligned bgBlocksBlue justSpaceEvenly justHeight200p">
+                    <div className="justBorders justRounded coloredContrastBlue justWidth60 justHeight70per">
+                        <div className="contentMiniMargins">
+                            <h2 className="textColorWhite miniMarginBottom">JAB block explorer</h2>
+                            <div className="standardDivRowFullWNH justWidth90 justbackgroundOrange justRounded justHeight50p justAligned">
+                                <select className="justHeight50p justpadding10p justWidth120px">
+                                    <option value="All">All Filters</option>
+                                    <option value="tx_id">TxId</option>
+                                    <option value="block">Block</option>
+                                    <option value="username">Username</option>
+                                </select>
+                                {/* onChange={(e) => setSearchInput(e.target.value)}  */}
+                                <input type="text"  
+                                    onKeyDown={(e) => checkInput(e.target.value)} placeholder="  Search Tx/#Block/@Username (+Enter)"
+                                    className="justHeight45p justWidth70"
+                                />
+                                <div onClick={() => checkInput("searchBtn")} className="pointer justHeight50p justiAlig standardDivRowNWNH">
+                                    <Img fixed={data.searchIcon.childImageSharp.fixed} />
+                                </div>
                             </div>
                         </div>
-                        <p className="textAlignedCenter xSmalltext">Search Tx/#Block/@Username (+Enter)</p>
+                    </div>
+                    <div className="standardDiv30Percent justiAlig">
+                        <p className="textColorWhite">Space for ads</p>
                     </div>
                 </div>
+                {
+                    (queryType.type === 'default') &&
+                    <div>
+                        <Btncollapse title={"Show/Hide Market CAP & Chart"} toogleValue={showInfoHive} btnAction={() => setShowInfoHive(!showInfoHive)}/>
+                        {
+                            showInfoHive && hiveDataCG &&
+                            <div className="standardDivRowNWNH justMargin0auto minimumMarginTB justWidth90 justHeight200p justRounded justBorders">
+                                <ul className="standardUlRowFlexPlain justWidth90">
+                                    <li className="standardDivColW50perc normalTextSmall contentMiniMargins">
+                                        <p className="noMarginsTB">HIVE/USD: {hiveDataCG.market_data.current_price.usd.toFixed(2)}</p>
+                                        <p className="noMarginsTB">High 24h: {hiveDataCG.market_data.high_24h.usd.toFixed(2)}</p>
+                                        <p className="noMarginsTB">Low 24h: {hiveDataCG.market_data.low_24h.usd.toFixed(2)}</p>
+                                        <p className="noMarginsTB">Market CAP[USD]: {hiveDataCG.market_data.market_cap.usd}</p>
+                                    </li>
+                                    <li className="standardDivColW50perc">
+                                        {
+                                            charData && <Charter arrayData={charData} daysToHandle={8}/>
+                                        }
+                                    </li>
+                                </ul>
+                            </div>
+                        }
+                        <div>
+                            <Btncollapse title={"Show/Hide Live Blocks on Hive"} toogleValue={showBObs} btnAction={() => setShowBObs(!showBObs)}/>
+                            {
+                                showBObs && 
+                                <Blockchainobserver renderMode={"fullMode"} nBlocks={5}
+                                    testingData={false} showBlocks={false} timeChecks={2000} 
+                                    CbOnClick={itemClickedToquery}
+                                />
+                            }
+                        </div>
+                    </div>
+                }
                 {
                     txToLookUp && !loadingQuery &&
                     <div>
@@ -342,7 +449,7 @@ const Jabexplorer = (props) => {
                         <hr></hr>
                     </div>
                 }
-                <h2>Block Info</h2>
+                <h2>Info / Block / Tx / Username</h2>
                 {
                     loadingBlock && <div className="standardDivRowFlex100pX100pCentered miniMarginTB"><Loader logginIn={true} typegif={"blocks"}/></div>
                 }

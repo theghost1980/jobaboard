@@ -29,9 +29,11 @@ const Previewjob = (props) => {
     const makeDeal = (job) => {
         if(userdata.logged && userdata.username){
             //process the order using the job object.
-            navigate("/checkout",{
-                state : job
-            });
+            if(userdata.username !== job.username){
+                navigate("/checkout",{
+                    state : job
+                });
+            }
         }else{
             navigate("/signup/");
         }
@@ -53,7 +55,7 @@ const Previewjob = (props) => {
     //END functions/CB
 
     return (
-        <div className="borderedFlexShadowMinContent relativeDiv coloredContrast1">
+        <div className="borderedFlexShadowMinContent relativeDiv coloredContrast1 marginTop3x">
             <Btnclosemin btnAction={cbClose} />
             {/* {JSON.stringify(job)} */}
             {
@@ -67,11 +69,11 @@ const Previewjob = (props) => {
                             </div>
                         }
                         <div className="standardBlockMaxW80p">
-                            <div className="standardDivRowFullW justiAlig">
+                            <div className="standardDivRowFullW justSpaceAround justAligned">
                                 <Miniprofile username={job.username} />
-                                <div>
+                                <div className="justWidth20">
                                     {/* TODO: logic if logged, negociate with user if not take to login & save in history this job, so after log in redirect to this action */}
-                                    <button onClick={() => makeDeal(job)} title="Make this deal!">Jab It</button>
+                                    <button className="justWidth100per" onClick={() => makeDeal(job)} title="Make this deal!">Jab It</button>
                                 </div>
                             </div>
                             <h1>{job.title}</h1>

@@ -9,6 +9,9 @@ import Btninfo from '../btns/btninfo';
 
 //constants
 const msg = "Important: Once you send a token to an account, the transaction will be irreversible, so please review it carefully.";
+const userEP = process.env.GATSBY_userEP;
+const nfthandlermongoEP = process.env.GATSBY_nfthandlermongoEP;
+//end contants
 
 // Important TODO
 // This component will:
@@ -41,6 +44,44 @@ const Nftsender = (props) => {
     const [newHolding, setNewHolding] = useState(null);
 
     // functions/CB
+    async function processEvent(arrayEvents){
+        const nfts = [];
+        const nfts_ids = [];
+        console.log('Received on processEvent', arrayEvents);
+        arrayEvents.map(nftEvent => {
+            if(nftEvent.event === "transfer"){
+                nfts.push(
+                    { ntf_id: Number(nft._id), ntf_symbol: nft.symbol, nft_instance_id: Number(nftEvent.data.id),}
+                )
+                nfts_ids.push(Number(nftEvent.data.id)); //to store only the id of each instance
+            }
+        });
+        console.log('About to send to BE:',nfts);
+        console.log('To send to:', transferTo);
+        // TODO now modify the old owner of this nfts to the newone
+        const headers = {
+            'x-access-token': userdata.token,
+            'query': JSON.stringify({ username: transferTo, updatedAt: new Date() }),
+            'filter': JSON.stringify({ nft_instance_id: { $in: [...nfts_ids] }, ntf_symbol: nft.symbol }),
+            'updatemany': 'YESPLEASE!',
+        }
+        sendPostPlain(nfthandlermongoEP+"updateInstanceNFTfield",headers)
+        .then(response => console.log(response))
+        .catch(error => console.log('Error trying to add new instance.',error));
+
+        // const headers = { 'x-access-token': userdata.token, 'query': JSON.stringify({ $pull: { nfts: nfts } }), 'toupdateon': null};
+        // sendPostPlain(userEP+"updateUserField", headers)
+        // .then(response => {
+        //     //TODO add to OPlogger on BE
+        //     console.log('User updated by removing the nfts in user.nfts, please check!',response);
+        // }).catch(error => { console.log('Error updating nfts field on user!',error)});
+        // const headers2 = { 'x-access-token': userdata.token, 'query': JSON.stringify({ $push: { nfts: nfts } }), 'toupdateon': transferTo};
+        // sendPostPlain(userEP+"updateUserField", headers2)
+        // .then(response => {
+        //     //TODO add to OPlogger on BE
+        //     console.log('User updated by adding the nfts in user.nfts, please check!',response);
+        // }).catch(error => { console.log('Error updating nfts field on user!',error)});
+    }
     function processCustomJson(jsonData, msg){
         if(isKeychainInstalled){
             setWorking(true);
@@ -163,6 +204,7 @@ const Nftsender = (props) => {
                                         if(payload.isSignedWithActiveKey && payload.nfts[0].ids.length === payloadArray.length){
                                             updateHolding(payload.nfts[0].ids.length);
                                             alert(`Successfully sent ${payload.nfts[0].ids.length} ${nft.symbol} Token(s) to ${transferTo}`);
+                                            processEvent(logs.events);
                                             setTx(null);
                                             cbOnFinish();
                                             // TODO important
@@ -178,6 +220,7 @@ const Nftsender = (props) => {
                                         if(payload.isSignedWithActiveKey && payload.nfts.length === payloadArray.length){
                                             updateHolding(payload.nfts.length);
                                             alert(`Successfully sent ${payload.nfts.length} ${nft.symbol} Token(s) to ${transferTo}`);
+                                            processEvent(logs.events);
                                             setTx(null);
                                             cbOnFinish();
                                         }
@@ -232,6 +275,13 @@ const Nftsender = (props) => {
         return response.json(); 
     };
     async function sendPostBEJH(url = '', headers) {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: headers,
+        });
+        return response.json(); 
+    };
+    async function sendPostPlain(url = '', headers) {
         const response = await fetch(url, {
             method: 'POST',
             headers: headers,

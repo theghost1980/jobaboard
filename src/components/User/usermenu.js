@@ -149,7 +149,7 @@ const UserMenu = (props) => {
 
     return (
             <div className="userMenuContainer">
-                <ul className={`ulMenuOptionUser ${fixed ? `makeFixeduserMenu` : null}`}>
+                <ul className={`ulMenuOptionUser  ${fixed ? `makeFixeduserMenu fadeInLonger` : null}`}>
                     <Link to="/app/profile" className="gralLink" onClick={() => setActualMenu("Profile")}>
                         <li className="menuOptionLi">
                             <Img fixed={data.profileIcon.childImageSharp.fixed} className="imgOptionsUser" />

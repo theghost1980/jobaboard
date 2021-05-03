@@ -26,6 +26,10 @@ GatsbyImageSharpFluid_withWebp_tracedSVG */
 /* https://www.pexels.com/photo/people-inside-strucure-449559/ */
 /* https://www.pexels.com/photo/two-white-printer-papers-near-macbook-on-brown-surface-590016/ */
 /* https://www.pexels.com/photo/photo-of-ipad-on-orange-fruits-927802/ */
+/* about svg bg TODO: add the license info on credits page */
+/* https://www.svgbackgrounds.com/license/ */
+/* https://www.svgbackgrounds.com/#protruding-squares */
+/* shine effect: http://jsfiddle.net/nqQc7/512/ https://stackoverflow.com/users/4620771/nenad-vracar */
 /* end credits */
 
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;500;600;700&display=swap');
@@ -43,14 +47,25 @@ html, body {
 body {
     font-family: 'Poppins', sans-serif;
     -webkit-font-smoothing: antialiased;
+    scrollbar-color: orange rgba(255, 255, 255, 0);
 }
 /* body::-webkit-scrollbar-track {
     background: whitesmoke;
-}
-body::-webkit-scrollbar-thumb {
-    border-radius: 6px;
-    border: 2px solid orange;
+} */
+/* body::-webkit-scrollbar-thumb {
+    border-radius: 2px;
+    width: 2em;
 }  */
+body::-webkit-scrollbar {
+    width: 0.5em;
+}
+.scrolBarThin::-webkit-scrollbar {
+    width: 0.5em !important;
+}
+.scrolBarThin::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    border: 1px solid orange;
+}
 
 /* testing test components */
 .loginLogicCont {
@@ -73,6 +88,7 @@ body::-webkit-scrollbar-thumb {
     list-style: none;
     justify-content: center;
     align-items: center;
+    padding-inline-start: 0px;
 }
 #mainMenu > li {
     float: inherit;
@@ -144,6 +160,13 @@ body::-webkit-scrollbar-thumb {
     height: 100%;
     justify-content: space-around;
 }
+.standardDiv80Auto {
+    display: flex;
+    flex-direction: column;
+    width: 80%;
+    height: auto;
+    position: relative;
+}
 .standardDiv70Auto {
     display: flex;
     flex-direction: column;
@@ -154,8 +177,18 @@ body::-webkit-scrollbar-thumb {
     border-radius: 10px;
     position: relative;
 }
+.standardDiv70plain {
+    display: flex;
+    flex-direction: column;
+    width: 70%;
+    height: auto;
+}
 
 /* shared classes */
+.bgBlocksBlue {
+    background-color: #337ca0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='117' height='117' viewBox='0 0 200 200'%3E%3Cdefs%3E%3ClinearGradient id='a' gradientUnits='userSpaceOnUse' x1='100' y1='33' x2='100' y2='-3'%3E%3Cstop offset='0' stop-color='%23000' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%23000' stop-opacity='1'/%3E%3C/linearGradient%3E%3ClinearGradient id='b' gradientUnits='userSpaceOnUse' x1='100' y1='135' x2='100' y2='97'%3E%3Cstop offset='0' stop-color='%23000' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%23000' stop-opacity='1'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg fill='%232b6988' fill-opacity='0.15'%3E%3Crect x='100' width='100' height='100'/%3E%3Crect y='100' width='100' height='100'/%3E%3C/g%3E%3Cg fill-opacity='0.15'%3E%3Cpolygon fill='url(%23a)' points='100 30 0 0 200 0'/%3E%3Cpolygon fill='url(%23b)' points='100 100 0 130 0 100 200 100 200 130'/%3E%3C/g%3E%3C/svg%3E");
+}
 .btnWhiteBackAbsClose {
     display: flex;
     width: 40px;
@@ -234,6 +267,9 @@ body::-webkit-scrollbar-thumb {
 .textColorWhite {
     color: white;
 }
+.textColorBlack {
+    color: black;
+}
 .trTablePortP {
     background: orange;
     color: white;
@@ -302,8 +338,21 @@ body::-webkit-scrollbar-thumb {
     width: 30px;
     height: 30px;
 }
+.justWH35 {
+    width: 35px;
+    height: 35px;
+}
 .justWidth70{
     width: 70%;
+}
+.justWidth60{
+    width: 60%;
+}
+.justWidth50{
+    width: 50%;
+}
+.justWidth40{
+    width: 40%;
 }
 .justWidth90{
     width: 90%;
@@ -311,8 +360,20 @@ body::-webkit-scrollbar-thumb {
 .justWidth30{
     width: 30%;
 }
+.justWidth20{
+    width: 20%;
+}
 .justWidth200{
     width: 200px;
+}
+.justWidth300{
+    width: 300px;
+}
+.justWidth250{
+    width: 250px;
+}
+.justWidth120px{
+    width: 250px;
 }
 .justWidth100per{
     width: 100%;
@@ -428,6 +489,15 @@ body::-webkit-scrollbar-thumb {
 .scaleHovered:hover {
     transform: scale(1.1);
 }
+.contentBody > p > img {
+    width: 100%;
+}
+.contentBody > img {
+    width: 100%;
+}
+.pull-right > p > img {
+    width: 100%;
+}
 .hoveredOpaacity:hover{
     opacity: 1;
     cursor: crosshair;
@@ -499,9 +569,15 @@ body::-webkit-scrollbar-thumb {
 .coloredContrast2 {
     background: #214E34;
 }
+.coloredContrastBlue {
+    background: #337CA0;
+}
 .bordersRounded {
     border: 1px solid orange;
     border-radius: 10px;
+}
+.justMiniRounded {
+    border-radius: 4px;
 }
 .justRounded {
     border-radius: 10px;
@@ -518,6 +594,9 @@ body::-webkit-scrollbar-thumb {
 }
 .marginTop {
     margin-top: var(--marginBewteen-Objects);
+}
+.marginTop3x {
+    margin-top: calc(var(--marginBewteen-Objects)*3);
 }
 .activeSelected {
     box-shadow: 1px 2px 4px 1px orange;
@@ -557,6 +636,9 @@ body::-webkit-scrollbar-thumb {
 .fontXssmall {
     font-size: xx-small !important;
 }
+.highLightRow {
+    background: #337ca0 !important;
+}
 .wrapDiv{
     flex-wrap: wrap;
 }
@@ -570,6 +652,9 @@ body::-webkit-scrollbar-thumb {
 }
 .addAutoW {
     width: auto;
+}
+.activeSelectedText {
+    font-weight: bold;
 }
 .standardLiHovered {
     transition: all .2s cubic-bezier(0.455, 0.03, 0.515, 0.955);
@@ -609,6 +694,12 @@ body::-webkit-scrollbar-thumb {
     display: block;
     width: 80px;
     height: auto;
+}
+.iconBlock25p {
+    display: block;
+    width: 25px;
+    height: 25px;
+    
 }
 .standardFlexCol95 {
     display: flex;
@@ -686,6 +777,12 @@ body::-webkit-scrollbar-thumb {
 }
 .marginLeft{
     margin-left: var(--marginBewteen-Objects);
+}
+.justPaddingRight20p {    
+    padding-right: 20px;
+}
+.justMiniPadding {
+    padding: 4px;
 }
 .standardUlRow {
     display: flex;
@@ -805,6 +902,10 @@ body::-webkit-scrollbar-thumb {
 .standardContentMargin {
     margin: var(--marginBewteen-Objects);
 }
+.standardContentMarginLR {
+    margin-left: var(--marginBewteen-Objects);
+    margin-right: var(--marginBewteen-Objects);
+}
 .contentMiniMargins {
     margin-left: calc(var(--marginBewteen-Objects)/2);
     margin-right: calc(var(--marginBewteen-Objects)/2);
@@ -833,19 +934,52 @@ body::-webkit-scrollbar-thumb {
     justify-content: center;
     align-items: center;
 }
+.jutsMinHeight320px {
+    min-height: 320px;
+}
+.jutsMinHeight200px {
+    min-height: 200px;
+}
 .justMaxHeight {
     max-height: 90px;
+}
+.justMaxHeight300p {
+    max-height: 300px;
+}
+.justHeight300pOverY {
+    height: 300px;
+    overflow-x: scroll;
+}
+.justHeight150pOverY {
+    height: 150px;
+    overflow-x: scroll;
+}
+.justHeight500pOverY {
+    height: 500px;
+    overflow-y: scroll;
 }
 .jusBordersRounWhiteBack {
     border: 1px solid black;
     border-radius: 10px;
     background: white;
 }
+.justMiniMargins{
+    margin: 4px;
+}
 .justMarginAuto {
     margin: auto;
 }
+.justMarginBottom {
+    margin-bottom: var(--marginBewteen-Objects);
+}
 .justMargin0auto {
     margin: 0 auto;
+}
+.justHeight200p {
+    height: 200px;
+}
+.justHeight400p {
+    height: 400px;
 }
 .justHeight90p {
     height: 90px;
@@ -855,6 +989,15 @@ body::-webkit-scrollbar-thumb {
 }
 .justHeight60p {
     height: 60px;
+}
+.justHeight50p {
+    height: 50px;
+}
+.justHeight45p {
+    height: 45px;
+}
+.justHeight70per {
+    height: 70%;
 }
 .whiteBack {
     background: white;
@@ -905,6 +1048,33 @@ body::-webkit-scrollbar-thumb {
     width: 100%;
     height: auto;
 }
+.standardDivRowPlain {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: auto;
+}
+.standardDivRowWHAuto{
+    display: flex;
+    flex-direction: row;
+    width: auto;
+    height: auto;
+}
+.standardDivMini {
+    display: flex;
+    flex-direction: column;
+    width: 40px;
+    height: 40px;
+}
+.standardDivRowFullWNH {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+.standardDivRowNWNH {
+    display: flex;
+    flex-direction: row;
+}
 .standardDivRow90W {
     display: flex;
     flex-direction: row;
@@ -920,6 +1090,9 @@ body::-webkit-scrollbar-thumb {
 .justifyContentSpaced {
     justify-content: space-between; 
 }
+.justifyContentSpacedAro {
+    justify-content: space-around; 
+}
 .cursorDelete {
     cursor: move;
 }
@@ -933,6 +1106,12 @@ body::-webkit-scrollbar-thumb {
     display: flex;
     flex-direction: column;
     width: 90%;
+    height: auto;
+}
+.standardDivColW50perc {
+    display: flex;
+    flex-direction: column;
+    width: 50%;
     height: auto;
 }
 .justJustifiedContent {
@@ -956,7 +1135,7 @@ body::-webkit-scrollbar-thumb {
     top: 10px;
 }
 .justAbsolutePos {
-    position: absolute;
+    position: absolute !important;
 }
 .justAligned {
     align-items: center;
@@ -1008,11 +1187,28 @@ body::-webkit-scrollbar-thumb {
     width: 30%;
     height: auto;
 }
+.standardDiv70Percent {
+    display: flex;
+    flex-direction: column;
+    width: 70%;
+    height: auto;
+}
+.standardDiv20Percent {
+    display: flex;
+    flex-direction: column;
+    width: 20%;
+    height: auto;
+}
 .standardBlock25px {
     display: inline-block;
     width: 25px;
     height: 25px;
     margin: 0 auto;
+}
+.standardBlock150px {
+    display: block;
+    width: 150px;
+    height: 150px;
 }
 .marginAuto{
     margin: 0 auto;
@@ -1043,6 +1239,13 @@ body::-webkit-scrollbar-thumb {
     align-items: center;
     width: 100%;
     height: 40px;
+}
+.standardDiv250x140OverflowH {
+    display: flex;
+    flex-direction: column;
+    width: 250px;
+    height: 140px;
+    overflow: hidden;
 }
 .standardDivRowFlex80p {
     display: flex;
@@ -1176,6 +1379,11 @@ body::-webkit-scrollbar-thumb {
     width: 60px;
     height: auto;
 }
+.miniImagePosts250p {
+    display: block;
+    width: 250px;
+    height: auto;
+}
 .minibtn {
     justify-content: center;
     align-items: center;
@@ -1246,6 +1454,9 @@ body::-webkit-scrollbar-thumb {
 }
 .ulImageUploader > li {
     margin: var(--marginBewteen-Objects);
+}
+.textEditorBody {
+    min-height: 300px;
 }
 .standarBtnCont120x50Margin{
     display: flex;
@@ -1347,6 +1558,79 @@ body::-webkit-scrollbar-thumb {
 .normalTextSmall {
     font-size: small;
 }
+.goldeBorderRound {
+    border: 2px solid gold;
+    border-radius: 8px;
+}
+/* shinning Effect */
+    .shinning {
+        position: relative;
+        overflow: hidden;
+        /* width: 50px;
+        height: 50px; */
+        width: 100px;
+        height: auto;
+        display: flex;
+        
+        /* margin: 25px 0 25px 25px; */
+        border-radius: 5px;
+        color: rgb(252, 237, 172);
+        text-decoration: none;
+        text-align: center;
+        line-height: 50px;
+        font-size: 12px;
+        font-family: sans-serif;
+    }
+    .shinning:after {
+        animation: shine 3s ease-in-out  infinite;
+        animation-fill-mode: forwards;  
+        content: "";
+        position: absolute;
+        top: -110%;
+        left: -210%;
+        width: 200%;
+        height: 200%;
+        opacity: 0;
+        transform: rotate(30deg);
+        
+        background: rgba(255, 255, 255, 0.13);
+        background: linear-gradient(
+          to right, 
+          rgba(255, 255, 255, 0.13) 0%,
+          rgba(255, 255, 255, 0.13) 77%,
+          rgba(255, 255, 255, 0.5) 92%,
+          rgba(255, 255, 255, 0.0) 100%
+        );
+      }
+      /* Active state */
+    .shinning:active:after {
+        opacity: 0;
+    }
+    @keyframes shine{
+        10% {
+        opacity: 1;
+        top: -30%;
+        left: -30%;
+        transition-property: left, top, opacity;
+        transition-duration: 0.7s, 0.7s, 0.15s;
+        transition-timing-function: ease;
+        }
+        100% {
+        opacity: 0;
+        top: -30%;
+        left: -30%;
+        transition-property: left, top, opacity;
+        }
+    }
+/* emd shinning effect */
+.textSmallGray {
+    font-size: small;
+    color: gray;
+}
+.textXSmallGray {
+    font-size: x-small;
+    color: gray;
+}
 .hoveredAlert:hover {
     background: #EA3546;
     color: white;
@@ -1370,6 +1654,12 @@ body::-webkit-scrollbar-thumb {
 }
 .justOverflowAuto{
     overflow: auto;
+}
+.justOverflowX {
+    overflow-x: scroll;
+}
+.justOverflowY{
+    overflow-y: scroll;
 }
 .standardFormColHorFullWAutoH{
     display: flex;
@@ -1446,6 +1736,10 @@ body::-webkit-scrollbar-thumb {
 .smallText {
     font-size: small;
 }
+.justOverflowYMaxH100px {
+    max-height: 100px;
+    overflow-y: scroll;
+}
 .miniPaddingTB {
     padding-top: calc(var(--marginBewteen-Objects)/2);
     padding-bottom: calc(var(--marginBewteen-Objects)/2);
@@ -1481,6 +1775,10 @@ body::-webkit-scrollbar-thumb {
 .miniMarginTB {
     margin-top: calc(var(--marginBewteen-Objects)/2);
     margin-bottom: calc(var(--marginBewteen-Objects)/2);
+}
+.xtraMiniMarginTB4p {
+    margin-top: 4px;
+    margin-bottom: 4px;
 }
 .extraMiniMarginsTB {
     margin-top: 4px;
@@ -1639,11 +1937,17 @@ body::-webkit-scrollbar-thumb {
     top: 0px;
     right: 0px;
 }
+.justTop100p {
+    top:100px;
+}
 .justBorders {
     border: 1px solid orange;
 }
 .justSpaceAround {
     justify-content: space-around;
+}
+.justSpaceEvenly {
+    justify-content: space-evenly;
 }
 .justshadows {
     box-shadow: 0px 1px 3px 1px orange;
@@ -1654,11 +1958,18 @@ body::-webkit-scrollbar-thumb {
 .justbackground {
     background: white; 
 }
+.justbackgroundOrange {
+    background: orange; 
+}
 .justBottomMargin {
     margin-bottom: var(--marginBewteen-Objects);
     margin-left: 0px;
     margin-right: 0px;
     margin-top: 0px;
+}
+.justBottomPosLeft0 {
+    bottom: 0px;
+    left: 0px;
 }
 .justBottomMarginMin {
     margin-bottom: calc(var(--marginBewteen-Objects)/2);
@@ -1677,6 +1988,14 @@ body::-webkit-scrollbar-thumb {
     bottom: -20px;
     color: #EA3546;
 } */
+.minidisplay {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-content: center;
+    width: 36px;
+    height: 36px;
+}
 .miniDivAbs150{
     display: flex;
     width: 150px;
@@ -1746,6 +2065,10 @@ body::-webkit-scrollbar-thumb {
 }
 .smallImage {
     width: 100px;
+    height: auto;
+}
+.xSmallImage {
+    width: 50px;
     height: auto;
 }
 .smallImageMax120x120 {
@@ -1920,6 +2243,9 @@ body::-webkit-scrollbar-thumb {
     padding-top: 10px;
     padding-bottom: 10px;
 }
+.justpadding10p {
+    padding: 10px;
+}
 .justPosAbsRightTop {
     position: absolute;
     top: 0px;
@@ -1969,6 +2295,9 @@ body::-webkit-scrollbar-thumb {
     margin-right: 10px;
     font-size: x-small;
 }
+.justxxsmalltext {
+    font-size: xx-small;
+}
 .ulActionsWallet {
     display: flex;
     flex-direction: row;
@@ -2015,6 +2344,9 @@ body::-webkit-scrollbar-thumb {
 .justBackBlack {
     background: black;
 }
+.justFlexWrap {
+    flex-wrap: wrap;
+}
 .justBackRed {
     background: #EA3546;
 }
@@ -2027,7 +2359,6 @@ body::-webkit-scrollbar-thumb {
     justify-content: center;
     display: flex;
     flex-direction: column;
-    align-items: center;
 }
 .textNomarginXSmall {
     margin-bottom: 0px;
@@ -2316,6 +2647,10 @@ main {
 .noMargins {
     margin: 0px;
 }
+.noMarginsTB {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
 .noMarginSmall {
     margin: 0px;
     font-size: small;
@@ -2345,7 +2680,7 @@ main {
     display: flex;
     flex-direction: row;
     align-items: center;
-    width: 100%;
+    width: auto;
     height: auto;
     list-style: none;
     margin-block-end: 0px;
@@ -2445,7 +2780,7 @@ nav {
 .navbarRow {
     display: flex;
     flex-direction: row;
-    justify-content: flex-start;
+    justify-content: space-between;
     width: 100%;
     flex-wrap: wrap;
 }
@@ -2522,6 +2857,7 @@ nav {
     margin-block-start: 0px;
     margin-block-end: 0px;
     height: auto;
+    flex-wrap: wrap;
 }
 .menuBottomNavUl > li {
     float: inherit;
@@ -3218,5 +3554,8 @@ input[type=text]:focus{
  }
  .shadowsTitles{
     text-shadow: 2px 2px orange;
+ }
+ .shadowsTitlesSoft{
+    text-shadow: 1px 2px orange;
  }
 /* end global */
