@@ -6,20 +6,22 @@ import OutLink from '../btns/btnoutlink';
 // TODO: add a mechanism to set options: Update, Edit, Delete.
 /**
  * Used it to visualize a record of any type and amount of fields. 
+ * (***) you can specify if the link is a txIb by using {..., link: true, txLink: true }
  * @param {String} xclassCSS - Optional The css Extra class.
  * @param {String} imgClassCSS - Mandatory if you need to show a main image for this record.
  * @param {Function} clickedSubItemCB - Optional The function/CB to return the hovered item on menu.
  * @param {Function} closeCB - Optional, The function/CB to send the closing action to.
  * @param {[Object]} item - The single object to visualize and interact to.
- * @param {Object} toShow - The props you want to display of this array of items' As [{}] each object can be as: { field:'image', type: 'String', link: true }, you can omit the link but not the field,type.
+ * @param {Object} toShow - The props you want to display of this array of items' As [{}] each object can be as: { field:'image', type: 'String', link: true }, you can omit the link but not the field,type. (*** See note above.)
  * @param {Object} imageMainField - as { imgField: 'image'}. Mandatory to render a record with a main image to show.
  * @param {String} titleRecord - Optional if you want to show a hTag on top of the record.
  * @param {Boolean} devMode - Optional to see all the props and details. default as false.
  * @param {Boolean} miniSizes - optional if you require smaller sizes of all
+ * @param {Object} stylishOptions - optional if you need as { xtraCssF: 'theCssClass', xtraCssD: 'idem' }
  */
 
  const Recordnator = (props) => {
-    const { xclassCSS, imgClassCSS, clickedSubItemCB, item, toShow, devMode, imageMainField, titleRecord, closeCB, miniSizes } = props;
+    const { xclassCSS, imgClassCSS, clickedSubItemCB, item, toShow, devMode, imageMainField, titleRecord, closeCB, miniSizes, stylishOptions } = props;
 
     //to load on init
     useEffect(() => {
@@ -34,6 +36,7 @@ import OutLink from '../btns/btnoutlink';
             console.log(`titleRecord: ${titleRecord}`);
             console.log(`closeCB ${closeCB}`);
             console.log(`miniSizes ${miniSizes}`);
+            console.log(`stylishOptions ${stylishOptions}`);
         }
         // Object.entries(item).forEach(([key,value]) => {
         //     console.log(`key: ${key}, value: ${value}`);
@@ -89,11 +92,11 @@ import OutLink from '../btns/btnoutlink';
                     toShow.map(showField => {
                         return (
                             <div key={`${item._id}-${showField.field}`} className={`standardDivRowWHAuto justSpaceAround contentMiniMargins`}>
-                                <p className="justWidth30 xtraMiniMarginTB4p justOverflowX">{String(showField.field).substring(0,1).toUpperCase() + String(showField.field).substring(1,String(showField.field).length)}</p> 
-                                <p className="justWidth70 xtraMiniMarginTB4p">
+                                <p className={`justWidth30 xtraMiniMarginTB4p ${stylishOptions ? stylishOptions.xtraCssF : null }`}>{String(showField.field).substring(0,1).toUpperCase() + String(showField.field).substring(1,String(showField.field).length)}</p> 
+                                <p className={`justWidth70 xtraMiniMarginTB4p ${stylishOptions ? stylishOptions.xtraCssD : null }`}>
                                     {
                                     item.hasOwnProperty(showField.field) ? 
-                                        showField.link ? <OutLink xclassCSS={"normalTextSmall"} link={`${item[showField.field]}`} textLink={checkItem(item[showField.field],showField.type)} /> : checkItem(item[showField.field],showField.type) 
+                                        showField.link ? <OutLink xclassCSS={"normalTextSmall"} link={`${showField.txLink ? `/jabexplorer?tx_id=${item[showField.field]}` : item[showField.field]}`} textLink={checkItem(item[showField.field],showField.type)} /> : checkItem(item[showField.field],showField.type) 
                                         : 'not set'
                                     }
                                 </p>

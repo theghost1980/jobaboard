@@ -9,6 +9,8 @@ import Tablinator from '../interactions/tablinator';
 import Blogeditor from '../Blog/blogeditor';
 import ImageUploader from "react-images-upload";
 import Imageselector from '../interactions/imageselector';
+import Formulator from '../interactions/formulator';
+import Btncollapse from '../btns/btncollapse';
 
 //TODO important: as soon as we test using the @sexosentido account
 //add @jobaboard as the account.
@@ -18,6 +20,7 @@ const buildHook = process.env.GATSBY_buildHook;
 const adminEP = process.env.GATSBY_adminEP;
 const itemsMenu = [
         {title: 'Manage Categories', cbProp: 'manageCat', subMenu: [ 'List Categories', 'Add New'],},
+        {title: 'Manage Menus', cbProp: 'manageMenus', subMenu: [ 'List Main Menu'],},
         {title: 'Manage Platform', cbProp: 'managePlat', subMenu: [ 'List Options TODO', 'Blog @sexosentido', 'Manage Image Bank CDN', 'Fire a Rebuild Hook']},
         {title: 'Logs', cbProp: 'manageLogs', subMenu: [ 'List Logs - TODO']},
 ]
@@ -54,8 +57,20 @@ const Managewebcontent = (props) => {
         file: File, 
         active: Boolean,
     };
+    const initialMenu = {
+        title: "", 
+        inner_link: "", 
+        hideOnLoggin: false, 
+        link: false,
+        active: true,
+        icon_url: "",
+        show_icon: false,
+        createdAt: Date(),
+        updatedAt: Date(),
+    };
     const userdata = check();
     const [categories, setCategories] = useState(null);
+    const [mainMenus, setMainMenus] = useState(null);
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [showEditor, setShowEditor] = useState(false);
     const [errorImageIcon, setErrorImageIcon] = useState(false);
@@ -65,8 +80,10 @@ const Managewebcontent = (props) => {
     const [errorValidation, setErrorValidation] = useState({
         error: false, message: '',
     })
-    const [category, setCategory] = useState(initialCat)
+    const [category, setCategory] = useState(initialCat);
+    const [mainMenu, setMainMenu] = useState(initialMenu);
     const [option, setOption] = useState("");
+    const [subOption, setSubOption] = useState({ option: '', subOption: '', item: {} });
 
     // TODO: organize and move as components all the posible parts
     //images handlers
@@ -88,6 +105,9 @@ const Managewebcontent = (props) => {
         width: '', height: '', unit: 'pixels',
     })
     //functions/CB for images handlers
+    function updateSubOption(name,value){ 
+        return setData(prevState => { return { ...prevState, [name]: _value }});
+    }
     const onDrop = picture => {
         console.log(picture);
         // setResetImgUp(!resetImgUp);
@@ -142,6 +162,19 @@ const Managewebcontent = (props) => {
             console.log('Error while fetching data from BE - admins', err);
         })
     }
+    function getAllMenus(){
+        const headers = { 'x-access-token': userdata.token, 'filter': JSON.stringify({}), 'limit': 0, 'sort': JSON.stringify({ order: 1 }) };
+        getData(adminEP+"getMmenuJab",headers)
+        .then(response => {
+            console.log(response);
+            if(response.status === 'sucess'){
+                setMainMenus(response.result);
+            }
+        })
+        .catch(err => {
+            console.log('Error while fetching data from BE - admins', err);
+        })
+    }
     function getFileName(image = String){
         const lastSlash = String(image).lastIndexOf("/");
         const subLast = String(image).substring(lastSlash + 1,String(image).length);
@@ -173,10 +206,17 @@ const Managewebcontent = (props) => {
     //END functions/CB for images handlers
     useEffect(() => {//to load on init
         getAllImages();
+        getAllMenus();
+        getAllCats();
     },[]);
     //End images handlers
 
     //functions/CB
+    const cbOnSuccess = (from) => {
+        // if(from === "Add New Main Menu"){
+            getAllMenus();
+        // }
+    }
     const clickedOnMenu = (menu) => {
         console.log('Clicked on', menu);
         if(menu === "Add New"){
@@ -288,6 +328,8 @@ const Managewebcontent = (props) => {
         }else if(item === "imageC"){
             console.log('Setting now on imageC:',value);
             setImagesToBe(prevState => { return {...prevState, [name]: value}});
+        }else if(item === "mainMenu"){
+            setMainMenu(prevState => { return { ...prevState, [name]: value }});
         }
     }
     const deleteCat = (catId) => {
@@ -411,12 +453,6 @@ const Managewebcontent = (props) => {
     ///////////////////////////////////////
     //END functions/CB
 
-    //load on init
-    useEffect(() => {
-        getAllCats();
-    }, []);
-    //END load on init
-
     //load on every state change
     //for testing TO delete later on
     // useEffect(() => {
@@ -440,31 +476,41 @@ const Managewebcontent = (props) => {
                 <Tablinator items={categories} toShow={['name','title','query','active']}
                     clickedSubItemCB={(item) => editSelected(item)}
                 />
-                {/* <table className="tablePortPublic smallText marginsTB relativeDiv">
-                    <tbody>
-                    <tr className="trTablePortP">
-                        <th>Name</th>
-                        <th>Title</th>
-                        <th>Query</th>
-                        <th>Sub categories count</th>
-                        <th>Active</th>
-                    </tr>
-                {
-                categories.map(cat => {
-                return (
-                        <tr key={cat._id} className="trTableWhite standardLiHovered" onClick={() => editSelected(cat)} >
-                            <td>{cat.name}</td>
-                            <td>{cat.title}</td>
-                            <td>{cat.query}</td>
-                            <td>{cat.sub_category.length}</td>
-                            <td>{cat.active ? "YES":"NO"}</td>
-                        </tr>
-                        )
-                    })
-                }
-                </tbody>
-                </table> */}
                 <button onClick={() => setOption("")}>close</button>
+                </div>
+            }
+            {
+                option === "List Main Menu" && mainMenus &&
+                <div>
+                <Tablinator items={mainMenus} toShow={['title','inner_link','hideOnLoggin','active','order']}
+                    clickedSubItemCB={(item) => setSubOption({ option: option, subOption: 'update', item: item})}
+                />
+                {
+                    (subOption.option === option)
+                    && (subOption.subOption !== '') &&
+                    <Formulator 
+                    title={`${subOption.subOption} Main Menu`} devMode={true} closeCb={() => setSubOption({ option: option, subOption: '', item: null})}
+                    inputs={[
+                        { id: 'input-JAB-1', iType: 'text', iName: 'title', iLabel: true, iValue: '', iValueType: 'String', iRequired: true, iPattern: 'general-string', iInfo: true, iMsg: 'Title of the menu, the ones will be shown. I.e: Marketplace.'},
+                        { id: 'input-JAB-2', iType: 'text', iName: 'inner_link', iLabel: true, iValue: '', iValueType: 'String', iRequired: true, iPattern: 'general-string-all', iInfo: true, iMsg: 'Inner link to component/Page. I.e: "/marketplace".'},
+                        { id: 'input-JAB-3', iType: 'switch', iName: 'link', iLabel: false, iValue: '', iValueType: 'Boolean', iRequired: true, iPattern: 'null', iInfo: true, iMsg: 'Define menu appearance. true: link, false: button. I.e: login button.' },
+                        { id: 'input-JAB-4', iType: 'switch', iName: 'hideOnLoggin', iLabel: false, iValue: '', iRequired: true, iValueType: 'Boolean', iPattern: 'null', iInfo: true, iMsg: 'Defines if menu hide after the user has logged in.' },
+                        { id: 'input-JAB-5', iType: 'text', iName: 'order', iLabel: true, iValue: '', iRequired: true, iValueType: 'Number', iPattern: 'general-number-2max', iInfo: true, iMsg: 'Number to order the menus when shown, left to right(visually), 1(most left as first one.)'},
+                        { id: 'input-JAB-7', iType: 'switch', iName: 'active', iLabel: false, iValue: '', iRequired: true, iValueType: 'Boolean', iPattern: 'null', iInfo: true, iMsg: 'Defines if the menu is active to show after the next build of the website.' },
+                    ]}
+                    actionType={subOption.subOption}
+                    beEP={adminEP+`${subOption.subOption}MmenuJab`}
+                    cbOnSuccess={cbOnSuccess}
+                    selectedToEdit={subOption.item}
+                    uniqueField={"title"}
+                />
+                }
+                <div className="standardDisplayJusSpaceAround">
+                    {   (subOption.subOption === '') &&
+                        <button onClick={() => setSubOption({ option: option, subOption: 'add', item: null})}>Add New Menu</button>
+                    }
+                    <button onClick={() => setOption("")}>Close Main Menus</button>
+                </div>
                 </div>
             }
             {

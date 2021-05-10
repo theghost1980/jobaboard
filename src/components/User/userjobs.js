@@ -156,10 +156,10 @@ const Userjobs = () => {
                         {
                             selectedJob &&
                                 <Absscreenwrapper xtraClass={"justifyFlexStart"}>
-                                    {
+                                    {/* {
                                         userdata.logged &&
                                         <Menujobs />
-                                    }
+                                    } */}
                                     <Previewjob job={selectedJob} cbClose={closeJOB} />
                                 </Absscreenwrapper>
                         }

@@ -11,9 +11,16 @@ import Previewjob from '../components/User/jobs/previewjob';
 import { check } from '../utils/helpers';
 import Jobresult from '../components/User/jobs/subcomponents/jobresult';
 import Btnswitch from '../components/btns/btnswitch';
+import Filtersquery from '../components/interactions/filtersquery';
 
 //constants
 const jobEP = process.env.GATSBY_jobEP;
+const pubEP = process.env.GATSBY_publicEP;
+const devMode = true;
+const defaultQuery = { 
+    category: "Graphics & Design", 
+    active: true, 
+}
 //end constants
 
 // TODO: pass the current category/sub category as context so the page
@@ -51,6 +58,21 @@ const Explore = (props) => {
                     }
                 }
         }
+        categories: allMongodbGatsbyCategories(sort: {fields: name}){
+            edges {
+              node {
+                  active
+                  id
+                  thumb
+                  image
+                  name
+                  query
+                  sub_category
+                  subtitle
+                  title
+              }
+          }
+        }
         employeeIcon: file(relativePath: {eq: "employee.png"}) {
              childImageSharp {
                  fixed(width: 50) {
@@ -72,13 +94,27 @@ const Explore = (props) => {
                  }
              }
          }
+         append_menu: allMongodbGatsbyCategories(sort: {fields: name}) {
+          edges {
+              node {
+                  active
+                  id
+                  thumb
+                  image
+                  name
+                  query
+                  sub_category
+                  subtitle
+                  title
+              }
+          }
+        }
     }
     `);
     //end grapqhql queries
 
     const [resultQuery, setResultQuery] = useState([]);
     const [loadingQuery, setLoadingQuery] = useState(false);
-    const [defaultQuery, setDefaultQuery] = useState(null);
     const query  = props.location.search;
     // console.log('Received prop to work with:');
     // console.log(query);
@@ -93,6 +129,8 @@ const Explore = (props) => {
     const [limit, setLimit] = useState(0);
     const [subCats, setSubCats] = useState(null);
     const [selectedSubCat, setSelectedSubCat] = useState("");
+
+    const [queryToExecute, setQueryToExecute] = useState(null); //as {job_type: '', active: true, category: '', sub_category: ''}
     // console.log(props);
 
     // useEffect(() => {
@@ -116,14 +154,51 @@ const Explore = (props) => {
 
     // }, [filterQuery]);
 
+    const executeFromFilters = (item) => {
+        console.log(item)
+        if(item.from === 'job_type'){
+            // const filterQuery: { job_type: 'string', active: true, category: 'string'. sub_category: 'string' }
+            // setValueQuery(item.from,String(item.name).toLowerCase());
+            setQueryToExecute({ 
+                job_type: String(item.name).toLowerCase(), 
+                active: true, 
+            });
+            setLoadingQuery(true);
+        }else if(item.from === 'category'){
+            setQueryToExecute({  
+                active: true, 
+                category: item.name,
+            });
+            setLoadingQuery(true);
+        }else if(item.from === "delivery_options"){
+            const days = Number(String(item.name).split(" ")[0]);
+            setQueryToExecute({
+                active: true,
+                days_to_complete: days,
+            })
+        }else if(item.from === "no_filters"){
+            if(item.name === "All"){ setQueryToExecute({ active: true })}
+            else{
+                const job_type = String(item.name).split(" ")[0].toLowerCase();
+                setQueryToExecute({
+                    active: true,
+                    job_type: job_type, 
+                });
+            }
+        }
+    }
     function setValueQuery(name,value){
         setFilterQuery(prevState => {
             return { ...prevState, [name]: value }
         })
     }
 
-    async function sendQuery(q){
-        getDataQ(jobEP + "publicAllJobsQuery",q,limit)
+    async function sendQuery(q, limit, sortby){
+        // TODO handle pagination
+        const headers = { 'query': JSON.stringify(q), 'limit': limit, 'sortby': JSON.stringify(sortby),};
+        if(devMode){ console.log('About to send:',{ ep: pubEP+"JobsQuery", headers: headers })};
+        setLoadingQuery(true);
+        dataRequest(pubEP+"JobsQuery", "GET", headers)
         .then(response => {
             console.log(response);
             // TODO handle pagination
@@ -138,92 +213,85 @@ const Explore = (props) => {
     }
 
     // to load on each change of state
-    useEffect(() => {
-        if(defaultQuery){
-            setLoadingQuery(true);
-            var passedQ = {
-                category: "", sub_category: ""
-            }
-            const cleanQ = decodeURI(defaultQuery);
-            // console.log(cleanQ);
-            const category = cleanQ.split("?category=")[1].split("|");
-            passedQ.category = category[0];
-            const sub_category = category[1].split("sub_category=")[1];
-            passedQ.sub_category = sub_category;
-            if(category[0]){
-                setValueQuery("category",category[0]);
-            }
-            if(sub_category){
-                setValueQuery("sub_category",sub_category);
-            }
-            passedQ.active = true;
-            const cleanedQ = cleanQuery(passedQ);
-            console.log('To execute on this cleaned one:');
-            console.log(cleanedQ);
-            sendQuery(cleanedQ);
-            setDefaultQuery(null);
-        }
-    }, [defaultQuery]);
+    // useEffect(() => {
+    //     if(defaultQuery){
+    //         setLoadingQuery(true);
+    //         var passedQ = {
+    //             category: "", sub_category: ""
+    //         }
+    //         const cleanQ = decodeURI(defaultQuery);
+    //         // console.log(cleanQ);
+    //         const category = cleanQ.split("?category=")[1].split("|");
+    //         passedQ.category = category[0];
+    //         const sub_category = category[1].split("sub_category=")[1];
+    //         passedQ.sub_category = sub_category;
+    //         if(category[0]){
+    //             setValueQuery("category",category[0]);
+    //         }
+    //         if(sub_category){
+    //             setValueQuery("sub_category",sub_category);
+    //         }
+    //         passedQ.active = true;
+    //         const cleanedQ = cleanQuery(passedQ);
+    //         console.log('To execute on this cleaned one:');
+    //         console.log(cleanedQ);
+    //         sendQuery(cleanedQ);
+    //         setDefaultQuery(null);
+    //     }
+    // }, [defaultQuery]);
     //search jobs 
+    // useEffect(() => {
+    //     if(query){
+    //         setLoadingQuery(true);
+    //         var passedQ = {
+    //             category: "", sub_category: ""
+    //         }
+    //         const cleanQ = decodeURI(query);
+    //         // console.log(cleanQ);
+    //         const category = cleanQ.split("?category=")[1].split("|");
+    //         passedQ.category = category[0];
+    //         const sub_category = category[1].split("sub_category=")[1];
+    //         passedQ.sub_category = sub_category;
+    //         if(category[0]){
+    //             setValueQuery("category",category[0]);
+    //         }
+    //         if(sub_category){
+    //             setValueQuery("sub_category",sub_category);
+    //         }
+    //         passedQ.active = true;
+    //         const cleanedQ = cleanQuery(passedQ);
+    //         console.log('To execute on this cleaned one:');
+    //         console.log(cleanedQ);
+    //         sendQuery(cleanedQ);
+    //     }
+    // },[query]);
     useEffect(() => {
-        if(query){
-            setLoadingQuery(true);
-            var passedQ = {
-                category: "", sub_category: ""
-            }
-            const cleanQ = decodeURI(query);
-            // console.log(cleanQ);
-            const category = cleanQ.split("?category=")[1].split("|");
-            passedQ.category = category[0];
-            const sub_category = category[1].split("sub_category=")[1];
-            passedQ.sub_category = sub_category;
-            if(category[0]){
-                setValueQuery("category",category[0]);
-            }
-            if(sub_category){
-                setValueQuery("sub_category",sub_category);
-            }
-            passedQ.active = true;
-            const cleanedQ = cleanQuery(passedQ);
-            console.log('To execute on this cleaned one:');
-            console.log(cleanedQ);
-            sendQuery(cleanedQ);
+        if(queryToExecute){ //as { job_type: '', active: true, category: '', sub_category: ''
+            sendQuery(queryToExecute,limit ? limit : null, {});
         }
-    },[query]);
+    },[queryToExecute]);
 
     //to load on init
     useEffect(() => {
         if(!query){
-            setDefaultQuery('explore?category=Graphics%20&%20Design|sub_category=none');
+            setQueryToExecute(defaultQuery);
+        }else{ //explore?category=Graphics%20&%20Design|sub_category=none
+            const cleanQ = decodeURI(query);
+            const category = cleanQ.split("?category=")[1].split("|");
+            const sub_category = category[1] ? category[1].split("sub_category=")[1] : null;
+            const tempQ = { active: true, category: category[0], sub_category: sub_category };
+            const cleanedQ = cleanQuery(tempQ);
+            setQueryToExecute(cleanedQ);
+            if(devMode){
+                console.log('Process:',{ cleanQ: cleanQ, category: category, sub_category: sub_category, tempQ: tempQ, cleanedQ: cleanedQ });
+            }
         }
     }, []);
     //END to load on init
 
     //fecthing data
-    async function getData(url = '') {
-        const response = await fetch(url, {
-        method: 'GET', // *GET, POST, PUT, DELETE, etc.
-        mode: 'cors', // no-cors, *cors, same-origin
-        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-        },
-        });
-        return response.json(); 
-    };
-    async function getDataQ(url = '',query = {}, limit = Number) {
-        const response = await fetch(url, {
-        method: 'GET', // *GET, POST, PUT, DELETE, etc.
-        mode: 'cors', // no-cors, *cors, same-origin
-        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'query': JSON.stringify(query),
-            'limit': limit,
-        },
-        });
+    async function dataRequest(url = '', requestType, headers) {
+        const response = await fetch(url, { method: requestType, headers: headers });
         return response.json(); 
     };
     //end fetchin data
@@ -232,24 +300,24 @@ const Explore = (props) => {
         setSelectedJOb(null);
     }
 
-    const executeQuery = () => {
-        console.log('Executing query + filters selected');
-        console.log(filterQuery,limit);
-        if(filterQuery !== initialStateQ){
-            setShowFilters(false);
-            setLoadingQuery(true);
-            console.log('Sending new query....');
-            const newNode = cleanQuery(filterQuery);
-            console.log(newNode);
-            sendQuery(newNode);
-        };
-    }
+    // const executeQuery = () => {
+    //     console.log('Executing query + filters selected');
+    //     console.log(filterQuery,limit);
+    //     if(filterQuery !== initialStateQ){
+    //         setShowFilters(false);
+    //         setLoadingQuery(true);
+    //         console.log('Sending new query....');
+    //         const newNode = cleanQuery(filterQuery);
+    //         console.log(newNode);
+    //         sendQuery(newNode);
+    //     };
+    // }
 
     const handleSelectedCat = (event) => {
         const cat = event.target.value;
         setValueQuery("category",cat);
         if(cat !== null && cat !== ""){
-            const _subCats = data.cats.edges.filter(({node: category}) => category.name === cat)[0].node.sub;
+            const _subCats = data.categories.edges.filter(({node: category}) => category.name === cat)[0].node.sub_category;
             setSubCats(_subCats);
         }else{
             setSubCats(null);
@@ -270,117 +338,10 @@ const Explore = (props) => {
     return (
         <Layout>
             <div className="exploreContainer">
-                {/* <p>query={query} For now brings all. TODO</p> */}
-                {/* todo set this one as a component to re-use where needed */}
-                <h1>Explore Categories</h1>
-                <div className="standardDivRowFullW">
-                        <p>Filters:</p>
-                        <div className="pointer standardDiv40px40pxPlain justiAlig scaleHovered" onClick={prepareQuery}>
-                            <Img fixed={data.filterIcon.childImageSharp.fixed} />
-                        </div>
-                </div>
-                {
-                    showFilters &&
-                    <div className="normalTextSmall standardFlexColBordered justRounded softBackground marginsTB">
-                        <div className="miniMargins">
-                        <div>
-                            <div className="standardDivRowFullW justifyContentSpaced">
-                                <p>Job/Service Type</p>
-                                <div className="standardDivRowFullW justifyContentSpaced textAlignedCenter miniMarginBottom">
-                                    <div className={`standardDiv30Percent justiAlig bordersRounded hoveredBoxShadow pointer ${filterQuery.job_type === "employee" ? 'activeSelected' : null}`}
-                                        onClick={() => setValueQuery("job_type","employee")}
-                                    >
-                                        <Img fixed={data.employeeIcon.childImageSharp.fixed} title={"Published to get hired"} className="miniMarginTop" />
-                                        <p>Offering a Service/Job</p>
-                                    </div>
-                                    <div className={`standardDiv30Percent justiAlig bordersRounded hoveredBoxShadow pointer ${filterQuery.job_type === "employer" ? 'activeSelected' : null}`}
-                                        onClick={() => setValueQuery("job_type","employer")}
-                                    >
-                                        <Img fixed={data.employerIcon.childImageSharp.fixed} title={"Published to Hire a professional"} className="miniMarginTop"/>
-                                        <p>Looking for a Service/Professional</p>
-                                    </div> 
-                                    <div className={`standardDiv30Percent justiAlig bordersRounded hoveredBoxShadow pointer ${!filterQuery.job_type ? 'activeSelected' : null}`}
-                                        onClick={() => setValueQuery("job_type","")}
-                                    >
-                                        <Img fixed={data.allIcon.childImageSharp.fixed} title={"Published to Hire and to be Hired"} className="miniMarginTop"/>
-                                        <p>Bring All Available(by default)</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="standardDivRowFullW justifyContentSpaced">
-                                <label htmlFor="category">Category</label>
-                                <select name="category" onChange={handleSelectedCat}>
-                                    <option defaultValue="Select one Option"></option>
-                                    {
-                                        data.cats.edges.map(({ node:cat }) => {
-                                            return (
-                                                <option key={cat.id}>{cat.name}</option>
-                                            )
-                                        })
-                                    }
-                                </select>
-                            </div>
-                            <div className="standardDivRowFullW justifyContentSpaced">
-                                <label htmlFor="sub_category">Sub Category</label>
-                                {   subCats &&
-                                    <select name="sub_category" onChange={(e)=>setValueQuery(e.target.name,e.target.value)}>
-                                    <option defaultValue="Select one Option"></option>
-                                    {
-                                        subCats.map(subcat => {
-                                            return (
-                                                <option key={`${subcat}-categoryJAB`}>{subcat}</option>
-                                            )
-                                        })
-                                    }
-                                </select>
-                                }
-                            </div>
-                            <div className="standardDivRowFullW justifyContentSpaced">
-                                <label className="justWidth30" htmlFor="limit">Limit to:</label>
-                                <input className="justWidth70" type="text" name="limit" onChange={(e) => setLimit(e.target.value)} />
-                            </div>
-                            <Btnswitch 
-                                btnAction={() => console.log('Pressed!')} 
-                                showValueDevMode={true}
-                                sideText={"Pro Users"}
-                                initialValue={false}
-                            />
-                            <Btnswitch 
-                                btnAction={() => console.log('Pressed!')} 
-                                showValueDevMode={true}
-                                sideText={"Top Users"}
-                                initialValue={false}
-                            />
-                            <Btnswitch 
-                                btnAction={() => console.log('Pressed!')} 
-                                showValueDevMode={true}
-                                sideText={"Verifyed Users"}
-                                initialValue={false}
-                                title={"Show only users who have passed our KYC."}
-                            />
-                            <Btnswitch 
-                                btnAction={() => console.log('Pressed!')} 
-                                showValueDevMode={true}
-                                sideText={"Users with experience on JAB"}
-                                initialValue={false}
-                                title={"Show only users who have completed at least, 1 service/hiring on JAB."}
-                            />
-                            {/* <Btnswitch 
-                                btnAction={(cen) => cen ? setValueQuery("job_type","employee"):setValueQuery("job_type","employer")} 
-                                showValueDevMode={true}
-                                sideText={"Show me only JABers"}
-                                title={"JABers are the ones who look to get hired."}
-                                initialValue={false}
-                            /> */}
-                        </div>
-                        <div className="standardDivRowFullW marginAuto justifyContentSEvenly">
-                            <button onClick={clearQuery}>Clear/Hide</button>
-                            <button onClick={executeQuery}>Apply</button>
-                        </div>
-                        </div>
-                    </div>
-                }
-                {/* end future component */}
+                {/* testing filter component */}
+                <Filtersquery clickCB={(item) => executeFromFilters(item)}
+                    arrayFilter={data.categories.edges.map(({ node:cat }) => cat)}
+                />
                 {
                     loadingQuery &&
                         <div className="standardDivRowFlex100pX100pCentered miniMarginTB">
@@ -390,10 +351,10 @@ const Explore = (props) => {
                 {
                     selectedJob &&
                         <Absscreenwrapper>
-                            {
+                            {/* {
                                 userdata.logged &&
                                 <Menujobs />
-                            }
+                            } */}
                             <Previewjob job={selectedJob} cbClose={closeJOB} userdata={userdata} />
                         </Absscreenwrapper>
                 }
@@ -401,6 +362,8 @@ const Explore = (props) => {
                     (resultQuery && resultQuery.length > 0)
                         &&
                         <div>
+                            <h1>Results on {queryToExecute.category} > {queryToExecute.sub_category ? queryToExecute.sub_category : null }</h1>
+                            <h4>Showing {resultQuery.length} Result{resultQuery.length === 1 ? '.':'s.'}</h4>
                             <ul className="standardUlHorMini wrapDiv coloredContrast3Soft justRounded">
                                     {
                                         resultQuery.map(job => {
@@ -416,14 +379,25 @@ const Explore = (props) => {
                         </div>
                 }
                 {
-                    (resultQuery.length === 0 && !showFilters && !loadingQuery) &&
-                        <div>
-                            <p>No Results for</p>
-                            <p>Cat: {filterQuery.category} > {filterQuery.sub_category}</p>
-                            <p>Try another Category using the filter :D</p>
+                    (resultQuery.length === 0 && !loadingQuery) &&
+                        <div className="imgContCatHAuto relativeDiv justMargin0auto justHeightAuto">
+                            {
+                                data.append_menu.edges.filter(cat_menu => cat_menu.node.name === filterQuery.category).map(catFound => {
+                                    console.log('NotFound on::::', catFound)
+                                    return (
+                                        <div key={catFound.node.id}>
+                                            <img src={catFound.node.image} className="imgCat " alt={`${catFound.node.name}-${catFound.node.id}`} />
+                                            <div className="justPosAbsTop20p standardDivColFullW justbackgroundblackalpha">
+                                                <h2 className="specialH2H3">Sorry, Not results on {catFound.node.name} > {filterQuery.sub_category}</h2>
+                                                <h3 className="specialH2H3">Please feel free to use the filters above. Or just surf the recommendations bellow.</h3>
+                                            </div>
+                                        </div>
+                                    )
+                                })
+                            }
                         </div>
                 }
-                <div>
+                <div className="justxxsmalltext">
                     <p>TODO we could have 2 or 3 sections as</p>
                     <ul>
                         <li>Top users</li>

@@ -43,7 +43,7 @@ const Loader = (props) => {
     }
 
     return (
-        <div className={`${xtraClass}`}>
+        <div className={`${xtraClass} zIndexTop`}>
         {
             logginIn &&
                 <div className={`loaderImgCont`}>

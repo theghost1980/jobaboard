@@ -30,6 +30,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { isKeychainInstalled, keychain } from '@hiveio/keychain';
 import { setStored } from '../features/socket/socketSlice';
 import { setValueOnProfile, selectProfile } from '../features/userprofile/profileSlice';
+import { isBrowser } from '../utils/logger';
 // end testing 
 
 //hivesigner SDK + init
@@ -42,6 +43,7 @@ var hivesigner = require('hivesigner');
 const secret = process.env.GATSBY_SECRET;
 const callbackURL = process.env.GATSBY_callbackURL;
 const beechatEP = process.env.GATSBY_beeChatEP;
+const devMode = true;
 // const beechatEP = "https://beechat.hive-engine.com/api/";
 const epsBee = [
     { ep: "messages/conversations",lsItem: "oldmessages"},
@@ -84,7 +86,7 @@ const Navbar = (props) => {
               }
           }
         }
-        main_menu: allMongodbGatsbyMainMenu {
+        main_menu: allMongodbGatsbyMainMenus(sort: {fields: order, order: ASC}) {
             edges {
                 node {
                     id
@@ -92,6 +94,7 @@ const Navbar = (props) => {
                     title
                     link
                     hideOnLoggin
+                    order
                 }
             }
         }
@@ -118,6 +121,20 @@ const Navbar = (props) => {
                 }
             }
         } 
+        menuIconBlack: file(relativePath: {eq: "menu_black.png"}) {
+            childImageSharp {
+                fixed(width: 40) {
+                    ...GatsbyImageSharpFixed_withWebp
+                }
+            }
+        }
+        menuIconOrange: file(relativePath: {eq: "menu_orange.png"}) {
+            childImageSharp {
+                fixed(width: 40) {
+                    ...GatsbyImageSharpFixed_withWebp
+                }
+            }
+        }
     }
     `);
     //end grapqhql queries
@@ -202,6 +219,24 @@ const Navbar = (props) => {
     const dispatch = useDispatch();
     // // end testing
 
+    const [pathName, setPathName] = useState(
+        global.window ? window.location.pathname : "notReady"
+    );
+    console.log('Actual pathname:', pathName);
+    const [mobile, setMobile] = useState(false);
+    function checkWidth(){
+        const _screenWidth = window.innerWidth;
+        if(devMode) { console.log('Resize Width Event _screenWidth:', _screenWidth) };
+        setMobile(_screenWidth <= 980 ? true : false );
+    }
+    useEffect(() => {
+        checkWidth();
+        window.addEventListener('resize',checkWidth);
+        return () => { window.removeEventListener('resize', checkWidth);}
+    }, []);
+    useEffect(() => {
+        if(devMode){ console.log('Mobile set as:', mobile)};
+    }, [mobile]);
     //end state constants/vars
 
     // useEffect(() => {
@@ -561,7 +596,7 @@ const Navbar = (props) => {
     return (
             <nav>
                 {
-                    (_profile.navigating_on !== "Marketplace") 
+                    (pathName !== "/nftmarket" && pathName !== "/app/profile" && pathName !== "/checkout") 
                     &&
                     <div className={'menuBottomNav'}>
                         <ul className="menuBottomNavUl">
@@ -662,12 +697,9 @@ const Navbar = (props) => {
                     }
                     </ul>
                     <div>
-                        <Coinprices />
-                        {/* TODO: must a component apart */}
-                        {/* <div className="searchContainer">
-                            <input type="text" className="searchInput" placeholder="find your next job" />
-                            <Img fixed={data.searchIcon.childImageSharp.fixed} className="imgSearch" />
-                        </div> */}
+                        <Coinprices devMode={true}
+                            show={pathName === "/nftmarket"}
+                        />
                     </div>
                 </div>
                 {/* Testing to have socketBee wrapping the usermenu */}

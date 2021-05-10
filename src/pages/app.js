@@ -34,7 +34,7 @@ const App = () => (
         <PrivateRoute path="/app/settings" component={UserSettings} />
         <PrivateRoute path="/app/beechatfixed" component={Beechatfixed} />
         <PrivateRoute path="/app/profile" component={UserProfile} />
-        <PrivateRoute path="/app/wallet" component={Userwallet} />
+        {/* <PrivateRoute path="/app/wallet" component={Userwallet} /> */}
         <PrivateRoute path="/app/tokens" component={TokensUser} />
         <PrivateRoute path="/app/jobs" component={Userjobs} />
         <PrivateRoute path="/app/order-checkout" component={Ordercheckout}/>

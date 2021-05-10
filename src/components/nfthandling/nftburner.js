@@ -4,6 +4,7 @@ import {keychain, isKeychainInstalled, hasKeychainBeenUsed} from '@hiveio/keycha
 import Absscreenwrapper from '../absscreenwrapper';
 import Btnclosemin from '../btns/btncloseMin';
 import Loader from '../loader';
+import Alerticon from '../icons/alerticon';
 
 //constants
 const userEP = process.env.GATSBY_userEP;
@@ -21,10 +22,12 @@ const nfthandlermongoEP = process.env.GATSBY_nfthandlermongoEP;
  * @param {[Object]} selectedInstances the array of objects that contain the selected instances.
  * @param {String} ssc_test_id as the node we want to replicate the transaction. Options: 1: "ssc-testNettheghost1980" 2: "main"
  * @param {Object} selected as the selected nft when user clicks as we need it here to stablish _id, symbol.
+ * @param {Function} cbOnSucess Optional if you need to do something after burns.
+ * @param {Boolean} devMode Optional to debug on console.
  */
 
 const Nftburner = (props) => {
-    const { closeCB, selectedInstances, userdata, ssc_test_id, selected } = props;
+    const { closeCB, selectedInstances, userdata, ssc_test_id, selected, cbOnSucess, devMode } = props;
     const [tx, setTx] = useState(null);
     const [loadingData, setLoadingData] = useState(false);
     const [selectedToBurn, setSelectedToBurn] = useState(null);
@@ -34,10 +37,10 @@ const Nftburner = (props) => {
         // TODO: play with the logic on, if this token is been used on a job?
         // I guess in_use can serve to "transfers" maybe but cannot see the logic yet.
         if(isKeychainInstalled){
-            const answer = window.confirm('You are about to Burn 1 token. Shall we proceed?');
+            const answer = window.confirm(`You are about to Burn 1 ${selected.symbol} token.\nShall we proceed?`);
             if(answer){
                 setLoadingData(true);
-                console.log(`To burn:${token._id}`);
+                console.log('To burn:', { nft_instance: token, nft_definition: selected });
                 setSelectedToBurn(token);
                 const jsonData = {
                             "contractName": "nft",
@@ -46,7 +49,7 @@ const Nftburner = (props) => {
                                 "nfts": [ {"symbol": String(selected.symbol), "ids": [ String(token._id) ]} ]
                             }
                 }
-                const msg = `To burn 1 ${selected.symbol}`;
+                const msg = `To burn 1 ${selected.symbol} token.`;
                 window.hive_keychain.requestCustomJson(userdata.username, ssc_test_id, "Active", JSON.stringify(jsonData), msg, function(result){
                     const { message, success, error } = result;
                     console.log(result);
@@ -57,6 +60,7 @@ const Nftburner = (props) => {
                         }else if(error === "user_cancel"){
                             // addStateOP({ state: 'User cancelled before transfer.', data: { date: new Date().toString()} }); 
                             console.log('User cancelled burning!');
+                            setLoadingData(false);
                         }
                     }else if (success){
                         //check on this txId to analize results.
@@ -78,12 +82,9 @@ const Nftburner = (props) => {
             // const nft_symbol = arrayEvents[0].data.symbol;
             const nft_instance_id = selectedToBurn._id;
             const query = { burned: true, updatedAt: new Date(),}
-            sendPostBEJH(nfthandlermongoEP+"updateInstanceNFTfield",query, nft_instance_id)
+            sendPostBEJH(nfthandlermongoEP+"updateInstanceNFTfield",query, nft_instance_id, selected.nft_id)
             .then(response => {
                 console.log(response); //status, result
-                // if(response.status === "sucess"){
-                //     setSelected(response.result);
-                // }
             }).catch(error => console.log('Error updating field on Instance NFT to DB.',error));
         }
         // 0: Object { contract: "nft", event: "burn", data: {…} }
@@ -107,7 +108,7 @@ const Nftburner = (props) => {
                             //update user.nfts
                             updateBurned(logs.events);
                             //burned. show message to user
-                            const msg = `Symbol: ${logs.events[0].data.symbol} ID: ${logs.events[0].data.id} has been sent to null.`
+                            const msg = `Symbol: ${logs.events[0].data.symbol} ID: ${logs.events[0].data.id} has been sent to null.`;
                             alert('Token Burned Successfully\n' + msg);
                             setTx(null);
                             closeCB();
@@ -130,11 +131,11 @@ const Nftburner = (props) => {
         return response.json(); 
     };
     //data fecthing
-    async function sendPostBEJH(url = '', query = {}, nft_instance_id = Number) {
+    async function sendPostBEJH(url = '', query = {}, nft_instance_id = Number, ntf_id = Number) {
         const response = await fetch(url, {
             method: 'POST', // *GET, POST, PUT, DELETE, etc.
             mode: 'cors', // no-cors, *cors, same-origin
-            headers: { 'x-access-token': userdata.token, 'query': JSON.stringify(query), 'nft_instance_id': nft_instance_id,},
+            headers: { 'x-access-token': userdata.token, 'query': JSON.stringify(query), 'nft_instance_id': nft_instance_id, 'ntf_id': ntf_id},
         });
         return response.json(); 
     };
@@ -149,17 +150,31 @@ const Nftburner = (props) => {
     },[tx]);
     //END to load on every state change
 
+    //to load on Init/End
+    useEffect(() => {
+        if(devMode){ console.log('Received as props:', { closeCB: closeCB, selectedInstances: selectedInstances , userdata: userdata, ssc_test_id: ssc_test_id, selected: selected, cbOnSucess: cbOnSucess })}
+        return () => {
+            console.log('Unmount Burnernft.', cbOnSucess);
+            if(cbOnSucess){ return cbOnSucess()};
+        }
+    },[]);
+    //END to load on Init/End
+
     return (
         <Absscreenwrapper xtraClass={"justiAlig"}>
             <div className="standardDiv60Percent relativeDiv justBorders justRounded justbackground marginAuto">
                 <Btnclosemin classCSS={"closeBtnAbs"} btnAction={closeCB} />
                 {   
                     loadingData ? 
-                    <div className="standardDivRowFlex100pX100pCentered">
+                    <div className="standardDivRowFlex100pX100pCentered justpaddingTB">
                         <Loader logginIn={loadingData}/>
                     </div>
                     :
                     <div className="standardContentMargin">
+                        <div className="standardDivRowFullWAuto justFlexWrap justiAlig">
+                            <h2>We are about to Burn {selected.symbol} tokens</h2>
+                            <Alerticon xclassCSS={"iconBlock45p"} size={"Big"} type={"filled"} typeDiv={"notAbsolute"}/>
+                        </div>
                         <p>You must understand that this action cannot be undone.</p>
                         <p>Once a token has been burned, we cannot recover it. So please proceed with caution.</p>
                         <p>Important JAB feature: Even when the burned token will be gone, we will keep a record as burned, so you can check on your tokens history anytime.</p>

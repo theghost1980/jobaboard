@@ -50,7 +50,9 @@ const Nfteditor = (props) => {
         url: nftMongo.url,
         icon: nftMongo.image,
         desc: checkDescField(nft),
-        price: nftMongo.price,
+        // price: nftMongo.price,
+        price_definition: nftMongo.price_definition,
+        price_base_on_cast: nftMongo.price_base_on_cast,
         file: File,
     }
     // console.log(initialStateNftEdit);
@@ -313,11 +315,12 @@ const Nfteditor = (props) => {
         }
     }
     const updateJustMongo = () => {
-        if(nftEditInfo.price !== initialStateNftEdit.price){
+        if(nftEditInfo.price_base_on_cast !== initialStateNftEdit.price_base_on_cast || nftEditInfo.price_definition !== initialStateNftEdit.price_definition){
             setWorking(true);
-            console.log(`Has changed. So let us update it! id:${nftEditInfo.nft_id}, price:${nftEditInfo.price}`);
+            console.log(`Any of them Has changed. So let us update it! id:${nftEditInfo.nft_id}, price def:${nftEditInfo.price_definition} casting_base_price:${nftEditInfo.price_base_on_cast}`);
             const query = {
-                price: nftEditInfo.price,
+                price_base_on_cast: Number(nftEditInfo.price_base_on_cast),
+                price_definition: Number(nftEditInfo.price_definition),
                 updatedAt: new Date().toString(),
             }
             sendPostBEJH(nfthandlermongoEP+"updateNFTfield",query, nftEditInfo.nft_id)
@@ -327,12 +330,12 @@ const Nfteditor = (props) => {
                     setWorking(false);
                     //maybe send a update to parent
                     // for now show the alert message and...
-                    alert('Price Updated!');
+                    alert('Prices Updated!');
                     setHasChanged("");
                     cbOnFinish();
                 }
             }).catch(error => {
-                console.log('Error updating field on NFT to DB.',error);
+                console.log('Error updating NFT fields on DB.',error);
                 setWorking(false);
             });
         }
@@ -717,7 +720,7 @@ const Nfteditor = (props) => {
                                                     />
                                                     { hasChanged === "desc" && <Btnconfirmcancel xclassCSS={"justAbsolutePos justL-40T10"} title={"Click to Send"} animation={"animFadeFast minimumMarginTB"} typeIcon={"confirm"} btnAction={processEdition} />}
                                                 </div>
-                                                <div className="relativeDiv justDisplayGrid">
+                                                {/* <div className="relativeDiv justDisplayGrid">
                                                     <label htmlFor="price">Price:(on {jabFEE.acceptedCur})</label>
                                                     <input name="price" type="text"
                                                         defaultValue={nftEditInfo.price} 
@@ -725,6 +728,24 @@ const Nfteditor = (props) => {
                                                         required pattern="[0-9,]{1,21}" title="Just numbers and commas please. between 1 and 9,999,999,999."
                                                     />
                                                     { hasChanged === "price" && <Btnconfirmcancel xclassCSS={"justAbsolutePos justL-40T10"} title={"Click to Send"} animation={"animFadeFast minimumMarginTB"} typeIcon={"confirm"} btnAction={updateJustMongo} />}
+                                                </div> */}
+                                                <div className="relativeDiv justDisplayGrid">
+                                                    <label htmlFor="price_definition">Price Definition:(on {jabFEE.acceptedCur})</label>
+                                                    <input name="price_definition" type="text"
+                                                        defaultValue={nftEditInfo.price_definition} 
+                                                        onChange={(e)=> setValueNFT(e.target.name,Number(e.target.value))} 
+                                                        required pattern="[0-9,]{1,21}" title="Just numbers and commas please. between 1 and 9,999,999,999."
+                                                    />
+                                                    { hasChanged === "price_definition" && <Btnconfirmcancel xclassCSS={"justAbsolutePos justL-40T10"} title={"Click to Send"} animation={"animFadeFast minimumMarginTB"} typeIcon={"confirm"} btnAction={updateJustMongo} />}
+                                                </div>
+                                                <div className="relativeDiv justDisplayGrid">
+                                                    <label htmlFor="price_base_on_cast">Casting Price: (on {jabFEE.acceptedCur})</label>
+                                                    <input name="price_base_on_cast" type="text"
+                                                        defaultValue={nftEditInfo.price_base_on_cast} 
+                                                        onChange={(e)=> setValueNFT(e.target.name,Number(e.target.value))} 
+                                                        required pattern="[0-9,]{1,21}" title="Just numbers and commas please. between 1 and 9,999,999,999."
+                                                    />
+                                                    { hasChanged === "price_base_on_cast" && <Btnconfirmcancel xclassCSS={"justAbsolutePos justL-40T10"} title={"Click to Send"} animation={"animFadeFast minimumMarginTB"} typeIcon={"confirm"} btnAction={updateJustMongo} />}
                                                 </div>
                                             </div>
                                         </form>

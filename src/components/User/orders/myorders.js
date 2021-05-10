@@ -4,11 +4,17 @@ import Btnoutlink from '../../btns/btnoutlink';
 import Loader from '../../loader';
 import Orderoptions from './ordersoptions';
 import Btnprint from '../../btns/btnprint';
+import Starsgiver from '../../interactions/starsgiver';
+
+import Menuhover from '../../interactions/menuhover';
 
 //constants
 const orderEP = process.env.GATSBY_orderEP;
 // TODO take this on .env file
 const jabFEE = { fee: "0.002", currency: "HIVE", costInstance: "0.001", costCurr: "HIVE", acceptedCur: "HIVE"};
+const optionsOrdersMenu = [
+    {title: 'Options For This Order', cbProp: 'manageCat', subMenu: [ 'Mark as Completed', 'Report this Order', 'Cancel this Order'],},
+]
 
 const Myorders = () => {
     const userdata = check();
@@ -16,10 +22,17 @@ const Myorders = () => {
     const [myOrders, setMyOrders] = useState(null);
     const [loadingData, setLoadingData] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState(null);
+    const [actionOrder, setActionOrder] = useState("");
 
     //To load in onit
     useEffect(() => {
         setLoadingData(true);
+        getOrders();
+    }, []);
+    //END to load on init
+
+    //FUnctions/CB
+    function getOrders(){
         const query = { username_employer: userdata.username};
         const queryOr = { $or: [ { username_employer: userdata.username }, { username_employee: userdata.username } ] }
         getDataWH(orderEP+"getOrderquery", queryOr, 0, { "null": null})
@@ -35,10 +48,28 @@ const Myorders = () => {
             console.log('Error getting orders BE',error);
             setLoadingData(false);
         });
-    }, []);
-    //END to load on init
-
-    //FUnctions/CB
+    }
+    const setMenuAction = (item) => {
+        switch (item) {
+            case "Mark as Completed":
+                if(selectedOrder.status === "Completed"){ return alert('That order has been already set as Completed.')};
+                if(selectedOrder.status === "Reported"){ return alert('That order has been already set as Reported.\nPlease wait until our support staff contacts you with details.')};
+                if(selectedOrder.status === "Cancelled"){ return alert('That order has been already set as Cancelled.\nWe invite you to make new Orders!')};
+                setActionOrder("Completed");
+                break;
+            case "Report this Order":
+                if(selectedOrder.status === "Reported"){ return alert('That order has been already set as Reported.\nPlease wait until our support staff contacts you with details.')};
+                if(selectedOrder.status === "Cancelled"){ return alert('That order has been already set as Cancelled.\nWe invite you to make new Orders!')};
+                setActionOrder("Reported");
+                break;
+            case "Cancel this Order":
+                if(selectedOrder.status === "Cancelled" || selectedOrder.status === "Reported"){ return alert('That order has been already set as Cancelled.\nWe invite you to make new Orders!.')};
+                setActionOrder("Cancelled");
+                break;
+            default:
+                break;
+        }
+    }
     ///////data fetching
     async function getDataWH(url = '',query = {}, limit = Number, sortby) {
         const response = await fetch(url, {
@@ -59,7 +90,7 @@ const Myorders = () => {
 
     return (
         <div className="manageOrdersContainer">
-            <h2>My Orders   </h2>
+            <h2>My Orders</h2>
             {
                 loadingData &&
                 <div className="standardDivRowFlex100pX100pCentered miniMarginTB">
@@ -108,12 +139,17 @@ const Myorders = () => {
                     {
                         selectedOrder &&
                         <div>
-                            <h2>
-                                Order Details
-                                <div className="aInlineFlexPlain">
-                                    <Orderoptions xclassCSS={"justWidth200"} /> 
-                                </div>
-                            </h2>
+                            <div className="aInlineFlexPlain justSpaceAround justWidth100per">
+                                <h2>Order Details</h2>
+                                <Menuhover clickedSubItemCB={setMenuAction} items={optionsOrdersMenu} />
+                                {
+                                    actionOrder !== '' &&
+                                    <Orderoptions userdata={userdata} xclassCSS={"justWidth200"} orderSelected={selectedOrder} devMode={true} 
+                                        cbOnSucess={() => getOrders()} _actionOrder={actionOrder}
+                                        closeCB={() => setActionOrder("")}
+                                    /> 
+                                }
+                            </div>
                             <hr></hr>
                             <div className="standardDiv60Percent relativeDiv">
                                 <Btnprint classCSS={"justAbsolutePos scaleHovered standardDivFlexPlain justRight30pTop10p justBorders justRounded"}/>

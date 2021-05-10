@@ -5,6 +5,7 @@ import Btnclosemin from '../btns/btncloseMin';
 import Loader from '../loader';
 import Abswrapper from '../absscreenwrapper';
 import Btninfo from '../btns/btninfo';
+import Btnswitch from '../btns/btnswitch';
 // import Btnswitch from '../btns/btnswitch';
 
 //constants
@@ -42,6 +43,9 @@ const Nftsender = (props) => {
     const [userNameSearch, setUserNameSearch] = useState(null);
     const [transferTo, setTransferTo] = useState(null);
     const [newHolding, setNewHolding] = useState(null);
+    const [dataUserTo, setDataUserTo] = useState(null);
+    const [finishedOP, setFinishedOP] = useState(false);
+    const [sendAll, setSendAll] = useState(false);
 
     // functions/CB
     async function processEvent(arrayEvents){
@@ -92,6 +96,10 @@ const Nftsender = (props) => {
                     if(error !== "user_cancel"){
                         const { error, cause, data } = result.error;
                         console.log('Error while trying to send custom_json on NFT.', message);
+                        if(error.isOperational){
+                            //repeat the tx as this was an error from servers.
+                            // TODO
+                        }
                     }else if(error === "user_cancel"){
                         // addStateOP({ state: 'User cancelled before transfer.', data: { date: new Date().toString()} }); 
                         console.log('User cancelled Operation on the NFTeditor.!');
@@ -126,6 +134,7 @@ const Nftsender = (props) => {
                 console.log(response);
                 if(response.status === "sucess"){
                     setTransferTo(response.result.username);
+                    setDataUserTo(response.result);
                     setShowSearch(false);
                 }else if(response.status === "not found"){
                     alert('That user do not exist on JAB. Please try another user name!');
@@ -206,6 +215,7 @@ const Nftsender = (props) => {
                                             alert(`Successfully sent ${payload.nfts[0].ids.length} ${nft.symbol} Token(s) to ${transferTo}`);
                                             processEvent(logs.events);
                                             setTx(null);
+                                            setFinishedOP(true);
                                             cbOnFinish();
                                             // TODO important
                                             // here we must updateuserField as holding[symbol]
@@ -222,6 +232,7 @@ const Nftsender = (props) => {
                                             alert(`Successfully sent ${payload.nfts.length} ${nft.symbol} Token(s) to ${transferTo}`);
                                             processEvent(logs.events);
                                             setTx(null);
+                                            setFinishedOP(true);
                                             cbOnFinish();
                                         }
                                     }
@@ -266,6 +277,13 @@ const Nftsender = (props) => {
         }
     }
     // Data fecthing
+    async function dataRequest(url,requestType,headers,formdata){
+        const response = formdata ? fetch(url, {
+            method: requestType,
+            headers: headers,
+        }) : fetch(url, { method: requestType, headers: headers });
+        return (await response).json();
+    }
     async function getDataWH(url = '', headers = {}) {
         const response = await fetch(url, {
             method: 'GET',
@@ -348,6 +366,11 @@ const Nftsender = (props) => {
             });
         }
     }, [transferTo]);
+    useEffect(() => {
+        if(sendAll){
+            nftInstances.map(instance => addIt(instance._id));
+        };
+    }, [sendAll]);
     // for testing on dev - to delete later on
     useEffect(() => {
         console.log(newHolding);
@@ -358,6 +381,7 @@ const Nftsender = (props) => {
         <div className="standardDivRowFullW">
             <div className={`standardDivColHalfW whiteBack marginAuto relativeDiv justRounded ${working ? 'disableDiv2': null}`}>
                 <Btnclosemin btnAction={cbCancel} classCSS={"justTopRightPos absCloseCont"} />
+                { !finishedOP && nft &&
                 <div className="standardDivColFullW standardContentMargin">
                     <h2>We are about to Send {nft.symbol}<Btninfo msg={msg}/></h2>
                     {
@@ -367,6 +391,9 @@ const Nftsender = (props) => {
                         </div>
                     }
                     <p>You have {nftInstances.length - payloadArray.length} Token{nftInstances.length === 1 ? null: 's'} available.</p>
+                    <div>
+                        <Btnswitch initialValue={sendAll} btnAction={(cen) => setSendAll(cen)} xtraClassCSS={"justAligned"} sideText={"Select all Available."} />
+                    </div>
                     <div className="standardDivRowFullW justifyContentSpaced marginAuto">
                         <div className="standardDiv60Percent">
                             <p>Your tokens list</p>
@@ -400,11 +427,15 @@ const Nftsender = (props) => {
                             <p className="noMargins textXSmallOrange">Total tokens to send:{payloadArray.length.toString()}</p>
                         </div>
                     </div>
-                    <h2>Send the selected tokens to user: {transferTo}</h2>
+                    <div>
+                        {
+                            dataUserTo && dataUserTo.avatar && <img src={dataUserTo.avatar} className="miniImageJobs justMargin0auto justshadows" />
+                        }
+                        <h2>Send the selected tokens to user: {transferTo}</h2>
+                    </div>
                     <p>Options</p>
                         <ul className="standardUlRowFlexPlain justJustifiedContent">
                             <li className="marginRight"><button onClick={() => setSelector("showList")} title="Add from the JABers I follow">From Following</button></li>
-                            <li className="marginRight"><button title="Select from my Friends on the Chat">From Chat-TODO</button></li>
                             <li><button onClick={() => setShowSearch(true)} title="Let me input the name. ">I will search</button></li>
                         </ul>
                         {
@@ -436,7 +467,7 @@ const Nftsender = (props) => {
                                             <Loader xtraClass={"marginsTB"} logginIn={true} typegif={"blocks"} />
                                         </div>
                                     }
-                                    <p className="smallText">Just click on the user name, to select the receiver.</p>
+                                    <p className="smallText">Just click on the username, to select the receiver.</p>
                                     <ul className="overflowYscroll justMaxHeight">
                                         {
                                             following.map(user => {
@@ -539,6 +570,10 @@ const Nftsender = (props) => {
                         </div>
                     }
                 </div>
+                }
+                {
+                    finishedOP && <p>You may close this window.</p>
+                }
             </div>
         </div>
     )

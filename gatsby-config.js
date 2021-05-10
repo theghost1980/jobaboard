@@ -28,7 +28,7 @@ module.exports = {
       options: {
         connectionString : process.env.db_connection,
         dbName: 'gatsby',
-        collection: [`books`, `main_menu`, `menu_user`, `category`, `langs`, `countries`, `categories`],
+        collection: [`books`, `main_menu`, `menu_user`, `category`, `langs`, `countries`, `categories`, `main_menus`],
       },
     },
     `gatsby-transformer-sharp`,

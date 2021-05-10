@@ -13,6 +13,7 @@ import { selectNotifications } from '../../features/notifications/notiSlice';
 //testing to get context from socketbee
 import { Socket } from '../BeeChat/socketBee';
 import Sitesearch from '../interactions/sitesearch';
+import Coinprices from '../coinsprices';
 // import {
 //     decrement,
 //     increment,
@@ -155,11 +156,11 @@ const UserMenu = (props) => {
                             <Img fixed={data.profileIcon.childImageSharp.fixed} className="imgOptionsUser" />
                         </li>
                     </Link>
-                    <Link to="/app/wallet" className="gralLink" onClick={() => setActualMenu("Wallet")}>
+                    {/* <Link to="/app/wallet" className="gralLink" onClick={() => setActualMenu("Wallet")}>
                         <li className="menuOptionLi">
                             <Img fixed={data.walletIcon.childImageSharp.fixed} className="imgOptionsUser" />
                         </li>
-                    </Link>
+                    </Link> */}
                     <Link to="/app/tokens" className="gralLink" onClick={() => setActualMenu("NFTs")}>
                         <li className="menuOptionLi">
                             <Img fixed={data.tokensIcon.childImageSharp.fixed} className="imgOptionsUser"  />
@@ -211,6 +212,9 @@ const UserMenu = (props) => {
                             <Img fixed={data.searchIcon.childImageSharp.fixed} className="imgOptionsUser"  />
                         </div>
                     </li>
+                    {
+                        fixed && <Coinprices xtraClassCSSLogos={"whiteBack justRoundedFull miniMarginLeft"} xtraClassCSSUl={"textColorWhite"} show={true} />
+                    }
                     {
                         fixed && actualMenu !== '' &&
                         <p className="marginLeft textColorWhite">On: {actualMenu}</p>

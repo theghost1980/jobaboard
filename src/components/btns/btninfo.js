@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Img from 'gatsby-image';
 import { useStaticQuery, graphql } from 'gatsby';
 
@@ -33,6 +33,16 @@ const Btninfo = (props) => {
     `);
     //end grapqhl queries
 
+    const [longMsg, setLongMsg] = useState(false);
+
+    //to load on init
+    useEffect(() => {
+        if(String(msg).length >= 80){
+            setLongMsg(true);
+        }
+    },[]);
+    //END to load on init
+
     // const clicked = () => {
     //     if(btnAction){
     //         btnAction();
@@ -45,7 +55,7 @@ const Btninfo = (props) => {
     return (
         <div className={`${xclassCSS} marginTopRigthMin pointer relativeDiv topRight absInlineDisplay activeDisplay`}>
             <Img fixed={sourceIcon} />
-            <div className={`${xclassMsg} smallAbsDivDisNone120pPlain normalTextSmall justRight120pTop0p justBorders justRounded miniPaddings whiteBack animFade justTopZindex`}>
+            <div className={`${xclassMsg} justopacity1 ${longMsg ? 'smallAbsDivDisNoneWidth240pPlain' : 'smallAbsDivDisNone120pPlain'} normalTextSmall justRight120pTop0p justBorders justRounded miniPaddings whiteBack animFade justTopZindex`}>
                 {msg}
             </div>
         </div>

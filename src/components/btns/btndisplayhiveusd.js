@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useStaticQuery, graphql } from "gatsby"
+import Btncollapse from '../btns/btncollapse';
 import Img from 'gatsby-image';
 
 /**
@@ -8,12 +9,13 @@ import Img from 'gatsby-image';
  * @param {String} xclassCSS - Optional, an extra css class you may need to apply to the span.
  * @param {String} title - String to show when user hover on component.
  * @param {String} sideText - If you need to add a side text to show on the left side.
+ * @param {Boolean} expanded - Optional if you need to render it by request on user's click.
  * @param {Number} amount - The amount to compare against. I.e: price, so it will be showing the price in the selected currency by clicking on it.
  */
 
 const Btndisplayhiveusd = (props) => {
     // for white spaces &nbsp; || &nbsp;&nbsp;&nbsp;&nbsp;
-    const { amount, xclassCSS, title, sideText } = props;
+    const { amount, xclassCSS, title, sideText, expanded } = props;
 
      //graphql queries
      const data = useStaticQuery(graphql`
@@ -49,12 +51,8 @@ const Btndisplayhiveusd = (props) => {
      }
     `);
     //end grapqhql queries
-    const [coins, setCoins] = useState({
-        ethereum: {usd: 0},
-        hive: {usd: 0},
-        hive_dollar: {usd: 0},
-        steem: {usd: 0},
-    });
+    const [coins, setCoins] = useState({ ethereum: {usd: 0}, hive: {usd: 0}, hive_dollar: {usd: 0}, steem: {usd: 0},});
+    const [asExpanded, setAsExpanded] = useState(false);
     // loading once
     useEffect(() => {
         // localStorage.setItem("coins",JSON.stringify(response));
@@ -67,14 +65,17 @@ const Btndisplayhiveusd = (props) => {
     // end loading once
     return (
         coins ?  
-            <div className={`${xclassCSS} standardRowDivAutoWHPlain`} title={title}>
-                <p>
-                    &nbsp;&nbsp;&nbsp;{sideText}&nbsp;{(coins.hive.usd * amount).toFixed(3)}   
-                </p>
-                <div className="standardRowDivAutoWHPlain justAligned">
-                    <Img fixed={data.usdLogo.childImageSharp.fixed} />
-                    <p>/</p>
-                    <Img fixed={data.hiveLogo.childImageSharp.fixed} /> 
+            <div className="miniMarginLeft standardDivRowFullWAuto justAligned">
+                {expanded ? <Btncollapse toogleValue={asExpanded} btnAction={() => setAsExpanded(!asExpanded)} /> : null}
+                <div className={`${xclassCSS} ${asExpanded ? 'justDisplayFlex': 'justDisplayNone'} ${expanded ? 'standardRowDivAutoWHPlainNoDisplay' : 'standardRowDivAutoWHPlain'} justAligned`} title={title}>
+                    <p className="textSmallOrange">
+                        &nbsp;&nbsp;&nbsp;{sideText}&nbsp;{(coins.hive.usd * amount).toFixed(3)}   
+                    </p>
+                    <div className="standardRowDivAutoWHPlain justAligned">
+                        <Img fixed={data.usdLogo.childImageSharp.fixed} />
+                        <p>/</p>
+                        <Img fixed={data.hiveLogo.childImageSharp.fixed} /> 
+                    </div>
                 </div>
             </div>
             : null

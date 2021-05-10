@@ -3,6 +3,8 @@ import { Tab, TabList, TabPanel, Tabs } from 'react-tabs';
 import Btninfo from '../../btns/btninfo';
 import Loader from '../../loader';
 import Btnswitch from '../../btns/btnswitch';
+import Switchlist from '../../interactions/subcompfilters/switchlist';
+import Userwallet from '../../User/userwallet';
 
 //constants
 const nfthandlermongoEP = process.env.GATSBY_nfthandlermongoEP;
@@ -25,9 +27,12 @@ const Tokentabulator = (props) => {
     const [allNfts, setAllNfts] = useState([]); //all NFTs definitions on JAB.
     const [nfts, setNfts] = useState([]);
     const [myHoldings, setMyHoldings] = useState([]);
+    const [filteredList, setFilteredList] = useState([]);
     const [loadingNfts, setLoadingNfts] = useState(false);
     const [loadingInstances, setLoadingInstances] = useState(false);
     const [smallerIcons, setSmallerIcons] = useState(false);
+    const [showIcons, setShowIcons] = useState(true);
+    const [showBurned, setShowBurned] = useState(true);
 
     //to load on init
     useEffect(() => {
@@ -45,6 +50,7 @@ const Tokentabulator = (props) => {
         if(devMode) {console.log('fireAnUpdateInstances',fireAnUpdateInstances)};
         updateAllNftList();
     },[fireAnUpdateInstances]);
+    //END just for testing
     //END to load on each change of state
 
     //functions/CB
@@ -63,6 +69,7 @@ const Tokentabulator = (props) => {
         });
     }
     function updateInstances(){ //get all instances on mongoDB
+        setMyHoldings([]); //test to force the update on this state
         const query = { username: userdata.username };
         sendGETBEJustH(nfthandlermongoEP+"getNFTInstancesQuery",query,0, { symbol: 1 })
         .then(response => {
@@ -95,13 +102,23 @@ const Tokentabulator = (props) => {
     }
     function getThumb(nftId){
         const found = allNfts.filter(item => item.nft_id === nftId);
-        if(devMode) { console.log(found) };
+        // NOTE: Removed from devMode for now. if(devMode) { console.log(found) };
         return found ? found[0].thumb : null;
     }
     function getNftDefinition(nft_id){
         const found = allNfts.filter(nft => nft.nft_id === nft_id);
         if(devMode) { console.log(found) };
         return found[0];
+    }
+    const setSwitchs = (item) => {
+        if(devMode) { console.log('Clicked on:',item) };
+        if(item.switch === "show_icons"){
+            setShowIcons(item.cen);
+        }else if(item.switch === "smaller_icons"){
+            setSmallerIcons(item.cen);
+        }else if(item.switch === "show_burned"){
+            setShowBurned(item.cen);
+        }
     }
     //data fecthing
     async function sendRequest(url = '', requestType, headers) {
@@ -161,7 +178,7 @@ const Tokentabulator = (props) => {
                                                         <img src={token.thumb} className="smallImage" />
                                                     </div>
                                                     <p className="xSmalltext">Symbol: {token.symbol}</p>
-                                                    <p className="xSmalltext">Price: {token.price} HIVE</p>
+                                                    <p className="xSmalltext">Price Def: {token.price_definition} HIVE</p>
                                                 </div>
                                             </li>
                                         )
@@ -180,17 +197,28 @@ const Tokentabulator = (props) => {
                 </TabPanel>
                 <TabPanel>
                     <div className="jutsMinHeight320px">
-                        <ul className="standardUlRowFlexPlain overflowXscroll">
+                        <ul className={`${!showIcons ? 'standardDivColFullW standardUlColPlain' : 'standardUlRowFlexPlain'} overflowXscroll justOverflowY justMaxHeight300p`}>
                             {   !loadingInstances &&
                                 myHoldings.map(token => {
+                                    if(!showBurned && token.burned) return null;
                                     return (
-                                        <li key={token._id} className="pointer hoveredBordered miniMarginLeft" onClick={() => cbSendItem({...token, image: getThumb(token.ntf_id), nft_definition: getNftDefinition(token.ntf_id)},"nft_instance")}>
-                                            <div className="textAlignedCenter">
-                                                <div>
-                                                    <img src={getThumb(token.ntf_id)} className={`${smallerIcons ? 'xSmallImage': 'smallImage '}`} />
-                                                </div>
+                                        <li key={token._id} className={`${token.burned ? 'justBlackedDiv' : null } pointer hoveredBordered miniMarginLeft`} onClick={() => cbSendItem({...token, image: getThumb(token.ntf_id), nft_definition: getNftDefinition(token.ntf_id)},"nft_instance")}>
+                                            <div className={`textAlignedCenter ${!showIcons ? 'standardUlRowFlexPlain standardLiHovered justSpaceEvenly' : null}`}>
+                                                {   showIcons &&
+                                                    <div>
+                                                        <img src={getThumb(token.ntf_id)} className={`${smallerIcons ? 'xSmallImage': 'smallImage '}`} />
+                                                    </div>
+                                                }
                                                 <p className="xSmalltext">Symbol: {token.ntf_symbol}</p>
                                                 <p className="xSmalltext">Id: {token.nft_instance_id}</p>
+                                                {
+                                                    !showIcons &&
+                                                    <div className="standardUlRowFlexPlain justSpaceEvenly justWidth70">
+                                                        <p className="xSmalltext">Price: {token.price}</p>
+                                                        <p className="xSmalltext">Price Symbol: {token.priceSymbol}</p>
+                                                        <p className="xSmalltext">Burned: {token.burned.toString()}</p>
+                                                    </div>
+                                                }
                                             </div>
                                         </li>
                                     )
@@ -206,35 +234,25 @@ const Tokentabulator = (props) => {
                          {
                             !loadingInstances &&
                                 <div>
-                                    <Btnswitch xtraClassCSS={"justAligned"} btnAction={(cen) => setSmallerIcons(cen)}
-                                        sideText={"Smaller icons please!"} initialValue={false} 
+                                    <Switchlist xclassCSSUl={"standardUlRowFlexPlain justSpaceAround normalTextSmall"}
+                                        miniSizes={"true"} clickCB={(item) => setSwitchs(item)}
+                                        switchList={[
+                                            { id: 'switch-1a', iniValue: smallerIcons, sideText: 'Smaller icons please', name: 'smaller_icons',},
+                                            { id: 'switch-2a', iniValue: showIcons, sideText: 'Show Icons', name: 'show_icons'},
+                                            { id: 'switch-3a', iniValue: showBurned, sideText: 'Show Burned', name: 'show_burned'},
+                                        ]}
                                     />
                                 </div>
                         }
-                        <ul className="textNomarginXXSmall">
-                            <li>Todo Here</li>
-                            <li>Option for user to show as text/icons. Option to search & import nft instances(maybe). Option to group tokens if they have too many of each.</li>
-                            <li>Option to list all the instances of a particular NFT.</li>
-                        </ul>
                     </div>
                 </TabPanel>
                 <TabPanel>
                     <div className="jutsMinHeight320px">
-                        <ul className="standardUlColAutoW">
-                            <li>
-                                <button>Top Up</button>
-                            </li>
-                            <li>
-                                <button>Widthaw</button>
-                            </li>
-                            <li>
-                                <button>Convert</button>
-                            </li>
-                        </ul>
+                        <Userwallet />
                         <ul className="textNomarginXXSmall">
-                            <li>Todo Here</li>
-                            <li>We can send user to the wallet or do it here.</li>
-                            <li>Maybe think better about if this is needed here.</li>
+                            <li>Ideas TODO Here</li>
+                            <li>Allow user to topUp/widthdraw any coin they need. I.e: Orbs,LEO,etc.</li>
+                            <li>By using a existing contract that allow todo so, and just invoking it using hive keychain.</li>
                         </ul>
                     </div>
                 </TabPanel>

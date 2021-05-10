@@ -2,6 +2,9 @@ import React from 'react';
 import { useStaticQuery, graphql, Link, navigate } from "gatsby"
 import Img from 'gatsby-image';
 
+
+// TODO: active it or just remove it.
+// We must decide if this one is needed.
 const Menujobs = () => {
      //graphql queries
      const data = useStaticQuery(graphql`

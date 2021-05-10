@@ -95,8 +95,8 @@ const Jobs = (props) => {
         description: String,
         images: [String], 
         paying_price: Number,
-        escrow_type: String,
-        escrow_username: "TODO-NEXT-features",
+        // escrow_type: String,
+        // escrow_username: "TODO-NEXT-features",
         promoted: String, 
         active: String, 
         verifyed_profiles_only: String,
@@ -151,6 +151,7 @@ const Jobs = (props) => {
 
     //set a field on profile:
     function setJobField(name,value){
+        if(name === "paying_price" && value > 10){ return alert('For now the max tokens you can ask is 10.\n As we expand the dev works we will update this to make it unlimited.\nSorry for the troubles.')}
         setJob(prevState => { return {...prevState, [name]: value}})
     }
 
@@ -259,8 +260,8 @@ const Jobs = (props) => {
         formdata.append("job_type", job.job_type);
         formdata.append("nft_symbol", selectedNft.symbol);
         formdata.append("paying_price", job.paying_price);
-        formdata.append("escrow_type", job.escrow_type);
-        formdata.append("escrow_username", job.escrow_username);
+        // formdata.append("escrow_type", job.escrow_type);
+        // formdata.append("escrow_username", job.escrow_username);
         formdata.append("promoted", (job.promoted === "on" ? true : false));
         formdata.append("active", (job.active === "on" ? true : false));
         formdata.append("verifyed_profiles_only", (job.verifyed_profiles_only === "on" ? true : false));
@@ -384,7 +385,9 @@ const Jobs = (props) => {
     }
 
     const handleNftSelectedByIcon = (token) => {
-        console.log('Selected:',token);
+        console.log('Selected:', token);
+        console.log('Checking if the selected has price_base_on_cast:', token.price_base_on_cast);
+        if(token.price_base_on_cast <= 0){ return alert('Before using a NFT for a Gig/Service, you must set its Casting Base Price.\nPlease go to Tokens > Edit.')}
         setSelectedNft(token);
         setJobField("nft_symbol",token.symbol);
     }
@@ -417,7 +420,7 @@ const Jobs = (props) => {
         <div className="jobsContainer">
             {/* <button onClick={testUploadImages}>Test images only</button> */}
             {
-                (ownedTokens && ownedTokens.length > 0 && !created) &&
+                (myNFTsMongo && myNFTsMongo.length > 0 && !created) &&
                     <div>
                         <h1>New Job/Service</h1>
                         <hr className="standardHr"></hr>
@@ -503,11 +506,14 @@ const Jobs = (props) => {
                             </select> */}
                             {/* new way more visual showing a mini icon of each user NFT */}
                             {/* <button className="btnMini2 normalTextSmall" onClick={() => setShowMyNftsMongo(!showMyNftsMongo)}>My NFTs</button> */}
-                            <p>{selectedNft ? `Token Selected: ${selectedNft.symbol} each on:${selectedNft.price} HIVE`: 'Please select a Token from the list bellow!'}</p>
+                            <div className="standardDivRowFullW justAligned">
+                                <p>{selectedNft ? `Token Selected: ${selectedNft.symbol} each on: ${selectedNft.price_base_on_cast} HIVE`: 'Please select a Token from the list bellow!'}</p>
+                                <Btninfo size={"mini"} msg={"Only your NFTs with a Casting Price Set will be shown here. If you want to use another NFT definition you own, please go to Tokens > Edit > Edit Token Info"}/>
+                            </div>
                             {   myNFTsMongo &&
                                 <ul className="standardUlRowFlexPlain overflowXscroll">
                                     {
-                                        myNFTsMongo.map(token => {
+                                        myNFTsMongo.filter(token => token.price_base_on_cast > 0).map(token => {
                                             return (
                                                 <li key={token._id} className="pointer hoveredBordered miniMarginLeft" onClick={() => handleNftSelectedByIcon(token)}>
                                                     <div className="textAlignedCenter">
@@ -515,7 +521,7 @@ const Jobs = (props) => {
                                                             <img src={token.thumb} className="miniImageJobs" />
                                                         </div>
                                                         <p className="xSmalltext justBoldtext">{token.symbol}</p>
-                                                        <p className="xSmalltext">{token.price} HIVE</p>
+                                                        <p className="xSmalltext">{token.price_base_on_cast} HIVE</p>
                                                     </div>
                                                 </li>
                                             )
@@ -526,17 +532,17 @@ const Jobs = (props) => {
                             {/* emd new more visual way */}
                             { selectedNft && job.job_type &&
                                 <>
-                                <label htmlFor="divPaying">
-                                    {job.job_type === "employee" ? 'I will ask ': 'I will Pay '}
-                                </label>
                                 <div className="standardDivRowFullW hSmall" name="divPaying">
-                                    <input name="paying_price" className="inputSmall" 
+                                    <label htmlFor="divPaying">
+                                        {job.job_type === "employee" ? 'I will ask ': 'I will Pay '}
+                                    </label>
+                                    <input name="paying_price" className="inputSmall standardContentMarginLR" 
                                         ref={register({ pattern: /[0-9.,]/g, required: true })} 
-                                        onChange={(e)=>setJobField(e.target.name,e.target.value)}  
-                                        defaultValue="1"
+                                        onChange={(e)=>setJobField(e.target.name,Number(e.target.value))}  
+                                        defaultValue="0"
                                     />
                                     {/* <span>-{selectedNft ? selectedNft : 'Please select one Token.'}</span> */}
-                                    <span> In HIVE:{selectedNft.price * job.paying_price} {(coins && job.paying_price) ? ` In USD:${Number(job.paying_price * coins.hive.usd * selectedNft.price).toFixed(3)}`: null }</span>
+                                    <span className="justBoldtext">{job.paying_price ? `${selectedNft.symbol} ${job.paying_price === 1 ? 'Token.' : 'Tokens.'}`: null} {Number(selectedNft.price_base_on_cast * job.paying_price).toFixed(2)} HIVE. {(coins && job.paying_price) ? ` Equivalent to: ${Number(job.paying_price * coins.hive.usd * selectedNft.price_base_on_cast).toFixed(3)}  USD.`: null }</span>
                                 </div>
                                 </>
                             }
@@ -547,12 +553,12 @@ const Jobs = (props) => {
                             <input type="checkbox" name="active" ref={register} onChange={(e)=>setJobField(e.target.name,e.target.value)} />
                             <label htmlFor="promoted">Promoted</label>
                             <input type="checkbox" name="promoted" ref={register} onChange={(e)=>setJobField(e.target.name,e.target.value)}  />
-                            <label htmlFor="escrow_type">Escrow Type</label>
+                            {/* <label htmlFor="escrow_type">Escrow Type</label>
                             <select name="escrow_type" ref={register({ required: true })} onChange={(e)=>setJobField(e.target.name,e.target.value)} >
                                 <option defaultValue="Select one Option">Select one Option</option>
                                 <option value="system">System Auto</option>
                                 <option value="select_from_lists">I want to select from list. -TODO</option>
-                            </select>
+                            </select> */}
                             <label htmlFor="imagesUploader-third-party">Support Images. First image will be Cover Image.</label>
                             {
                                 errorImage &&
@@ -597,14 +603,14 @@ const Jobs = (props) => {
                 showNewJob &&
                     <Previewjob job={newReceivedJob} cbClose={() => setShowNewJob(false)} />
             }
-            {
+            {/* {
                 !ownedTokens && 
                 <div className="standardBlock150px centered">
                     <Loader logginIn={true} />
                 </div>
-            }
+            } */}
             {
-                (ownedTokens && (ownedTokens.length <= 0)) &&
+                (myNFTsMongo && (myNFTsMongo.length <= 0)) &&
                     <div>
                         <p>Looks like you don't have any tokens created yet.</p>
                         <p>Please go to Add a New Token <Link to="/app/tokens">clicking Here.</Link></p>

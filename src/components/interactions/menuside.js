@@ -19,14 +19,15 @@ import React, { useState, useEffect } from 'react';
 /**
  * Sets a Ul horizontal menu and pass active prop to parent to activate childs css classes on hovered.
  * @param {Function} clickedSubItemCB - The function/CB to return the hovered item on menu.
- * @param {[Object]} items - The Array of objects to map and present.
+ * @param {[Object]} items - The Array of objects to map and present. as [ {id: '1-JAB', title: 'Search NFT', hasSubMenu: false, clickeable: true }, ...]
  * @param {String} xclassCSS - Optional The css Extra class.
  * @param {String} xclassCSSUL - Optional The css Extra class for the Ul.
+ * @param {Boolean} resetAfterCb - optional if you need to reset the state after the user click an item.
  * @param {Boolean} devMode - optional to show logs & props.
  */
 
 const Menuside = (props) => {
-    const { xclassCSS, xclassCSSUL, clickedSubItemCB, items, devMode } = props;
+    const { xclassCSS, xclassCSSUL, clickedSubItemCB, items, devMode, resetAfterCb } = props;
     // const items = [
     //     {id: '', title: 'Manage Categories', subMenu: [ 'List Categories'],},
     // ]
@@ -51,6 +52,7 @@ const Menuside = (props) => {
         }
         if(menuItem.clickeable){
             clickedSubItemCB(menuItem.title)
+            if(resetAfterCb){ setSelectedItem("")};
         }
     }
     const selectedSub = (subItem) => {

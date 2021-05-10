@@ -8,10 +8,13 @@ import Jobitoassistant from './jobitoassistant';
 import { useForm } from 'react-hook-form';
 //hiveio/keychain
 import {keychain, isKeychainInstalled, hasKeychainBeenUsed} from '@hiveio/keychain';
+import Btninfo from '../btns/btninfo';
+import Btnoutlink from '../btns/btnoutlink';
 //testing SSCjs library
 const SSC = require('sscjs');
 const ssc = new SSC('https://api.hive-engine.com/rpc');
 //END testing
+const msgInfoWallet = "Use the deposit button to import the desired amount of HIVE, it will automatically convert to SWAP.HIVE which is the currency used to create your own Tokens.\nThe withdraw button will convert your SWAP.HIVE back to HIVE and return it to your HIVE wallet.\n*There is a 1% fee when converting between HIVE and SWAP.HIVE.";
 
 const Userwallet = () => {
     const { register, handleSubmit, errors } = useForm(); // initialize the hook
@@ -217,65 +220,59 @@ const Userwallet = () => {
     };
 
     return (
-        <div className="walletCont">
-            <ul className="ulActionsWallet">
-                <li>
-                    <button onClick={() => setAction('deposit')}>Top Up</button>
-                    <Img fixed={data.depositIcon.childImageSharp.fixed} className="iconWalletAction" />
-                </li>
-                <li>
-                    <button onClick={() => setAction('withdraw')}>Widthdraw</button>
-                    <Img fixed={data.withdrawIcon.childImageSharp.fixed} className="iconWalletAction"  />
-                </li>
-                <div className="absInfoCont">
-                    <Img fixed={data.infoIcon.childImageSharp.fixed} className="iconInfo" />
-                    <div className="displayInfo">
-                        <h3 className="xsmallMargin">Job a Board Info</h3>
-                        <p className="xsmallMargin">Use the deposit button to import the desired amount of HIVE, it will automatically convert to SWAP.HIVE which is the currency used to create your own Tokens.</p>
-                        <p className="xsmallMargin">The withdraw button will convert your SWAP.HIVE back to HIVE and return it to your HIVE wallet.</p>
-                        <p className="xtraSmall">*There is a 1% fee when converting between HIVE and SWAP.HIVE</p>
+        <div className="standardDivRowFullW justMinHeight300px">
+            <div className="standardDiv50Percent">
+                <ul className="ulActionsWallet">
+                    <li>
+                        <button onClick={() => setAction('deposit')}>Top Up</button>
+                        <Img fixed={data.depositIcon.childImageSharp.fixed} className="iconWalletAction" />
+                    </li>
+                    <li>
+                        <button onClick={() => setAction('withdraw')}>Widthdraw</button>
+                        <Img fixed={data.withdrawIcon.childImageSharp.fixed} className="iconWalletAction"  />
+                    </li>
+                    <li>
+                        <Btninfo msg={msgInfoWallet} />
+                    </li>
+                </ul>
+                {
+                    !(tokens.length > 0 && iconsTokens.length > 0) && (!noTokens) &&
+                    <div className="standardDivRowFlex100pX100pCentered">
+                        <Loader logginIn={true} />
                     </div>
-                </div>
-            </ul>
-            {
-                (action !== '') &&
-                    <div className="actionContainer">
-                        <form onSubmit={handleSubmit(onSubmit)}>
-                            <div className="standardRowDiv">
-                                <p>Amount </p>
-                                {/* <input type="text" className="inputValueNum" required pattern="[0-9.,]" /> */}
-                                <input name="amount" ref={register({ pattern: /[0-9.]+/, required: true })} 
-                                    className="inputValueNum"
-                                    pattern="[0-9.]+"
-                                    title="Only Numbers and Dots."
-                                    defaultValue="0.000"
-                                />
-                                <p>to {action}</p>
-                            </div>
-                            {errors.amount && <p className="warningTextSmall centered">Please numbers Only!</p>}
-                            <div className="standardRowDiv spaceEvenly marginBottom">
-                                <button>Go! let's {action}</button>
-                                <button onClick={() => setAction('')}>cancel</button>
-                            </div>
-                        </form>
-                    </div>
-            }
-            {
-                noTokens && 
-                    <div className="standarDiv400h">
-                        <p>Look like you have no balance yet.</p>
-                        <p>TODO: possibly a loader of "counting money, i.e:cash machine, money flowing...."</p>
-                        <p>Invoking Jobito down bellow....Help me Jobito!</p>
-                        <Jobitoassistant helpmewith={"wallet"} />
-                    </div>
-            }
-            {
-                (tokens.length > 0 && iconsTokens.length > 0) && 
-                    <ul className="ulTokenWallet">
+                }
+                {
+                    (action !== '') &&
+                        <div className="actionContainer">
+                            <form onSubmit={handleSubmit(onSubmit)}>
+                                <div className="standardRowDiv">
+                                    <p>Amount </p>
+                                    {/* <input type="text" className="inputValueNum" required pattern="[0-9.,]" /> */}
+                                    <input name="amount" ref={register({ pattern: /[0-9.]+/, required: true })} 
+                                        className="inputValueNum"
+                                        pattern="[0-9.]+"
+                                        title="Only Numbers and Dots."
+                                        defaultValue="0.000"
+                                    />
+                                    <p>to {action}</p>
+                                </div>
+                                {errors.amount && <p className="warningTextSmall centered">Please numbers Only!</p>}
+                                <div className="standardRowDiv spaceEvenly marginBottom">
+                                    <button>Go! let's {action}</button>
+                                    <button onClick={() => setAction('')}>cancel</button>
+                                </div>
+                            </form>
+                        </div>
+                }
+            </div>
+            <div className="standardDiv50Percent justAlignEnd">
+                {
+                    (tokens.length > 0 && iconsTokens.length > 0) && 
+                    <ul className="ulTokenWallet justHeight250pOverX backGroundColorBlueJab justRounded justSpaceAround">
                         {
                             tokens.map(token => {
                                 return (
-                                    <li key={`${token._id}`}>
+                                    <li key={`${token._id}`} className="marginLeft marginRight">
                                         <div className="walletTokenCont">
                                             {
                                                 (iconsTokens.length > 0) &&
@@ -283,18 +280,25 @@ const Userwallet = () => {
                                                         className="iconToken"
                                                     />
                                             }
-                                            <p className="walletUserAmount">{token.symbol}: {fixNumber(token.balance,2)}</p>
+                                            <p className="walletUserAmount justMiniPadding">{String(token.symbol).substring(0,1) + String(token.symbol).substring(1).toLowerCase()}: {fixNumber(token.balance,2)}</p>
                                         </div>
                                     </li>
                                 )
                             })
                         }
                     </ul>
-            }
-            {
-                !(tokens.length > 0 && iconsTokens.length > 0) && (!noTokens) &&
-                    <Loader logginIn={true} />
-            }
+                }
+                <Btnoutlink xtraIcon={true} xclassCSS={"normalTextSmall justWidth200"} textLink={"discover more tokens"} link={"https://hive-engine.com/"}/>
+            </div>
+            {/* {
+                noTokens && 
+                    <div className="standarDiv400h">
+                        <p>Look like you have no balance yet.</p>
+                        <p>TODO: possibly a loader of "counting money, i.e:cash machine, money flowing...."</p>
+                        <p>Invoking Jobito down bellow....Help me Jobito!</p>
+                        <Jobitoassistant helpmewith={"wallet"} />
+                    </div>
+            } */}
         </div>
     )
 }

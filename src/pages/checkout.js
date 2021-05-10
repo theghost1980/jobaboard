@@ -116,9 +116,9 @@ const Checkout = (props) => {
                         // we may add it to myHoldings
                         updateOrderState("nft_id", response.result[0].nft_id);
                         updateOrderState("nft_symbol", response.result[0].symbol);
-                        updateOrderState("nft_price_on_init",Number(response.result[0].price));
-                        updateOrderState("sub_total", (Number(response.result[0].price) * Number(state.paying_price)));
-                        updateOrderState("total_amount", (Number(response.result[0].price) * Number(state.paying_price)));
+                        updateOrderState("nft_price_on_init",Number(response.result[0].price_base_on_cast));
+                        updateOrderState("sub_total", (Number(response.result[0].price_base_on_cast) * Number(state.paying_price)).toFixed(5));
+                        updateOrderState("total_amount", (Number(response.result[0].price_base_on_cast) * Number(state.paying_price)).toFixed(5));
                     }
                 }).catch(error => console.log('Error asking for NFTs on this user from DB, mongo.',error));
             }else{
@@ -224,6 +224,10 @@ const Checkout = (props) => {
     useEffect(() => {
         if(tx){ setTimeout(getInfoTX,3000)}; ////testing on 3s
     },[tx]);
+    //TODO for testing to delete  later on
+    useEffect(() => {
+        console.log('Changes on order:', order);
+    },[order]);
     //END to load on state changes
 
     // functions/CB
@@ -429,7 +433,7 @@ const Checkout = (props) => {
                 <div className="businessPageCont">
                     <h1>Order processed.</h1>
                     <p>Under any issue, do not hesitate our contact support by email or using the messaging system on JAB.</p>
-                    <p>If you need you can print this information but a copy has been sent to your email.</p>
+                    <p>If you need you can print this information now or later by accessing your dashboard.</p>
                     <p>Also it can be located within > Jobs > My Orders > (TODO LINK, FE,BE)</p>
                     <p>Important: JAB is creating the tokens for you as we "speak". As soon as they are casted, you will receive a notification.</p>
                     <hr></hr>
@@ -464,72 +468,74 @@ const Checkout = (props) => {
                 </div>
             }
             { jobSelected && jobSelected._id && !loadingData && !results &&
-            <div className="businessPageCont">
-                <h1>Checkout Page</h1>
-                <h3>You have selected:</h3>
-                <div className="standardDivRowFullW">
-                    <div className="standardDiv30Percent">
-                        <img src={jobSelected.images[0]} className="imageMedium"/>
-                    </div>
-                    <div className="standardDiv60Percent">
-                        <p>Job/Gig Title: {jobSelected.title}</p>
-                        <p>JABer on this Gig/Job: {jobSelected.username}</p>
-                        <p>Category: {jobSelected.category}</p>
-                        <p>To Pay: {jobSelected.paying_price} {jobSelected.nft_symbol} Tokens.</p>
-                        {
-                            jobSelected.days_to_complete ?
-                            <p>Days to complete: {jobSelected.days_to_complete}.</p>
-                            : <p className="warningTextSmall">Warning. This Job/Gig do not have Days to complete, review this with the provider and make a note if possible, before processing it.</p>
-                        }
-                    </div>
-                </div>
-                <div className="justiAlig">
-                    <Btnswitch  xtraClassCSS={"justAligned"} initialValue={false} title={"Add more details"} 
-                        sideText={"Add specific details and customizations"}
-                        btnAction={processSwitch}
-                    />
-                </div>
-                {
-                    moreDetails &&
-                    <div className="justMargin0auto">
-                        <form className="formColFlex90p justMargin0auto">
-                            <label htmlFor="special_requirements">Special Requirements:</label>
-                            <textarea name="special_requirements" onChange={(e) => {updateOrderState(e.target.name,e.target.value)}} 
-                                placeholder="Feel free to add here all the special needs or requirements you may need"
-                            />
-                            <label htmlFor="note">Note for the Professional:</label>
-                            <textarea name="note" onChange={(e) => {updateOrderState(e.target.name,e.target.value)}} 
-                                placeholder="We recommend placing here special delivery dates or specific details"
-                            />
-                            <Btnswitch xtraClassCSS={"justAligned"} initialValue={false} sideText={"Add Extra Fast delivery request for 10% more."} showValueDevMode={false}
-                                btnAction={addExtra} addInfoBtn={true} infoMsg={"Be sure to ask to the provider/seller as they may delay, we recommend adding a note."}
-                            />
-                        </form>
-                    </div>
-                }
-                {   order.sub_total &&
-                    <div className="formColFlex90p justBorders justRounded marginsTB justMarginAuto">
-                        <div className="marginRL standardDisplayJusSpaceAround">
-                            <div className="standardDivFlexPlain">
-                                <Img fixed={data.acceptedAll.childImageSharp.fixed} />
-                                <p className="textNomarginXSmall">On JobAboard we take crypto, very much!</p>
-                            </div>
-                            <div className="marginBottom">
-                                <h3>Sub Total: {order.sub_total} HIVE.</h3>
-                                {
-                                    order.extra_money > 0 &&
-                                    <h4 className="justColorGray">Extra Fast Added as 10%: {order.extra_money}</h4>
-                                }
-                                <h2>Total to Pay: {order.total_amount} HIVE</h2>
-                                <button onClick={processPayment} className="justBackRed">Proceed with payment</button>
-                            </div>
+            <div className="businessPageCont justRounded justBorders">
+                <div className="standardContentMarginLR">
+                    <h1>Checkout Page</h1>
+                    <h3>You have selected:</h3>
+                    <div className="standardDivRowFullW">
+                        <div className="standardDiv30Percent">
+                            <img src={jobSelected.images[0]} className="imageMedium"/>
+                        </div>
+                        <div className="standardDiv60Percent">
+                            <p>Job/Gig Title: {jobSelected.title}</p>
+                            <p>JABer on this Gig/Job: {jobSelected.username}</p>
+                            <p>Category: {jobSelected.category}</p>
+                            <p>To Pay: {jobSelected.paying_price} {jobSelected.nft_symbol} Tokens.</p>
+                            {
+                                jobSelected.days_to_complete ?
+                                <p>Days to complete: {jobSelected.days_to_complete}.</p>
+                                : <p className="warningTextSmall">Warning. This Job/Gig do not have Days to complete, review this with the provider and make a note if possible, before processing it.</p>
+                            }
                         </div>
                     </div>
-                }
-                <div className="marginsTB justMarginAuto standardDivFlexPlain textAlignedCenter justWidth90 ">
-                    <Img fixed={data.keyChainLogo.childImageSharp.fixed} className="justBackBlack justRoundedMini justMargin0auto"/>
-                    <p className="textNomarginXSmall">Payment powered by <Btnoutlink link={"https://chrome.google.com/webstore/detail/hive-keychain/jcacnejopjdphbnjgfaaobbfafkihpep"} textLink={"Hive Keychain"} />.</p>
-                    <p className="textNomarginXXSmall">Terms and Conditions: you as the customer, who hire, is accepting our refund policy by executing this contract bewteen the buyer, called also as JABer, and you known also as the JABer. Please review your order carefully as we process the support request on a 24 - 48 hours base. For more information go to Policy in JAB at the bottom part.</p>
+                    <div className="justiAlig">
+                        <Btnswitch  xtraClassCSS={"justAligned"} initialValue={false} title={"Add more details"} 
+                            sideText={"Add specific details and customizations"}
+                            btnAction={processSwitch}
+                        />
+                    </div>
+                    {
+                        moreDetails &&
+                        <div className="justMargin0auto">
+                            <form className="formColFlex90p justMargin0auto">
+                                <label htmlFor="special_requirements">Special Requirements:</label>
+                                <textarea name="special_requirements" onChange={(e) => {updateOrderState(e.target.name,e.target.value)}} 
+                                    placeholder="Feel free to add here all the special needs or requirements you may need"
+                                />
+                                <label htmlFor="note">Note for the Professional:</label>
+                                <textarea name="note" onChange={(e) => {updateOrderState(e.target.name,e.target.value)}} 
+                                    placeholder="We recommend placing here special delivery dates or specific details"
+                                />
+                                <Btnswitch xtraClassCSS={"justAligned"} initialValue={false} sideText={"Add Extra Fast delivery request for 10% more."} showValueDevMode={false}
+                                    btnAction={addExtra} addInfoBtn={true} infoMsg={"Be sure to ask to the provider/seller as they may delay, we recommend adding a note."}
+                                />
+                            </form>
+                        </div>
+                    }
+                    {   order.sub_total &&
+                        <div className="formColFlex90p justBorders justRounded marginsTB justMarginAuto">
+                            <div className="standardDisplayJusSpaceAround justSpecialAttentionClass">
+                                <div className="standardDivFlexPlain">
+                                    <Img fixed={data.acceptedAll.childImageSharp.fixed} />
+                                    <p className="textNomarginXSmall justNotextShadowColorBlack">On JobAboard we take crypto, very much!</p>
+                                </div>
+                                <div className="marginBottom">
+                                    <h3>Sub Total: {order.sub_total} HIVE.</h3>
+                                    {
+                                        order.extra_money > 0 &&
+                                        <h4 className="justColorYellow">Extra Fast Added as 10%: {order.extra_money}</h4>
+                                    }
+                                    <h2>Total to Pay: {order.total_amount} HIVE</h2>
+                                    <button onClick={processPayment} className="justBackRed">Proceed with payment</button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    <div className="marginsTB justMarginAuto standardDivFlexPlain textAlignedCenter justWidth90 ">
+                        <Img fixed={data.keyChainLogo.childImageSharp.fixed} className="justBackBlack justRoundedMini justMargin0auto"/>
+                        <p className="textNomarginXSmall">Payment powered by <Btnoutlink link={"https://chrome.google.com/webstore/detail/hive-keychain/jcacnejopjdphbnjgfaaobbfafkihpep"} textLink={"Hive Keychain"} />.</p>
+                        <p className="textNomarginXXSmall">Terms and Conditions: you as the customer, who hire, is accepting our refund policy by executing this contract bewteen the buyer, called also as JABer, and you known also as the JABer. Please review your order carefully as we process the support request on a 24 - 48 hours base. For more information go to Policy in JAB at the bottom part.</p>
+                    </div>
                 </div>
             </div>
             }

@@ -9,6 +9,7 @@ import Manageusers from '../components/Admin/manageusers';
 import Managewebcontent from '../components/Admin/managewebcontent';
 import Managenfts from '../components/Admin/managenfts';
 import Managejobsgigs from './Admin/managejobsgigs';
+import Manageorders from './Admin/manageorders';
 
 // import Loader from '../components/loader';
 // import Notifications from './notifications';
@@ -266,6 +267,11 @@ const AdminPanel = () => {
                     >
                         NFTs
                     </li>
+                    <li onClick={() => setComponentSelected("orders")}
+                        className={`standardLink ${componentSelected === "orders" ? `activeInnerMenu`: null}`}
+                    >
+                        Orders
+                    </li>
                     {/* <li>
                         <button onClick={listUsers}>List all Users</button>
                     </li>
@@ -292,6 +298,9 @@ const AdminPanel = () => {
                     }
                     {
                         (componentSelected === "nfts") && <Managenfts />
+                    }
+                    {
+                        (componentSelected === "orders") && <Manageorders />
                     }
             </div>
             {

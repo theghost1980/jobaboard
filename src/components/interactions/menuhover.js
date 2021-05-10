@@ -5,11 +5,12 @@ import React, { useState, useEffect } from 'react';
  * @param {String} xclassCSS - Optional The css Extra class.
  * @param {Function} clickedSubItemCB - The function/CB to return the hovered item on menu.
  * @param {[Object]} items - The Array of objects to map and present.
+ * @param {Boolarn} devMode to console on log.
  */
 
 const Menuhover = (props) => {
 
-    const { xclassCSS, clickedSubItemCB, items } = props;
+    const { xclassCSS, clickedSubItemCB, items, devMode } = props;
     // const items = [
     //     {title: 'Manage Categories', cbProp: 'manageCat', subMenu: [ 'List Categories'],},
     //     {title: 'Manage Platform', cbProp: 'managePlat', subMenu: [ 'List Options', 'Fire a Rebuild Hook']},
@@ -19,11 +20,12 @@ const Menuhover = (props) => {
 
     //functions/CB
     const onMouseE = (item) => {
-        // console.log(item.cbProp);
+        if(devMode) { console.log('Mouse Enter on Menu Hoover:', item) };
         setSelectedItem(item);
     }
     const selectedSub = (subItem) => {
         // console.log('Click on', subItem);
+        if(devMode) { console.log('Clicked on subItem on Menu Hoover:', subItem) };
         clickedSubItemCB(subItem);
     }
     //END functions/CB

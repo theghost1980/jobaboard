@@ -28,6 +28,9 @@ import Nftimporter from '../nfthandling/subcomponents/nftimporter';
 import Marketenabler from '../nfthandling/subcomponents/marketenabler';
 import Menuside from '../interactions/menuside';
 import Recordnator from '../interactions/recordnator';
+import Transferowner from '../nfthandling/subcomponents/transferowner';
+import Tokenseller from '../nfthandling/subcomponents/tokenseller';
+// import Nfttransfer from '../nfthandling/subcomponents/nfttransfer';
 //testing SSCjs library
 // const SSC = require('sscjs');
 // const ssc = new SSC('http://185.130.45.130:5000/');
@@ -103,6 +106,10 @@ const Tokensuser = () => {
     const [wantToEdit, setWantToEdit] = useState(false);
     const [wantToSend, setWantToSend] = useState(false);
     const [wantToSell, setWantToSell] = useState(false);
+    //just for instance TODO: fix later on
+    const [wantActionInstance, setWantActionInstance] = useState("");
+    //END just for instance TODO: fix later on
+    const [wantToTrasnferOwn, setWantToTrasnferOwn] = useState(false);
     const [selectedFromHive, setselectedFromHive] = useState(null);
     const [showDangerZone, setShowDangerZone] = useState(false);
     const [showMarketEnabler, setShowMarketEnabler] = useState(false);
@@ -129,28 +136,21 @@ const Tokensuser = () => {
 
     // to execute on each set state
     useEffect(() => {
-        if(selected){
+        function queryData(){
             setLoadingData(true);
             setselectedFromHive(null);
             setSelectedInstances([]);
-            console.log(`Searching on:${selected.symbol}`);
-            getSSCDataTable(nftEP+"allInstances",`${selected.symbol}`,"instances",{ account: userdata.username })
+            console.log('Searching on:', active);
+            getSSCDataTable(nftEP+"allInstances",`${active.symbol}`,"instances",{ account: userdata.username })
             .then(response => {
                 console.log(response);
                 setSelectedInstances(response);
-                // if(response.length > 0){
-                //     setSelectedInstances(response);
-                // };
             }).catch(error => {
                 console.log('Error fecthing BE - instances.',error);
                 setLoadingData(false);
             });
-            //here we will ask to get selectedFromHive which is the ones holding the data for:
-            // - authorizedIssuingAccounts: [String]
-            // - supply: Number
-            // - circulatingSupply: Number
-            console.log(`Searching on:${selected.symbol} but in Hive chain...`);
-            getSSCData(nftEP+"allNFTs",{ symbol: selected.symbol,  })
+            // console.log(`Searching on:${active.symbol} but in Hive chain...`);
+            getSSCData(nftEP+"allNFTs",{ symbol: active.symbol,  })
             .then(response => {
                 console.log(response);
                 if(response.length === 1){
@@ -162,7 +162,17 @@ const Tokensuser = () => {
                 setLoadingData(false);
             });
         }
-    }, [selected]);
+        const active = {};
+        if(selected){
+            active['source'] = 'selected';
+            active['symbol'] = selected.symbol;
+            queryData();
+        }else if(selectedNft_Instance){
+            active['source'] = 'selected_instance';
+            active['symbol'] = selectedNft_Instance.ntf_symbol;
+            queryData();
+        }
+    }, [selected, selectedNft_Instance]);
     useEffect(() => {
         if(tx){
             //testing on 3s
@@ -328,6 +338,7 @@ const Tokensuser = () => {
         }).catch(error => console.log('Error asking for NFTs on this user from DB, mongo.',error));
     }
     const onSaleNft = () => {
+        if(!selected.price_definition || selected.price_definition === 0){ return alert('In order to sell this NFT Definition, you must set a Price Definition.\nPlease go to Edit > Edit Token Info.')}
         const answer = window.confirm('This option will set the NFT definition on sale just in JAB.\nDo we proceed?');
         if(answer){
             if(selected && !selected.for_sale){
@@ -353,6 +364,7 @@ const Tokensuser = () => {
 
     const showCreatorHideRest = () => {
         setShowCreator(true);
+        setSelectedNft_Instance(null);
         setSelected(null);
     }
     // function burnToken(token){
@@ -412,6 +424,9 @@ const Tokensuser = () => {
         setWantToInstantiate(false);
         setWantToEdit(false);
         setWantToSend(false);
+        setWantToTrasnferOwn(false);
+        setSelectedNft_Instance(null);
+        setWantActionInstance("");
     }
     const closeInstantiator = () => {
         setShowInstantiator(false);
@@ -607,6 +622,24 @@ const Tokensuser = () => {
     //     }
     // }
 
+    const wantToPlayWithInstance = (menuOption) => { //"Send Token" //"Sell on Market" //"Burn Token"
+        console.log('Clicked on:', menuOption);
+        if(menuOption === "Burn Token"){
+            setWantActionInstance("Burn");
+            // console.log('Set as: Burn');
+        }else if(menuOption === "Send Token"){
+            setWantActionInstance("Transfer");
+            // console.log('Set as: Transfer');
+        }else if(menuOption === "Sell on Market"){
+            setWantActionInstance("Sell");
+        }
+    }
+
+    const cancelActionInstance = () => {
+        setWantToBurnInstance(false);
+        setWantToSendInstance(false);
+    }
+
     //////////data fecthing BE////////////
     async function getSSCDataTX(url = '',tx) {
         const response = await fetch(url, {
@@ -648,49 +681,24 @@ const Tokensuser = () => {
     const settingSelected = (item,type) => {
         if(devMode) { console.log(item,type) };
         if(type === "nft_definition"){
-            setSelected(item)
+            setSelected(item);
+            setSelectedNft_Instance(null);
         }else{
-            //set instance.
+            setSelected(null);
             setSelectedNft_Instance(item);
         }
     } 
 
     return (
         <div className="userTokensContainer">
-            {/* list all user's tokens from DB */}
-            {/* {
-                (myNFTsMongo.length > 0) &&
-                <div>
-                    <h1 className="relativeDiv">My Creations<Btninfo msg={'These are all the NFTs you have created.'} /> </h1>
-                    <p>Click on one of the tokens to present details and options bellow.</p>
-                    <ul className="standardUlRowFlexPlain overflowXscroll">
-                        {
-                            myNFTsMongo.map(token => {
-                                return (
-                                    <li key={token._id} className="pointer hoveredBordered miniMarginLeft" onClick={() => setSelected(token)}>
-                                        <div className="textAlignedCenter">
-                                            <div>
-                                                <img src={token.thumb} className="smallImage" />
-                                            </div>
-                                            <p className="xSmalltext">Symbol: {token.symbol}</p>
-                                            <p className="xSmalltext">Price: {token.price} HIVE</p>
-                                        </div>
-                                    </li>
-                                )
-                            })
-                        }
-                    </ul>
-                </div>
-            } */}
             <Tokentabulator cbSendItem={(item,type) => settingSelected(item,type)} userdata={userdata}
                 tradeCointBalance={hive ? { coin: 'HIVE', balance: hive} : { coin: 'HIVE', balance: 0 }}
-                fireAnUpdateNfts={fireUpdateNfts}
+                fireAnUpdateNfts={fireUpdateNfts} fireAnUpdateInstances={fireUpdateInstances}
+                devMode={true}
             />
             <ul className="textNomarginXXSmall">
                 <li>Todo Here</li>
-                <li>Add fo definitions the Enable Market option, so the user can configure as they want, also let him know all the pros/cons</li>
-                <li>On my holdings: fix the selected so it will bring all th info about the Instance + icon + a button to show extra info about nft definition.</li>
-                <li>On holdings: add the options for instance as: send, send to JAB, send to market(put on sale), burn.</li>
+                <li>On holdings: add the options for instance as: send to market(put on sale).</li>
             </ul>
             {
                 !loadingData &&
@@ -703,9 +711,6 @@ const Tokensuser = () => {
                         </li>
                         <li>
                             <button onClick={() => setShowImporter(true)}>Import Token</button>
-                        </li>
-                        <li>
-                            <button onClick={() => alert('Idea: Maybe we can allow users to remove a token from JAB if they want to use somewhere else. This requires special checks as notBeingUsed, no currentOrders, and so on.')}>Remove Token from JAB</button>
                         </li>
                     </ul>
                 </div>
@@ -731,15 +736,18 @@ const Tokensuser = () => {
                     <div className="standardDivRowFullW">
                         <div className="standardDiv30Percent">
                             <img src={selectedNft_Instance.image} className="imageMedium" />
-                            <Menuside 
-                                clickedSubItemCB={(item) => console.log('Clicked on:', item)}
-                                items={[
-                                    { id: 'men-Jab-Instance-1', title: 'Send Token', hasSubMenu: false, clickeable: true },
-                                    { id: 'men-Jab-Instance-2', title: 'Send to JAB', hasSubMenu: false, clickeable: true },
-                                    { id: 'men-Jab-Instance-3', title: 'Sell on Market', hasSubMenu: false, clickeable: true },
-                                    { id: 'men-Jab-Instance-3', title: 'Burn Token', hasSubMenu: false, clickeable: true },
-                                ]}
-                            />
+                            {   
+                                <Menuside xclassCSS={`${selectedNft_Instance.burned ? 'disableDiv': null }`}
+                                    clickedSubItemCB={(item) => wantToPlayWithInstance(item)}
+                                    items={[
+                                        { id: 'men-Jab-Instance-1', title: 'Send Token', hasSubMenu: false, clickeable: true },
+                                        // { id: 'men-Jab-Instance-2', title: 'Send to JAB', hasSubMenu: false, clickeable: true },
+                                        { id: 'men-Jab-Instance-3', title: 'Sell on Market', hasSubMenu: false, clickeable: true },
+                                        { id: 'men-Jab-Instance-3', title: 'Burn Token', hasSubMenu: false, clickeable: true },
+                                    ]}
+                                />
+                            }
+                            { selectedNft_Instance.burned && <p className="smallText">Token Burned. Sadness.</p>}
                         </div>
                         <div className="standardDiv70Percent">
                             <Recordnator 
@@ -747,9 +755,13 @@ const Tokensuser = () => {
                                 toShow={[
                                     { field:'nft_instance_id', type: 'Number', link: false },
                                     { field:'ntf_symbol', type: 'String', link: false },
+                                    { field:'on_sale', type: 'Boolean', link: false },
+                                    { field:'price', type: 'Number', link: false },
+                                    { field:'priceSymbol', type: 'String', link: false },
                                     { field:'createdAt', type: 'Date', link: false },
                                     { field:'updatedAt', type: 'Date', link: false },
                                 ]}
+                                devMode={true}
                             />
                             <Btnswitch xtraClassCSS={"justAligned"} sideText={"Show me its definition bellow."} initialValue={false} btnAction={(cen) => setShowNftDefinition(cen)}/>
                             {
@@ -765,6 +777,8 @@ const Tokensuser = () => {
                                         { field:'market_enabled', type: 'Boolean', link: false },
                                         { field:'nft_id', type: 'Number', link: false },
                                         { field:'price', type: 'Number', link: false },
+                                        { field:'price_definition', type: 'Number', link: false },
+                                        { field:'price_base_on_cast', type: 'Number', link: false },
                                         { field:'for_sale', type: 'Boolean', link: false },
                                         { field:'url', type: 'String', link: true },
                                     ]}
@@ -775,6 +789,39 @@ const Tokensuser = () => {
                     </div>
                 </div>
             }
+            {/* just for instances send/burn, TODO modify to re-use code */}
+            {
+                            (wantActionInstance === "Transfer") &&
+                            <Abswrapper xtraClass={"justiAlig"}>
+                                <Nftsender userdata={userdata} nft={selectedFromHive} cbCancel={() => setWantActionInstance("")} 
+                                    ssc_id={ssc_test_id} userEP={userEP}
+                                    nftEP={nftEP} cbOnFinish={successOp} nftInstances={selectedInstances}
+                                />
+                            </Abswrapper>
+            }
+            {
+                (wantActionInstance === "Burn") &&
+                <Nftburner userdata={userdata} closeCB={() => setWantActionInstance("")}
+                    selectedInstances={selectedInstances} ssc_test_id={ssc_test_id}
+                    cbOnSucess={successOp}
+                    selectedInstances={selectedInstances}
+                    selected={selectedNft_Instance.nft_definition}
+                    devMode={false}
+                />
+            }
+            { 
+                (wantActionInstance === "Sell") &&
+                <Tokenseller 
+                    selectedNft_instance={selectedNft_Instance}
+                    userdata={userdata} closeCB={() => setWantActionInstance("")}
+                    devMode={true}
+                    ssc_test_id={ssc_test_id}
+                    nfthandlermongoEP={nfthandlermongoEP} nftEP={nftEP}
+                    renderMode={"onTop"}
+                    cbOnSucess={successOp}
+                />
+            }
+            {/* END just for instances send/burn, TODO modify to re-use code */}
             {
                 selected && selectedFromHive &&
                 <div className="relativeDiv marginsTB borderTPGroove">
@@ -845,7 +892,12 @@ const Tokensuser = () => {
                                                 </li>
                                             }
                                             {/* TODO on edit token info: check on transaction to see if there is transaction>token_used && transaction>status = "ongoing" to prevent price edition */}
-                                            <li className="standardLiHovered" onClick={onSaleNft}>Sell just in JAB</li>
+                                            <li className="standardLiHovered" onClick={onSaleNft}>
+                                                <div className="standardDivRowFullW">
+                                                    <p className="minimumMarginTB">Sell Definition</p>
+                                                    <Btninfo xclassMsg={"textColorBlack"} size={"mini"} msg={"Each NFT has a definition that holds the most important info and properties. If you decide you can sell it on JAB. We suggest a high price."} />
+                                                </div>
+                                            </li>
                                         </div>
                                     </div>
                                 }
@@ -863,7 +915,7 @@ const Tokensuser = () => {
                                                 (selectedInstances.length > 0) &&
                                                     <div>
                                                         <li onClick={() => setWantToSend(true)} className="standardLiHovered">Send</li>
-                                                        <li onClick={() => alert('TODO the options could be:\n1. Sell it back to owner for a cheaper price.\n2. Put in on the JAB market. The Market may be a place to buy and sell tokens.\n3. Sell it to JAB for a very cheap price. Also can be trade with JAB(for free promotions, special JAB tokens,etc). JAB could also put it on sale as "Week NFTs bargains"')} className="standardLiHovered">Send To JAB</li>
+                                                        {/* <li onClick={() => alert('TODO the options could be:\n1. Sell it back to owner for a cheaper price.\n2. Put in on the JAB market. The Market may be a place to buy and sell tokens.\n3. Sell it to JAB for a very cheap price. Also can be trade with JAB(for free promotions, special JAB tokens,etc). JAB could also put it on sale as "Week NFTs bargains"')} className="standardLiHovered">Send To JAB</li> */}
                                                     </div>
                                             }
                                             </ul>
@@ -872,7 +924,6 @@ const Tokensuser = () => {
                                 </li>
                                 <li>
                                     {
-                                        (selectedInstances.length > 0) &&
                                         <div className="borderedFlexShadow90pW2 miniMarginTB relativeDiv justTransitions">
                                             <div className="standardDivRowPlain justAligned">
                                                 <p className="contentMiniMargins warningTextSmall pointer hoveredAlert" onClick={() => setShowDangerZone(!showDangerZone)}>Danger Zone</p>
@@ -881,10 +932,13 @@ const Tokensuser = () => {
                                             {
                                                 showDangerZone &&
                                                 <ul className="standardUlColPlain contentMiniMargins">
-                                                    <li className="standardLiHovered" onClick={() => setWantToBurn(true)}>Burn Tokens</li>
+                                                    {
+                                                        selectedInstances.length > 0 &&
+                                                        <li className="standardLiHovered" onClick={() => setWantToBurn(true)}>Burn Tokens</li>
+                                                    }
                                                     {
                                                         (selected.account === userdata.username) &&
-                                                        <li className="standardLiHovered">Transfer Ownership</li>
+                                                        <li className="standardLiHovered" onClick={() => setWantToTrasnferOwn(true)}>Transfer Ownership</li>
                                                     }
                                                 </ul>
                                             }
@@ -922,10 +976,11 @@ const Tokensuser = () => {
                             </Abswrapper>
                         }
                         {
-                            wantToBurn &&
+                            (wantToBurn) &&
                             <Nftburner userdata={userdata} closeCB={() => setWantToBurn(false)}
                                 selectedInstances={selectedInstances} ssc_test_id={ssc_test_id}
                                 selected={selected} 
+                                cbOnSucess={successOp}
                             />
                         }
                         {
@@ -936,6 +991,19 @@ const Tokensuser = () => {
                                 ssc_test_id={ssc_test_id}
                                 nftEP={nftEP} nfthandlermongoEP={nfthandlermongoEP}
                                 devMode={true}
+                                cbOnSucess={successOp}
+                            />
+                        }
+                        {
+                            wantToTrasnferOwn &&
+                            <Transferowner 
+                                userdata={userdata}
+                                selectedNftDefinition={selected}
+                                cbCancel={() => setWantToTrasnferOwn(false)}
+                                ssc_id={ssc_test_id}
+                                nftEP={nftEP}
+                                nfthandlermongoEP={nfthandlermongoEP}
+                                cbOnSucess={successOp}
                             />
                         }
                         {/* {
@@ -964,8 +1032,16 @@ const Tokensuser = () => {
                         } */}
                         <div className="standardDiv60Percent">
                             <div className="standardDivRowFlexAutoH">
-                                <p className="extraMiniMarginsTB">Actual price: {selected.price} {jabFEE.acceptedCur}</p>
-                                <Btndisplayhiveusd amount={selected.price} xclassCSS={"extraMiniMarginsTB"} sideText={"Equivalent to:"} title={"Equivalent to: USD/Crypto"} />
+                                <p className="extraMiniMarginsTB">
+                                    Price Definition:<Btninfo size={"mini"} msg={"Each NFT has its definitions. This is the price you set if you decide to trade the NFT Token definition."} /> {selected.price_definition} {jabFEE.acceptedCur}
+                                </p>
+                                <Btndisplayhiveusd expanded={true} amount={selected.price_definition} sideText={"Equivalent to:"} title={"Equivalent to: USD/Crypto"} />
+                            </div>
+                            <div className="standardDivRowFlexAutoH">
+                                <p className="extraMiniMarginsTB">
+                                    Casting Price:<Btninfo size={"mini"} msg={"This is the price you set as a Casting base price on each token. A buyer/employer must pay this price to trade for your Gigs/Services."} /> {selected.price_base_on_cast} {jabFEE.acceptedCur}
+                                </p>
+                                <Btndisplayhiveusd expanded={true} amount={selected.price_base_on_cast} sideText={"Equivalent to:"} title={"Equivalent to: USD/Crypto"} />
                             </div>
                             <p className="extraMiniMarginsTB">Symbol: {selected.symbol}</p>
                             <div className="standardDivRowFlexAutoH">

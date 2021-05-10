@@ -17,7 +17,7 @@ const Footer = () => {
                     }
                 }
             }
-            main_menu: allMongodbGatsbyMainMenu {
+            main_menu: allMongodbGatsbyMainMenus(sort: {fields: order, order: ASC})  {
                 edges {
                     node {
                         id
@@ -25,6 +25,7 @@ const Footer = () => {
                         title
                         link
                         hideOnLoggin
+                        order
                     }
                 }
             }
