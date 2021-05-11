@@ -5,6 +5,10 @@ import Loader from '../../loader';
 import Btnswitch from '../../btns/btnswitch';
 import Switchlist from '../../interactions/subcompfilters/switchlist';
 import Userwallet from '../../User/userwallet';
+import Btncollapse from '../../btns/btncollapse';
+import Tablinator from '../../interactions/tablinator';
+import Menuhover from '../../interactions/menuhover';
+import Menuside from '../../interactions/menuside';
 
 //constants
 const nfthandlermongoEP = process.env.GATSBY_nfthandlermongoEP;
@@ -33,6 +37,9 @@ const Tokentabulator = (props) => {
     const [smallerIcons, setSmallerIcons] = useState(false);
     const [showIcons, setShowIcons] = useState(true);
     const [showBurned, setShowBurned] = useState(true);
+    const [enableSelection, setEnableSelection] = useState(false);
+    const [arraySelected, setArraySelected] = useState([]);
+    const [showSelection, setShowSelection] = useState(false);
 
     //to load on init
     useEffect(() => {
@@ -50,10 +57,34 @@ const Tokentabulator = (props) => {
         if(devMode) {console.log('fireAnUpdateInstances',fireAnUpdateInstances)};
         updateAllNftList();
     },[fireAnUpdateInstances]);
+    useEffect(() => {
+        console.log(arraySelected);
+    },[arraySelected]);
     //END just for testing
     //END to load on each change of state
 
     //functions/CB
+    const setNClear = (cen) => {
+        setEnableSelection(cen);
+        if(!cen) { setArraySelected([])};
+    }
+    function updateArrayState(action,item){
+        if(action === 'add'){
+            setArraySelected(prevState => [...prevState, {...item} ] );
+        }else{
+            const removedItem = arraySelected.filter(_item => _item.id !== item.id);
+            setArraySelected(removedItem);
+        }
+    }
+    const selectionMultiple = (event,item) => {
+        console.log('Selected: ', item);
+        console.log('Checked: ', event.target.checked);
+        if(event.target.checked){
+            updateArrayState("add", item);
+        }else{
+            updateArrayState("remove", item);
+        }
+    }
     function updateAllNftList(){ //get all instances on mongoDB
         setLoadingInstances(true);
         const query = {};
@@ -118,6 +149,8 @@ const Tokentabulator = (props) => {
             setSmallerIcons(item.cen);
         }else if(item.switch === "show_burned"){
             setShowBurned(item.cen);
+        }else if(item.switch === "enable_multiple"){
+            setNClear(item.cen);
         }
     }
     //data fecthing
@@ -171,16 +204,15 @@ const Tokentabulator = (props) => {
                                 {
                                     nfts.map(token => {
                                         return (
-                                            
-                                            <li key={token._id} className={`pointer goldeBorderRound hoveredBordered miniMarginLeft`} onClick={() => cbSendItem(token,"nft_definition")}>
-                                                <div className="textAlignedCenter">
-                                                    <div className="shinning">
-                                                        <img src={token.thumb} className="smallImage" />
+                                                <li key={token._id} className={`pointer goldeBorderRound hoveredBordered miniMarginLeft`} onClick={() => cbSendItem(token,"nft_definition")}>
+                                                    <div className="textAlignedCenter">
+                                                        <div className="shinning">
+                                                            <img src={token.thumb} className="imageSquaredSmall" />
+                                                        </div>
+                                                        <p className="xSmalltext">Symbol: {token.symbol}</p>
+                                                        <p className="xSmalltext">Price Def: {token.price_definition} HIVE</p>
                                                     </div>
-                                                    <p className="xSmalltext">Symbol: {token.symbol}</p>
-                                                    <p className="xSmalltext">Price Def: {token.price_definition} HIVE</p>
-                                                </div>
-                                            </li>
+                                                </li>
                                         )
                                     })
                                 }
@@ -202,25 +234,34 @@ const Tokentabulator = (props) => {
                                 myHoldings.map(token => {
                                     if(!showBurned && token.burned) return null;
                                     return (
-                                        <li key={token._id} className={`${token.burned ? 'justBlackedDiv' : null } pointer hoveredBordered miniMarginLeft`} onClick={() => cbSendItem({...token, image: getThumb(token.ntf_id), nft_definition: getNftDefinition(token.ntf_id)},"nft_instance")}>
-                                            <div className={`textAlignedCenter ${!showIcons ? 'standardUlRowFlexPlain standardLiHovered justSpaceEvenly' : null}`}>
-                                                {   showIcons &&
-                                                    <div>
-                                                        <img src={getThumb(token.ntf_id)} className={`${smallerIcons ? 'xSmallImage': 'smallImage '}`} />
-                                                    </div>
-                                                }
-                                                <p className="xSmalltext">Symbol: {token.ntf_symbol}</p>
-                                                <p className="xSmalltext">Id: {token.nft_instance_id}</p>
-                                                {
-                                                    !showIcons &&
-                                                    <div className="standardUlRowFlexPlain justSpaceEvenly justWidth70">
-                                                        <p className="xSmalltext">Price: {token.price}</p>
-                                                        <p className="xSmalltext">Price Symbol: {token.priceSymbol}</p>
-                                                        <p className="xSmalltext">Burned: {token.burned.toString()}</p>
-                                                    </div>
-                                                }
+                                        <div key={`${token._id}-${token.ntf_symbol}`}>
+                                        {
+                                            enableSelection &&
+                                            <div>
+                                                <input type="checkbox" className="pointer" title="Click just in the checkbox to select" onChange={(e) => selectionMultiple(e, token)}
+                                                />
                                             </div>
-                                        </li>
+                                        }
+                                            <li key={token._id} className={`${token.burned ? 'justBlackedDiv' : null } pointer hoveredBordered miniMarginLeft`} onClick={() => cbSendItem({...token, image: getThumb(token.ntf_id), nft_definition: getNftDefinition(token.ntf_id)},"nft_instance")}>
+                                                <div className={`textAlignedCenter ${!showIcons ? 'standardUlRowFlexPlain standardLiHovered justSpaceEvenly' : null}`}>
+                                                    {   showIcons &&
+                                                        <div>
+                                                            <img src={getThumb(token.ntf_id)} className={`${smallerIcons ? 'imageSquaredXSmall': 'imageSquaredSmall '}`} />
+                                                        </div>
+                                                    }
+                                                    <p className="xSmalltext">Symbol: {token.ntf_symbol}</p>
+                                                    <p className="xSmalltext">Id: {token.nft_instance_id}</p>
+                                                    {
+                                                        !showIcons &&
+                                                        <div className="standardUlRowFlexPlain justSpaceEvenly justWidth70">
+                                                            <p className="xSmalltext">Price: {token.price}</p>
+                                                            <p className="xSmalltext">Price Symbol: {token.priceSymbol}</p>
+                                                            <p className="xSmalltext">Burned: {token.burned.toString()}</p>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </li>
+                                        </div>
                                     )
                                 })
                             }
@@ -234,14 +275,41 @@ const Tokentabulator = (props) => {
                          {
                             !loadingInstances &&
                                 <div>
-                                    <Switchlist xclassCSSUl={"standardUlRowFlexPlain justSpaceAround normalTextSmall"}
+                                    <Switchlist xclassCSSUl={"standardUlRowFlexPlain justFlexWrap justSpaceAround normalTextSmall"}
                                         miniSizes={"true"} clickCB={(item) => setSwitchs(item)}
                                         switchList={[
                                             { id: 'switch-1a', iniValue: smallerIcons, sideText: 'Smaller icons please', name: 'smaller_icons',},
                                             { id: 'switch-2a', iniValue: showIcons, sideText: 'Show Icons', name: 'show_icons'},
                                             { id: 'switch-3a', iniValue: showBurned, sideText: 'Show Burned', name: 'show_burned'},
+                                            { id: 'switch-4a', iniValue: enableSelection, sideText: 'Select Multiple', name: 'enable_multiple'},
                                         ]}
                                     />
+                                    {
+                                        arraySelected && enableSelection &&
+                                        <div className="standardDivRowFullW justAligned">
+                                            <div className="justWidth20">
+                                                <Menuhover xclassCSS={"marginLeft"}
+                                                    clickedSubItemCB={(item) => console.log('Clicked on:',item)}
+                                                    items={[
+                                                        {title: 'Batch Actions', cbProp: 'bacthActions', subMenu: [ 'Transfer All','Burn All'],},
+                                                    ]}
+                                                />
+                                            </div>
+                                            <div className="justWidth80">
+                                                <div className="standardDivRowFullW justAligned">
+                                                    <p className="normalTextSmall">Selected(s): {arraySelected.length}</p>
+                                                    <Btncollapse xclassCSS={"marginLeft"} miniSizes={true} toogleValue={showSelection} btnAction={() => setShowSelection(!showSelection)}  />
+                                                </div>
+                                                {
+                                                    showSelection &&
+                                                    <Tablinator xclassCSS={"justMaxHeight300p overflowXscroll"}
+                                                        items={arraySelected} titleTable={'My Selection'}
+                                                        toShow={['nft_instance_id','ntf_id','ntf_symbol','on_sale','createdAt','burned',]}
+                                                    />
+                                                }
+                                            </div>
+                                        </div>
+                                    }
                                 </div>
                         }
                     </div>

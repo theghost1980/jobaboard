@@ -15,15 +15,12 @@ import { formatDateTime } from '../../utils/helpers';
 const Tablinator = (props) => {
 
     const { xclassCSS, clickedSubItemCB, items, toShow, devMode, titleTable, highLight } = props;
+    const [keyOrderBy, setKeyOrderBy] = useState("");
 
     //to load on init
     useEffect(() => {
         if(devMode){
-            console.log('Received on props::::');
-            console.log(items);
-            console.log(toShow);
-            console.log(titleTable);
-            console.log(highLight);
+            console.log('Received on props: tablinator,', { xclassCSS, clickedSubItemCB, items, toShow, devMode, titleTable, highLight } );
         }
     },[]);
     //END to load on init
@@ -40,13 +37,31 @@ const Tablinator = (props) => {
         }
     }
     const selectedItem = (item) => {
-        if(devMode){ console.log('Clicked and about to send it to parent:', item);}
-        clickedSubItemCB(item);
+        if(devMode){ console.log('Clicked and about to send it to parent IF exists CB:', item);}
+        if(clickedSubItemCB){
+            clickedSubItemCB(item);
+        }
+    }
+    function compare(a, b,) {
+        if ( a[keyOrderBy] < b[keyOrderBy] ){ return -1 };
+        if ( a[keyOrderBy] > b[keyOrderBy] ){ return 1 };
+        return 0;
+    }
+    const orderBy = (key) => {
+        if(devMode) {console.log('Order By:', key)};
+        function compare(a, b) {
+            if ( a[key] < b[key] ){ return -1 };
+            if ( a[key] > b[key] ){ return 1 };
+            return 0;
+        }
+        const ordered = items.sort( compare );
+        if(devMode) {console.log(ordered) };
+        setListItems(ordered);
     }
     //END functions/CB
 
     return (
-        <div className={xclassCSS}>
+        <div className={xclassCSS} title="Click on each column header to Order List By.">
             {
                 titleTable ? <h4 className="minimumMarginTB textAlignedCenter">{titleTable}</h4> : null
             }
@@ -56,7 +71,7 @@ const Tablinator = (props) => {
                         {
                             toShow.map(keyItem => {
                                 return (
-                                    <th key={`${keyItem}-KeyJAB`}>
+                                    <th key={`${keyItem}-KeyJAB`} onClick={() => setKeyOrderBy(keyItem)} className="pointer" title={`Order by ${keyItem}`}>
                                         {String(keyItem).substring(0,1).toLocaleUpperCase() + String(keyItem).substring(1,String(keyItem).length)}
                                     </th>
                                 )
@@ -64,7 +79,7 @@ const Tablinator = (props) => {
                         }
                     </tr>
                     {
-                        items.map(item => {
+                        items.sort( compare ).map(item => {
                             return (
                                 <tr key={item._id} className={`trTableWhite standardLiHovered ${checkHighLight(item)}`} onClick={() => selectedItem(item)}>
                                     {

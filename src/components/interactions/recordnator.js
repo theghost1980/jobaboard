@@ -2,26 +2,39 @@ import React, { useState, useEffect } from 'react';
 import { formatDateTime } from '../../utils/helpers';
 import Btnclosemin from '../btns/btncloseMin';
 import OutLink from '../btns/btnoutlink';
+import Absscreenwrapper from '../absscreenwrapper';
+import { useStaticQuery, graphql } from 'gatsby';
+//arrow_spiners.gif
 
 // TODO: add a mechanism to set options: Update, Edit, Delete.
 /**
  * Used it to visualize a record of any type and amount of fields. 
  * (***) you can specify if the link is a txIb by using {..., link: true, txLink: true }
+ * xtraData: is optional to add as side content on that field.
  * @param {String} xclassCSS - Optional The css Extra class.
  * @param {String} imgClassCSS - Mandatory if you need to show a main image for this record.
  * @param {Function} clickedSubItemCB - Optional The function/CB to return the hovered item on menu.
  * @param {Function} closeCB - Optional, The function/CB to send the closing action to.
  * @param {[Object]} item - The single object to visualize and interact to.
- * @param {Object} toShow - The props you want to display of this array of items' As [{}] each object can be as: { field:'image', type: 'String', link: true }, you can omit the link but not the field,type. (*** See note above.)
+ * @param {Object} toShow - The props you want to display of this array of items' As [{}] each object can be as: { field:'image', type: 'String', link: true, xtraData: 'bla bla' }, you can omit the link but not the field,type. (*** See note above.)
  * @param {Object} imageMainField - as { imgField: 'image'}. Mandatory to render a record with a main image to show.
  * @param {String} titleRecord - Optional if you want to show a hTag on top of the record.
  * @param {Boolean} devMode - Optional to see all the props and details. default as false.
  * @param {Boolean} miniSizes - optional if you require smaller sizes of all
+ * @param {String} showMode - as "onTop" or "bellow".
  * @param {Object} stylishOptions - optional if you need as { xtraCssF: 'theCssClass', xtraCssD: 'idem' }
  */
 
  const Recordnator = (props) => {
-    const { xclassCSS, imgClassCSS, clickedSubItemCB, item, toShow, devMode, imageMainField, titleRecord, closeCB, miniSizes, stylishOptions } = props;
+    const data = useStaticQuery(graphql`
+        query{
+            loadingImg: file(relativePath: {eq: "arrow_spiners.gif"}) {
+                    publicURL
+            }
+        }
+    `);
+    //end grapqhl queries
+    const { xclassCSS, imgClassCSS, clickedSubItemCB, item, toShow, devMode, imageMainField, titleRecord, closeCB, miniSizes, stylishOptions, showMode } = props;
 
     //to load on init
     useEffect(() => {
@@ -71,6 +84,10 @@ import OutLink from '../btns/btnoutlink';
             closeCB();
         }
     }
+    function fixField(field){
+        const fieldFixed = String(field).split("_").join(" ");
+        return String(fieldFixed).substring(0,1).toUpperCase() + String(fieldFixed).substring(1,String(fieldFixed).length);
+    }
     //END functions/CB
 
      return (
@@ -91,15 +108,19 @@ import OutLink from '../btns/btnoutlink';
                 {
                     toShow.map(showField => {
                         return (
-                            <div key={`${item._id}-${showField.field}`} className={`standardDivRowWHAuto justSpaceAround contentMiniMargins`}>
-                                <p className={`justWidth30 xtraMiniMarginTB4p ${stylishOptions ? stylishOptions.xtraCssF : null }`}>{String(showField.field).substring(0,1).toUpperCase() + String(showField.field).substring(1,String(showField.field).length)}</p> 
-                                <p className={`justWidth70 xtraMiniMarginTB4p ${stylishOptions ? stylishOptions.xtraCssD : null }`}>
-                                    {
-                                    item.hasOwnProperty(showField.field) ? 
-                                        showField.link ? <OutLink xclassCSS={"normalTextSmall"} link={`${showField.txLink ? `/jabexplorer?tx_id=${item[showField.field]}` : item[showField.field]}`} textLink={checkItem(item[showField.field],showField.type)} /> : checkItem(item[showField.field],showField.type) 
-                                        : 'not set'
-                                    }
-                                </p>
+                            <div key={`${item._id}-${showField.field}`} className={`standardDivRowWHAuto justSpaceBewteen contentMiniMargins`}>
+                                <div className="">
+                                    <p className={`xtraMiniMarginTB4p ${stylishOptions ? stylishOptions.xtraCssF : null }`}>{fixField(showField.field)}</p> 
+                                </div>
+                                <div className="">
+                                    <p className={`marginLeft xtraMiniMarginTB4p ${stylishOptions ? stylishOptions.xtraCssD : null }`}>
+                                        {
+                                        item.hasOwnProperty(showField.field) ? 
+                                            showField.link ? <OutLink xclassCSS={"normalTextSmall"} link={`${showField.txLink ? `/jabexplorer?tx_id=${item[showField.field]}` : item[showField.field]}`} textLink={checkItem(item[showField.field],showField.type)} /> : checkItem(item[showField.field],showField.type) 
+                                            : 'not set'
+                                        }
+                                    </p>
+                                </div>
                             </div>
                         )
                     })

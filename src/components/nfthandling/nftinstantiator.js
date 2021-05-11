@@ -57,12 +57,15 @@ const Instantiator = (props) => {
     function jsonArray(_amount){
         const feeSymbol = "BEE";
         const arrayJson = [];
+        const ts = Date.now().toString();
+        const nftinfoProp = JSON.stringify({ issuedby: '@jobaboard', createdat: "ts" + ts, });
         for(let i = 0; i < _amount ; i++){
             const payload = {
                 "fromType": "user",
                 "symbol": String(nft.symbol),
                 "to": userdata.username,
                 "feeSymbol": feeSymbol,
+                "properties": { "nftinfo": nftinfoProp },
             }
              arrayJson.push(payload);
         }

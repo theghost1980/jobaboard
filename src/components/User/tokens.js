@@ -30,6 +30,8 @@ import Menuside from '../interactions/menuside';
 import Recordnator from '../interactions/recordnator';
 import Transferowner from '../nfthandling/subcomponents/transferowner';
 import Tokenseller from '../nfthandling/subcomponents/tokenseller';
+import Btncollapse from '../btns/btncollapse';
+import Tablinator from '../interactions/tablinator';
 // import Nfttransfer from '../nfthandling/subcomponents/nfttransfer';
 //testing SSCjs library
 // const SSC = require('sscjs');
@@ -120,6 +122,8 @@ const Tokensuser = () => {
     const [fireUpdateInstances, setFireUpdateInstances] = useState(false);
     const [selectedNft_Instance, setSelectedNft_Instance] = useState(null);
     const [showNftDefinition, setShowNftDefinition] = useState(false);
+    const [showCirculatingSupply, setShowCirculatingSupply] = useState(false);
+    const [circulatingSupply, setCirculatingSupply] = useState(null);
     //init forms-hooks
     const { register, handleSubmit, errors } = useForm();
     // on load
@@ -173,12 +177,17 @@ const Tokensuser = () => {
             queryData();
         }
     }, [selected, selectedNft_Instance]);
+    useEffect(() => { if(tx){ setTimeout(getInfoTX,3000) }; }, [tx]); //testing on 3s
     useEffect(() => {
-        if(tx){
-            //testing on 3s
-            setTimeout(getInfoTX,3000);
+        if(showCirculatingSupply){
+            getSSCDataTable(nftEP+"allInstances",`${selected.symbol}`,"instances",{})
+            .then(response => {
+                setCirculatingSupply(response);
+            }).catch(error => { console.log('Error fecthing BE - instances.',error) } );
+        }else{
+            setCirculatingSupply(null);
         }
-    }, [tx]);
+    },[showCirculatingSupply]);
     // useEffect(() => {
     //     if(nfts){
     //         console.log(nfts);
@@ -339,14 +348,15 @@ const Tokensuser = () => {
     }
     const onSaleNft = () => {
         if(!selected.price_definition || selected.price_definition === 0){ return alert('In order to sell this NFT Definition, you must set a Price Definition.\nPlease go to Edit > Edit Token Info.')}
-        const answer = window.confirm('This option will set the NFT definition on sale just in JAB.\nDo we proceed?');
+        const update_for_sale = selected.for_sale ? false : true; //toogle the status.
+        const answer = window.confirm(`Update NFT definition ${selected.symbol} as ${update_for_sale ? 'For Sale': 'Cancel Sell'}\nDo we proceed?`);
         if(answer){
-            if(selected && !selected.for_sale){
+            if(selected){
                 // TODO a component abs on top to show the loader while we load data or do something
                 // TODO add the logic so the same component can be used to toogle on_sale
                 // maybe with a cool down to prevent abuse or "fooling around"
                 const query = {
-                    for_sale: true,
+                    for_sale: update_for_sale,
                     updatedAt: new Date().toString(),
                 }
                 sendPostBEJH(nfthandlermongoEP+"updateNFTfield",query, selected.nft_id)
@@ -354,6 +364,11 @@ const Tokensuser = () => {
                     console.log(response); //status, result
                     if(response.status === "sucess"){
                         setSelected(response.result);
+                        if(response.result.for_sale){
+                            alert('Nft definition placed on Sell.');
+                        }else{
+                            alert('Cancelled Sell!');
+                        }
                     }
                     // todo some kind of component that show messages smoothly on top of everything
                     // maybe we can just improve the topmessenger.
@@ -622,6 +637,10 @@ const Tokensuser = () => {
     //     }
     // }
 
+    const setCirculatingReset = () => {
+        setShowCirculatingSupply(!showCirculatingSupply);
+    }
+
     const wantToPlayWithInstance = (menuOption) => { //"Send Token" //"Sell on Market" //"Burn Token"
         console.log('Clicked on:', menuOption);
         if(menuOption === "Burn Token"){
@@ -806,7 +825,7 @@ const Tokensuser = () => {
                     cbOnSucess={successOp}
                     selectedInstances={selectedInstances}
                     selected={selectedNft_Instance.nft_definition}
-                    devMode={false}
+                    devMode={true}
                 />
             }
             { 
@@ -894,7 +913,11 @@ const Tokensuser = () => {
                                             {/* TODO on edit token info: check on transaction to see if there is transaction>token_used && transaction>status = "ongoing" to prevent price edition */}
                                             <li className="standardLiHovered" onClick={onSaleNft}>
                                                 <div className="standardDivRowFullW">
-                                                    <p className="minimumMarginTB">Sell Definition</p>
+                                                    <p className="minimumMarginTB">
+                                                        {
+                                                            selected.for_sale ? 'Cancel Selling' : 'Sell Definition'
+                                                        }
+                                                    </p>
                                                     <Btninfo xclassMsg={"textColorBlack"} size={"mini"} msg={"Each NFT has a definition that holds the most important info and properties. If you decide you can sell it on JAB. We suggest a high price."} />
                                                 </div>
                                             </li>
@@ -981,6 +1004,8 @@ const Tokensuser = () => {
                                 selectedInstances={selectedInstances} ssc_test_id={ssc_test_id}
                                 selected={selected} 
                                 cbOnSucess={successOp}
+                                devMode={true}
+                                xtraClassCSS={"justTop100p"}
                             />
                         }
                         {
@@ -1064,7 +1089,22 @@ const Tokensuser = () => {
                             <p className="extraMiniMarginsTB">Organization Name: {selectedFromHive.orgName}</p>
                             <p className="extraMiniMarginsTB">Product Name: {selectedFromHive.productName}</p>
                             <p className="extraMiniMarginsTB">Supply: {selectedFromHive.supply.toString()}</p>
-                            <p className="extraMiniMarginsTB">Circulating Supply: {selectedFromHive.circulatingSupply.toString()}</p>
+                            <div className="">
+                                <div className="standardDivRowFlexAutoH">
+                                    <p className="extraMiniMarginsTB">
+                                        Circulating Supply:<Btninfo size={"mini"} msg={"Show current token holders."} /> {selectedFromHive.circulatingSupply.toString()}
+                                    </p>
+                                    <Btncollapse xclassCSS={"marginLeft"}  toogleValue={showCirculatingSupply} btnAction={() => setShowCirculatingSupply(!showCirculatingSupply)} />
+                                </div>
+                                {
+                                    (showCirculatingSupply && circulatingSupply ) ?
+                                    <Tablinator xclassCSS={"justHeight150pOverY justBordersRounded"}
+                                        items={circulatingSupply} titleTable={`Circulating supply of ${selected.symbol}`}
+                                        toShow={['_id','account','ownedBy']}
+                                    />
+                                    : showCirculatingSupply ? <div className={"justMarginAuto"}><Loader logginIn={true} typegif={"spin"}/></div> : null
+                                }
+                            </div>
                             {
                                 selectedFromHive.maxSupply ? 
                                 <p className="extraMiniMarginsTB">Max Supply: {selectedFromHive.maxSupply.toString()}</p> : null

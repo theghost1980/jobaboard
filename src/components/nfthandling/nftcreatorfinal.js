@@ -411,7 +411,7 @@ const Nftcreatorfinal = (props) => {
         console.log(`To instantiate 1 token of: ${payload.symbol}.`);
         updateSteps("currentAction", "issue");
         const ts = Date.now().toString();
-        const nftinfoProp = JSON.stringify({ issuedby: '@jobaboard', createdat: "ts" + ts, origin: 'Jobaboard Platform' });
+        const nftinfoProp = JSON.stringify({ issuedby: '@jobaboard', createdat: "ts" + ts, isPremiun: true });
         const json = [{ "contractName": "nft", "contractAction": "issue", "contractPayload": { "symbol": payload.symbol, "to": userdata.username, "feeSymbol": jabFEE.feeSymbol, "properties": { "nftinfo": nftinfoProp },}}];
         const data = { id: ssc_test_id, json: JSON.stringify(json), required_auths: ['jobaboard'], required_posting_auths: [],};
         client.broadcast.json(data, privateKey)

@@ -24,10 +24,11 @@ const nfthandlermongoEP = process.env.GATSBY_nfthandlermongoEP;
  * @param {Object} selected as the selected nft when user clicks as we need it here to stablish _id, symbol.
  * @param {Function} cbOnSucess Optional if you need to do something after burns.
  * @param {Boolean} devMode Optional to debug on console.
+ * @param {String} xtraClassCSS - optional.
  */
 
 const Nftburner = (props) => {
-    const { closeCB, selectedInstances, userdata, ssc_test_id, selected, cbOnSucess, devMode } = props;
+    const { closeCB, selectedInstances, userdata, ssc_test_id, selected, cbOnSucess, devMode, xtraClassCSS } = props;
     const [tx, setTx] = useState(null);
     const [loadingData, setLoadingData] = useState(false);
     const [selectedToBurn, setSelectedToBurn] = useState(null);
@@ -108,6 +109,7 @@ const Nftburner = (props) => {
                             //update user.nfts
                             updateBurned(logs.events);
                             //burned. show message to user
+                            cbOnSucess();
                             const msg = `Symbol: ${logs.events[0].data.symbol} ID: ${logs.events[0].data.id} has been sent to null.`;
                             alert('Token Burned Successfully\n' + msg);
                             setTx(null);
@@ -152,17 +154,13 @@ const Nftburner = (props) => {
 
     //to load on Init/End
     useEffect(() => {
-        if(devMode){ console.log('Received as props:', { closeCB: closeCB, selectedInstances: selectedInstances , userdata: userdata, ssc_test_id: ssc_test_id, selected: selected, cbOnSucess: cbOnSucess })}
-        return () => {
-            console.log('Unmount Burnernft.', cbOnSucess);
-            if(cbOnSucess){ return cbOnSucess()};
-        }
+        if(devMode){ console.log('Received as props:', { closeCB: closeCB, selectedInstances: selectedInstances , userdata: userdata, ssc_test_id: ssc_test_id, selected: selected, cbOnSucess: cbOnSucess, xtraClassCSS: xtraClassCSS })}
     },[]);
     //END to load on Init/End
 
     return (
         <Absscreenwrapper xtraClass={"justiAlig"}>
-            <div className="standardDiv60Percent relativeDiv justBorders justRounded justbackground marginAuto">
+            <div className={`standardDiv60Percent relativeDiv justBorders justRounded justbackground marginAuto ${xtraClassCSS}`}>
                 <Btnclosemin classCSS={"closeBtnAbs"} btnAction={closeCB} />
                 {   
                     loadingData ? 
@@ -179,12 +177,12 @@ const Nftburner = (props) => {
                         <p>Once a token has been burned, we cannot recover it. So please proceed with caution.</p>
                         <p>Important JAB feature: Even when the burned token will be gone, we will keep a record as burned, so you can check on your tokens history anytime.</p>
                         <p>Select the Token to burn from the list</p>
-                        <ul className="justBorders justRounded ">
+                        <ul className="justBorders justRounded justHeight250pOverX">
                             {
                                 selectedInstances.map(token => {
                                     return (
                                         <li key={`${token._id}-toBurn`} className="standardLiHovered" onClick={() => burnToken(token)}>
-                                            ID: {token._id} - Owned By: {token.ownedBy}
+                                            ID: {token._id}- Symbol: {selected.symbol} - Owned By: {token.ownedBy}
                                             {/* TODO: add a loader when is trying to burn the token. */}
                                             {/* TODO: remove the token symbol from user>holding if he had only one of this one. */}
                                         </li>

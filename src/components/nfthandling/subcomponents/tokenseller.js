@@ -5,6 +5,10 @@ import Btnclosemin from '../../btns/btncloseMin';
 //hiveio/keychain
 import {keychain, isKeychainInstalled, hasKeychainBeenUsed} from '@hiveio/keychain';
 
+// TODO important here:
+// FInd out why the instance cannot be placed on sellOrder by the actual holder????
+// -> happening now: when the user who holds the instance try to place the sellOrder, it return the same object as "an ongoin order" WTF
+
 /**
  * This component allow user to place/remove on sale of a token(instance).
  * For now must allow user to set the sell parameters, update it values on MongoDB.
