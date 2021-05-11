@@ -35,7 +35,7 @@ const Maintabulator = (props) => {
     function scanObjectFields(object){
         const arrayFields = [];
         Object.entries(object[0]).forEach(([key,value]) => { 
-            if(key !== "_id" && key !== "__v"){ arrayFields.push(key) } 
+            if(key !== "_id" && key !== "__v" && key !== "burned" && key !== "for_sale" && key !== "on_sale" && key !== "image" && key !== "thumb"){ arrayFields.push(key) } 
         });
         if(devMode){ console.log( {arrayFields: arrayFields} )}
         return arrayFields;
@@ -86,20 +86,20 @@ const Maintabulator = (props) => {
                                 </select>
                                 <Btnswitch xtraClassCSS={"justDisplayFlexRow justiAlig normalTextSmall justWidth100"} miniSizes={true}  btnAction={(cen) => setOrderAsc(cen)} sideText={`${orderAsc ? 'Desc': 'Asc'}`}/>
                             </div>
-                            <ul className="standardUlRowFlexPlain justFlexWrap justSpaceBewteen">
+                            <ul className="standardUlRowFlexPlain justFlexWrap">
                                 {
                                     nft_definitions.sort( compare ).filter(item => item.for_sale ).map(token => {
                                         return (
-                                            <li key={token._id} className="pointer hoveredBordered miniMarginLeft marginTop" >
+                                            <li key={token._id} className="marginTop marginRight">
                                                 <div className="standardDivFlexPlain textAlignedCenter">
-                                                    <div onClick={() => cbSendItem("definition",token)}>
+                                                    <div onClick={() => cbSendItem("definition",token)} className="pointer hoveredBordered">
                                                         <div>
                                                             <img src={token.thumb} className="mediumImage" />
                                                         </div>
                                                         <p className="normalTextSmall">Symbol: {token.symbol}</p>
                                                         <p className="normalTextSmall">Price: {token.price_definition} On {jabFEE.currency}</p>
                                                     </div>
-                                                    <div className="standardUlRowFlexPlain justiAlig">
+                                                    <div className="standardUlRowFlexPlain pointer justiAlig">
                                                         <p className="normalTextSmall">Owner:</p>
                                                         <Btnoutlink xclassCSS={"justiAlig"} textLink={token.account} link={`/portfoliouser?query=${token.account}`} /> 
                                                     </div>
@@ -131,20 +131,20 @@ const Maintabulator = (props) => {
                                 </select>
                                 <Btnswitch xtraClassCSS={"justDisplayFlexRow justiAlig normalTextSmall justWidth100"} miniSizes={true}  btnAction={(cen) => setOrderAsc(cen)} sideText={`${orderAsc ? 'Desc': 'Asc'}`}/>
                             </div>
-                            <ul className="standardUlRowFlexPlain justFlexWrap justSpaceBewteen">
+                            <ul className="standardUlRowFlexPlain justFlexWrap">
                                 {
                                     nft_instances.sort( compare ).map(token => {
                                         return (
-                                            <li key={token._id} className="pointer hoveredBordered miniMarginLeft marginTop" >
+                                            <li key={token._id} className="marginTop marginRight" >
                                                 <div className="standardDivFlexPlain textAlignedCenter">
-                                                    <div onClick={() => cbSendItem("instance",token)}>
+                                                    <div onClick={() => cbSendItem("instance",token)} className="pointer hoveredBordered">
                                                         <div>
                                                             <img src={getThumb(token.ntf_id)} className="mediumImage" />
                                                         </div>
                                                         <p className="normalTextSmall">Symbol: {token.ntf_symbol}</p>
                                                         <p className="normalTextSmall">Price: {token.price} on {token.priceSymbol}</p>
                                                     </div>
-                                                    <div className="standardUlRowFlexPlain justiAlig">
+                                                    <div className="standardUlRowFlexPlain justiAlig pointer">
                                                         <p className="normalTextSmall">Owner:</p>
                                                         <Btnoutlink xclassCSS={"justiAlig"} textLink={token.username} link={`/portfoliouser?query=${token.username}`} /> 
                                                     </div>
