@@ -119,10 +119,10 @@ const Porfoliouser = (props) => {
                 {
                     selectedJob &&
                         <Absscreenwrapper>
-                            {
+                            {/* {
                                 userdata.logged &&
                                 <Menujobs />
-                            }
+                            } */}
                             <Previewjob job={selectedJob} cbClose={closeJOB} />
                         </Absscreenwrapper>
                 }

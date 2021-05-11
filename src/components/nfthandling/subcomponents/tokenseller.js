@@ -4,11 +4,9 @@ import Absscreenwrapper from '../../absscreenwrapper';
 import Btnclosemin from '../../btns/btncloseMin';
 //hiveio/keychain
 import {keychain, isKeychainInstalled, hasKeychainBeenUsed} from '@hiveio/keychain';
-
-// TODO important here:
-// FInd out why the instance cannot be placed on sellOrder by the actual holder????
-// -> happening now: when the user who holds the instance try to place the sellOrder, it return the same object as "an ongoin order" WTF
-
+//constants
+const orderEP = process.env.GATSBY_orderEP;
+//end constants
 /**
  * This component allow user to place/remove on sale of a token(instance).
  * For now must allow user to set the sell parameters, update it values on MongoDB.
@@ -55,7 +53,7 @@ const Tokenseller = (props) => {
                     setWorking(false);
                 }else if (success){ // TODO: send log to loggerOP
                     //check on this txId to analize results.
-                    setTx(result.result.id);
+                    setTx(result.result.id); 
                     console.log('Checking TX!',result.result.id);
                 };
             });
@@ -71,11 +69,22 @@ const Tokenseller = (props) => {
     function fromTsToDate(ts){
         return new Date(ts);
     }
-    function sendDataMongo(data){
+    function sendDataMongo(data, order){
         const headers = { 'x-access-token': userdata.token, 'nft_instance_id': data.filter.nft_instance_id, 'ntf_id': data.filter.ntf_id, 'query': JSON.stringify(data.updateData), };
         dataRequest(nfthandlermongoEP+"updateInstanceNFTfield","POST",headers,{})
         .then(response => console.log(response))
         .catch(error => console.log('Error updating NFT instance - sellOrder', error));
+        const headers2 = { 'x-access-token': userdata.token, };
+        const formdata = new FormData();
+        const toSendFD = {};
+        Object.entries(order).forEach(([key,value]) => {
+            formdata.append(key,value);
+            toSendFD[key] = value;
+        });
+        if(devMode){ console.log('About to send to BE:', toSendFD)}
+        dataRequest(orderEP+"createMarketOrder","POST",headers2,formdata)
+        .then(response =>{ console.log(response) })
+        .catch(error => console.log('Error processing MarketOrder.',error));
     }
     function getInfoTX(){
         if(tx){
@@ -108,7 +117,8 @@ const Tokenseller = (props) => {
                                     updateData: { price: Number(price).toFixed(5), priceSymbol: priceSymbol, on_sale: true, updatedAt: new Date().toString() },
                                 }
                                 if(devMode){ console.log('About to process:', updateDataInstance )};
-                                sendDataMongo(updateDataInstance);
+                                const order = { username: userdata.username, order_type: "sell", type: "instance", orderId: orderId, nft_id: selectedNft_instance.ntf_id, nft_symbol: selectedNft_instance.ntf_symbol, nft_instance_id: selectedNft_instance.nft_instance_id, price_total: Number(price).toFixed(5), price_symbol: priceSymbol, tx_id: tx, ts_hive: Number(timestamp), createdAt: new Date().toString(), };
+                                sendDataMongo(updateDataInstance, order);
                                 if(cbOnSucess){ cbOnSucess() };
                                 // TODO send all this info to BE.
                                 alert(`Order placed on ${symbol} ID: ${nftId}.\Take a screen shot of info bellow if you need it.\nBut at anytime just go to Marketplace > My Orders..\n***********************\nOrder Id: ${orderId}\nNFT: ${symbol}\nID Token: ${nftId}\nExecuted at: ${fromTsToDate(timestamp)}\nPrice: ${Number(price).toFixed(3)} on ${priceSymbol}\n***********************`);
@@ -199,7 +209,7 @@ const Tokenseller = (props) => {
                                         <p>Fill the neccesary fields bellow and when ready hit Submit.</p>
                                         <form onSubmit={sendData} className="standardFormColHorFullWAutoH relativeDiv colorX marginBottom">
                                             <label htmlFor="price">Price</label>
-                                            <input name="price" onChange={(e) => updateState("price",Number(e.target.value))} 
+                                            <input name="price" onChange={(e) => updateState("price", Number(e.target.value))} 
                                                 required pattern="[0-9.]{1,21}" title="Just numbers and dots please. between 1 and 9.999.999.999."
                                             />
                                             <label htmlFor="priceSymbol">Price Symbol</label>
