@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useStaticQuery, graphql } from "gatsby"
+import { useStaticQuery, graphql, navigate } from "gatsby"
 import Img from 'gatsby-image';
 
 //components
@@ -44,6 +44,10 @@ const fieldsByItem = [
 ]
 //end constants
 
+//Important note here.
+// To process public requests, we are setting the same routers as used in nftcontroller: /getNFTInstancesQuery & /getNFTquery
+// later on to handle the rest of queries as: update or buy/sells then we need to be logged in.
+
 const Nftmarket = (props) => {
     const userdata = check();
   
@@ -79,8 +83,8 @@ const Nftmarket = (props) => {
         setToShow(arraySelected);
     }
     function loadNfts(){
-        const headers = { 'x-access-token': userdata.token, 'query': JSON.stringify({}), 'limit': filters.limit, 'sortby': JSON.stringify({ symbol: 1 }),};
-        dataRequest(nfthandlermongoEP+"getNFTquery","GET",headers,null)
+        const headers = {'query': JSON.stringify({}), 'limit': filters.limit, 'sortby': JSON.stringify({ symbol: 1 }),};
+        dataRequest(publicEP+"getNFTquery","GET",headers,null)
         .then(response => {
             setNft_definitions(response.result);
         })
@@ -89,8 +93,8 @@ const Nftmarket = (props) => {
         });
     }
     function loadInstances(){
-        const headers = { 'x-access-token': userdata.token, 'query': JSON.stringify({ on_sale: true }), 'limit': filters.limit, 'sortby': JSON.stringify({ ntf_id: 1 }),};
-        dataRequest(nfthandlermongoEP+"getNFTInstancesQuery","GET",headers,null)
+        const headers = { 'query': JSON.stringify({ on_sale: true }), 'limit': filters.limit, 'sortby': JSON.stringify({ ntf_id: 1 }),};
+        dataRequest(publicEP+"getNFTInstancesQuery","GET",headers,null)
         .then(response => {
             setNft_instances(response.result);
             setLoadingData(false);
@@ -125,7 +129,7 @@ const Nftmarket = (props) => {
                     </div>
                 }
                 {
-                    !loadingData &&
+                    !loadingData && nft_definitions && nft_definitions &&
                     <div>
                         <Maintabulator 
                             nft_definitions={nft_definitions}
@@ -133,6 +137,7 @@ const Nftmarket = (props) => {
                             cbSendItem={setSelectedItem}
                             devMode={true}
                             jabFEE={jabFEE}
+                            userdata={userdata}
                         />
                     </div>
                 }
@@ -149,10 +154,14 @@ const Nftmarket = (props) => {
                                     toShow={toShow}
                                     titleRecord={`I Like this ${selected.type}.`}
                                 />
-                                <div className="marginsTB justSpaceAround standardDivRowFullW">
-                                    <button>Buy</button>
-                                    <button>Wishlist</button>
-                                </div>
+                                {
+                                    userdata.logged ?
+                                    <div className="marginsTB justSpaceAround standardDivRowFullW">
+                                        <button>Buy</button>
+                                        <button>Wishlist</button>
+                                    </div>
+                                    : <button onClick={() => navigate("/signup")} className="marginsTB">Log In/Signup for Buying/Selling on JAB</button>
+                                }
                             </div>
                         </div>
                     </Absscreenwrapper>

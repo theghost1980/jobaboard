@@ -10,11 +10,12 @@ import Btnswitch from '../btns/btnswitch';
  * @param {[Object]} nft_definitions - Nft definitions on Sale on JAB.
  * @param {[Object]} nft_instances - Nft tokens on Sale on JAB.
  * @param {Object}  jabFEE - defines fees & accepted currency, to be set later on from .env files.
+ * @param {Object} userdata - userdata.
  * @param {Boolean} devMode - optional to see console.logs
 */
 
 const Maintabulator = (props) => {
-    const { cbSendItem, nft_definitions, nft_instances, devMode, jabFEE} = props;
+    const { cbSendItem, nft_definitions, nft_instances, devMode, jabFEE, userdata} = props;
     const [definitionsSortBy, setDefinitionsSortBy] = useState([]); //maping the fields from incomming item on useeffect.
     const [instancesSortBy, setInstancesSortBy] = useState([]);
     const [keyOrderBy, setKeyOrderBy] = useState("");
@@ -36,6 +37,7 @@ const Maintabulator = (props) => {
         Object.entries(object[0]).forEach(([key,value]) => { 
             if(key !== "_id" && key !== "__v"){ arrayFields.push(key) } 
         });
+        if(devMode){ console.log( {arrayFields: arrayFields} )}
         return arrayFields;
     }
     //END functions/CB
@@ -58,9 +60,12 @@ const Maintabulator = (props) => {
                     <Tab>
                         <h3>Tokens on Sale</h3>
                     </Tab>
-                    <Tab>
-                        <h3>My Buy/Sells</h3>
-                    </Tab>
+                    {
+                        userdata.logged &&
+                        <Tab>
+                            <h3>My Buy/Sells</h3>
+                        </Tab>
+                    }
                 </TabList>
                 <TabPanel>
                     {
@@ -81,11 +86,11 @@ const Maintabulator = (props) => {
                                 </select>
                                 <Btnswitch xtraClassCSS={"justDisplayFlexRow justiAlig normalTextSmall justWidth100"} miniSizes={true}  btnAction={(cen) => setOrderAsc(cen)} sideText={`${orderAsc ? 'Desc': 'Asc'}`}/>
                             </div>
-                            <ul className="standardUlRowFlexPlain justFlexWrap">
+                            <ul className="standardUlRowFlexPlain justFlexWrap justSpaceBewteen">
                                 {
                                     nft_definitions.sort( compare ).filter(item => item.for_sale ).map(token => {
                                         return (
-                                            <li key={token._id} className="pointer hoveredBordered miniMarginLeft" >
+                                            <li key={token._id} className="pointer hoveredBordered miniMarginLeft marginTop" >
                                                 <div className="standardDivFlexPlain textAlignedCenter">
                                                     <div onClick={() => cbSendItem("definition",token)}>
                                                         <div>
@@ -126,11 +131,11 @@ const Maintabulator = (props) => {
                                 </select>
                                 <Btnswitch xtraClassCSS={"justDisplayFlexRow justiAlig normalTextSmall justWidth100"} miniSizes={true}  btnAction={(cen) => setOrderAsc(cen)} sideText={`${orderAsc ? 'Desc': 'Asc'}`}/>
                             </div>
-                            <ul className="standardUlRowFlexPlain justFlexWrap">
+                            <ul className="standardUlRowFlexPlain justFlexWrap justSpaceBewteen">
                                 {
                                     nft_instances.sort( compare ).map(token => {
                                         return (
-                                            <li key={token._id} className="pointer hoveredBordered miniMarginLeft" >
+                                            <li key={token._id} className="pointer hoveredBordered miniMarginLeft marginTop" >
                                                 <div className="standardDivFlexPlain textAlignedCenter">
                                                     <div onClick={() => cbSendItem("instance",token)}>
                                                         <div>
@@ -155,10 +160,13 @@ const Maintabulator = (props) => {
                         nft_definitions && nft_instances && nft_instances.length === 0 && <p>No Tokens on Sale yet!</p>
                     }
                 </TabPanel>
-                <TabPanel>
-                    <p>My orders Data</p>
-                    <p>Buy/Sells. Ongoing orders. Link to history.</p>
-                </TabPanel>
+                {
+                        userdata.logged &&
+                        <TabPanel>
+                            <p>My orders Data</p>
+                            <p>Buy/Sells. Ongoing orders. Link to history.</p>
+                        </TabPanel>
+                }
             </Tabs>
         </div>
     )
