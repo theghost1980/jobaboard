@@ -40,7 +40,8 @@ const Tokentabulator = (props) => {
     const [enableSelection, setEnableSelection] = useState(false);
     const [arraySelected, setArraySelected] = useState([]);
     const [showSelection, setShowSelection] = useState(false);
-
+    const [showJustSelling, setShowJustSelling] = useState(false);
+ 
     //to load on init
     useEffect(() => {
         updateAllNftList();
@@ -151,6 +152,8 @@ const Tokentabulator = (props) => {
             setShowBurned(item.cen);
         }else if(item.switch === "enable_multiple"){
             setNClear(item.cen);
+        }else if(item.switch === "just_selling"){
+            setShowJustSelling(item.cen);
         }
     }
     //data fecthing
@@ -233,6 +236,7 @@ const Tokentabulator = (props) => {
                             {   !loadingInstances &&
                                 myHoldings.map(token => {
                                     if(!showBurned && token.burned) return null;
+                                    if(showJustSelling && !token.on_sale) return null;
                                     return (
                                         <div key={`${token._id}-${token.ntf_symbol}`}>
                                         {
@@ -252,10 +256,14 @@ const Tokentabulator = (props) => {
                                                     <p className="xSmalltext">Symbol: {token.ntf_symbol}</p>
                                                     <p className="xSmalltext">Id: {token.nft_instance_id}</p>
                                                     {
+                                                        showJustSelling && <p className="xSmalltext">Selling on Price:{token.price}/{token.priceSymbol}</p>
+                                                    }
+                                                    {
                                                         !showIcons &&
                                                         <div className="standardUlRowFlexPlain justSpaceEvenly justWidth70">
                                                             <p className="xSmalltext">Price: {token.price}</p>
                                                             <p className="xSmalltext">Price Symbol: {token.priceSymbol}</p>
+                                                            <p className="xSmalltext">On Sale {token.on_sale.toString()}</p>
                                                             <p className="xSmalltext">Burned: {token.burned.toString()}</p>
                                                         </div>
                                                     }
@@ -278,10 +286,11 @@ const Tokentabulator = (props) => {
                                     <Switchlist xclassCSSUl={"standardUlRowFlexPlain justFlexWrap justSpaceAround normalTextSmall"}
                                         miniSizes={"true"} clickCB={(item) => setSwitchs(item)}
                                         switchList={[
-                                            { id: 'switch-1a', iniValue: smallerIcons, sideText: 'Smaller icons please', name: 'smaller_icons',},
+                                            { id: 'switch-1a', iniValue: smallerIcons, sideText: 'Smaller icons', name: 'smaller_icons',},
                                             { id: 'switch-2a', iniValue: showIcons, sideText: 'Show Icons', name: 'show_icons'},
                                             { id: 'switch-3a', iniValue: showBurned, sideText: 'Show Burned', name: 'show_burned'},
                                             { id: 'switch-4a', iniValue: enableSelection, sideText: 'Select Multiple', name: 'enable_multiple'},
+                                            { id: 'switch-5a', iniValue: showJustSelling, sideText: 'On Sell Only', name: 'just_selling'},
                                         ]}
                                     />
                                     {

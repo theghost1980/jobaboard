@@ -11,7 +11,7 @@ const Managejobsgigs = () => {
     const userdata = check();
     const [option, setOption] = useState("");
     const [loadingData, setLoadingData] = useState(false);
-    const [allJobs, setAllJobs] = useState([]);
+    const [allJobs, setAllJobs] = useState(null);
     const [loadingExtraData, setLoadingExtraData] = useState(false);
     const [selectedJob, setSelectedJob] = useState(null);
     const [edit, setEdit] = useState(false);

@@ -38,7 +38,7 @@ const md = new Remarkable({
 // LATER on, after tests, change to @jobaboard.
 
 const Visualizator = (props) => {
-    const { xclassCSS, hiveUser, limit, filter_tags, openMode, devMode, noFilter, hideRefreshBtn, xtraClassOnTopDiv, xclassCSSLi, xclassCSSUL } = props;
+    const { xclassCSS, hiveUser, limit, filter_tags, openMode, devMode, noFilter, hideRefreshBtn, xtraClassOnTopDiv, xclassCSSLi, xclassCSSUL, showRefresh } = props;
     // remarkable + sanitize-html
     const optionSanitize = {
         allowedTags: [ 

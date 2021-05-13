@@ -179,7 +179,7 @@ const Tokensuser = () => {
     }, [selected, selectedNft_Instance]);
     useEffect(() => { if(tx){ setTimeout(getInfoTX,3000) }; }, [tx]); //testing on 3s
     useEffect(() => {
-        if(showCirculatingSupply){
+        if(showCirculatingSupply && selected){
             getSSCDataTable(nftEP+"allInstances",`${selected.symbol}`,"instances",{})
             .then(response => {
                 setCirculatingSupply(response);

@@ -117,7 +117,8 @@ const Tokenseller = (props) => {
                                     updateData: { price: Number(price).toFixed(5), priceSymbol: priceSymbol, on_sale: true, updatedAt: new Date().toString() },
                                 }
                                 if(devMode){ console.log('About to process:', updateDataInstance )};
-                                const order = { username: userdata.username, order_type: "sell", type: "instance", orderId: orderId, nft_id: selectedNft_instance.ntf_id, nft_symbol: selectedNft_instance.ntf_symbol, nft_instance_id: selectedNft_instance.nft_instance_id, price_total: Number(price).toFixed(5), price_symbol: priceSymbol, tx_id: tx, ts_hive: Number(timestamp), createdAt: new Date().toString(), };
+                                const nft_instances =[ { symbol: symbol, nfts: [ Number(nftId) ], price: price, priceSymbol: priceSymbol, fee: 0 } ];
+                                const order = { username: userdata.username, order_type: "sell", item_type: "instance", orderId: orderId, nft_instances: JSON.stringify(nft_instances), price_total: price, price_symbol: priceSymbol, tx_id: tx, ts_hive: Number(timestamp), createdAt: new Date().toString(), };
                                 sendDataMongo(updateDataInstance, order);
                                 if(cbOnSucess){ cbOnSucess() };
                                 // TODO send all this info to BE.

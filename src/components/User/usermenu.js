@@ -212,8 +212,8 @@ const UserMenu = (props) => {
                             <Img fixed={data.searchIcon.childImageSharp.fixed} className="imgOptionsUser"  />
                         </div>
                     </li>
-                    {
-                        fixed && <Coinprices xtraClassCSSLogos={"whiteBack justRoundedFull miniMarginLeft"} xtraClassCSSUl={"textColorWhite"} show={true} />
+                    { 
+                        fixed && <Coinprices xtraClassCSSLogos={"whiteBack justMarginAuto justRoundedFull miniMarginLeft"} xtraClassCSSUl={"textColorWhite"} show={true} />
                     }
                     {
                         fixed && actualMenu !== '' &&

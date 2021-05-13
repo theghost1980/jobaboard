@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Tab, TabList, TabPanel, Tabs } from 'react-tabs';
 import Btnoutlink from '../btns/btnoutlink';
 import Btnswitch from '../btns/btnswitch';
+import Tablinator from '../interactions/tablinator';
+import Recordnator from '../interactions/recordnator';
 
 /**
  * This component present the definitions & holdings ON SALE in 2 separate tabs.
@@ -9,17 +11,19 @@ import Btnswitch from '../btns/btnswitch';
  * @param {Object} cbSendItem - The item where user has clicked.
  * @param {[Object]} nft_definitions - Nft definitions on Sale on JAB.
  * @param {[Object]} nft_instances - Nft tokens on Sale on JAB.
+ * @param {[Object]} market_orders - the market order of this user.
  * @param {Object}  jabFEE - defines fees & accepted currency, to be set later on from .env files.
  * @param {Object} userdata - userdata.
  * @param {Boolean} devMode - optional to see console.logs
 */
 
 const Maintabulator = (props) => {
-    const { cbSendItem, nft_definitions, nft_instances, devMode, jabFEE, userdata} = props;
+    const { cbSendItem, nft_definitions, nft_instances, devMode, jabFEE, userdata, market_orders} = props;
     const [definitionsSortBy, setDefinitionsSortBy] = useState([]); //maping the fields from incomming item on useeffect.
     const [instancesSortBy, setInstancesSortBy] = useState([]);
     const [keyOrderBy, setKeyOrderBy] = useState("");
     const [orderAsc, setOrderAsc] = useState(false);
+    const [selectedOrder, setSelectedOrder] = useState(null);
 
     //functions/CB
     function compare(a, b,) {
@@ -46,7 +50,7 @@ const Maintabulator = (props) => {
     useEffect(() => {
         if(nft_definitions){ setDefinitionsSortBy(scanObjectFields(nft_definitions)) };
         if(nft_instances){ setInstancesSortBy(scanObjectFields(nft_instances)) };
-        if(devMode){ console.log('Received on props:', { cbSendItem, nft_definitions, nft_instances, jabFEE})}
+        if(devMode){ console.log('Received on props:', { cbSendItem, nft_definitions, nft_instances, jabFEE, market_orders})}
     },[]);
     //END to load on init
 
@@ -74,6 +78,7 @@ const Maintabulator = (props) => {
                             <div className="standardUlRowFlexPlain">
                                 <label className="normalTextSmall miniMarginRight" htmlFor="sorting_definitions">Sort By: </label>
                                 <select className="normalTextSmall" name="sorting_definitions" onChange={(e) => setKeyOrderBy(e.target.value)}>
+                                    <option defaultValue="select option"></option>
                                     {
                                         definitionsSortBy.map(orderByfield => {
                                             return (
@@ -119,6 +124,7 @@ const Maintabulator = (props) => {
                             <div className="standardUlRowFlexPlain">
                                 <label className="normalTextSmall miniMarginRight" htmlFor="sorting_instances">Sort By: </label>
                                 <select className="normalTextSmall" name="sorting_instances" onChange={(e) => setKeyOrderBy(e.target.value)}>
+                                    <option defaultValue="select option"></option>
                                     {
                                         instancesSortBy.map(orderByfield => {
                                             return (
@@ -161,11 +167,38 @@ const Maintabulator = (props) => {
                     }
                 </TabPanel>
                 {
-                        userdata.logged &&
+                        userdata.logged && market_orders &&
                         <TabPanel>
-                            <p>My orders Data</p>
-                            <p>Buy/Sells. Ongoing orders. Link to history.</p>
+                            <Tablinator 
+                                xclassCSS={"justMaxHeight400p justOverflowAuto"}
+                                devMode={true}
+                                items={market_orders}
+                                titleTable={`Current Orders of ${userdata.username}`}
+                                toShow={['status','order_type','tx_id','createdAt','orderId','item_type','price_total','price_symbol']}
+                                clickedSubItemCB={(order) => setSelectedOrder(order)}
+                                arraySpecs={[
+                                    {field: 'tx_id', limitTo: 5, link: true, typeLink: 'jabExplorer' },
+                                ]}
+                            />
                         </TabPanel>
+                }
+                {
+                    selectedOrder &&
+                    <Recordnator 
+                        closeCB={() => setSelectedOrder(null)}
+                        titleRecord={`View or Order: ${selectedOrder.order_type} ${selectedOrder.item_type ? `of ${selectedOrder.item_type }` : '' }`}
+                        item={selectedOrder}
+                        toShow={[
+                            { field:'createdAt', type: 'Date', link: false, },
+                            { field:'item_type', type: 'String', link: false, },
+                            { field:'orderId', type: 'Number', link: false, xtraData: ' Order N, from Hive-chain.' },
+                            { field:'order_type', type: 'String', link: false, },
+                            { field:'status', type: 'String', link: false, },
+                            { field:'tx_id', type: 'String', link: false, },
+                            { field:'price_total', type: 'Number', link: false, },
+                            { field:'price_symbol', type: 'String', link: false, },
+                        ]}
+                    />
                 }
             </Tabs>
         </div>

@@ -22,6 +22,7 @@ const jabFEE = { fee: "0.002", currency: "HIVE", costInstance: "0.001", costCurr
 const jobEP = process.env.GATSBY_jobEP;
 const nfthandlermongoEP = process.env.GATSBY_nfthandlermongoEP;
 const publicEP = process.env.GATSBY_publicEP;
+const orderEP = process.env.GATSBY_orderEP;
 const devMode = true;
 const fieldsByItem = [
     { type: 'definition', toShow: [
@@ -54,6 +55,7 @@ const Nftmarket = (props) => {
     const [filters, setFilters] = useState({ limit: 0, sortby: {}, query: {} }); //as the initial filter to query all nfts. To modify later when needed fields
     const [nft_definitions, setNft_definitions] = useState(null); //Nft definitions On sale on JAB.
     const [nft_instances, setNft_instances] = useState(null);
+    const [myorders, setMyorders] = useState(null); //user marketorders.
     const [loadingData, setLoadingData] = useState(true);
     const [selected, setSelected] = useState(null); //can be instance or definition
     const [toShow, setToShow] = useState([]); //depending on selected we switch on which fields we send to recornatorabs.
@@ -67,6 +69,9 @@ const Nftmarket = (props) => {
         setLoadingData(true);
         loadNfts();
         loadInstances();
+        if(userdata.logged){
+            loadOrders();
+        }
     }, []);
     //END to load on init
 
@@ -104,6 +109,20 @@ const Nftmarket = (props) => {
             setLoadingData(false);
         });
     }
+    function loadOrders(){
+        setLoadingData(true);
+        const headers = { 'x-access-token': userdata.token, 'query': JSON.stringify({ username: userdata.username, status: 'notFilled' }), 'limit': 0, 'sortby': JSON.stringify({ createdAt: 1 }),};
+        dataRequest(orderEP+"getMarketOrder","GET",headers,null)
+        .then(response => {
+            if(devMode) { console.log(response) };
+            setMyorders(response.result);
+            setLoadingData(false);
+        })
+        .catch(error => {
+            console.log('Error on GET request to BE.',error);
+            setLoadingData(false);
+        });
+    }
     /////////fecthing data
     async function dataRequest(url = '', requestType, headers, formdata) {
         const response =    formdata ? fetch(url, { method: requestType, headers: headers,})
@@ -134,6 +153,7 @@ const Nftmarket = (props) => {
                         <Maintabulator 
                             nft_definitions={nft_definitions}
                             nft_instances={nft_instances}
+                            market_orders={myorders}
                             cbSendItem={setSelectedItem}
                             devMode={true}
                             jabFEE={jabFEE}

@@ -108,7 +108,8 @@ const Managenfts = () => {
                     items={nfts} toShow={['issued_On','nft_id','account','symbol','issuer']}
                     titleTable={"NFTs on JAB Platform"}
                     xclassCSS={"justBordersRoundedMarginB justHeight300pOverY"}
-                    devMode={true}
+                    devMode={false}
+                    pagination={{ perPage: 10, controls: false }}
                 />
             }
             {

@@ -105,9 +105,9 @@ const Formulator = (props) => {
         // if(name === uniqueField && compareFieldToList()){ return alert(`${uniqueField} found on list. Please choose another one`)}
         setData(prevState => { return { ...prevState, [name]: _value }});
         if(actionType === "add"){
-            setData(prevState => { return { ...prevState, ['createdAt']: new Date().toLocaleDateString() }});
+            setData(prevState => { return { ...prevState, ['createdAt']: new Date() }});
         }else{
-            setData(prevState => { return { ...prevState, ['updatedAt']: new Date().toLocaleDateString() }});
+            setData(prevState => { return { ...prevState, ['updatedAt']: new Date() }});
         }
     }
     const processData = (event) => {

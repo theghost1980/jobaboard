@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 //components
 import Layout from '../components/layout';
 import Visualizator from '../components/Blog/visualizator';
+import Btnoutlink from '../components/btns/btnoutlink';
 
 //constants
 const blogtags = [
@@ -28,15 +29,22 @@ const Blog = (props) => {
 
     return (
         <Layout>
-            <div className="businessPageCont">
-                <h1>Blog Page</h1>
-                <h1>TODO</h1>
+            <div className="businessPageCont jutsMinHeight420px bgBlocksBlueSofter justiAlig justRounded">
+                <h1 className="textAlignedCenter">Blog Page</h1>
                 <Visualizator 
+                    xclassCSS={"addUtlBlog justiAlig"}
+                    xclassCSSUL={"addUtlBlog justFlexWrap justiAlig"}
+                    xclassCSSLi={"activeSelected marginRightX2 justMarginBottomX2"}
                     hiveUser={'sexosentido'}
                     limit={100}
                     filter_tags={blogtags.map(({ tag }) => tag)}
                     openMode={"onTopOfAll"}
+                    hideRefreshBtn={true}
                 />
+            </div>
+            <div className="standardDivRowFullW justiAlig">
+                <p className="normalTextSmall">Blog Powered By Hive Blockchain - </p>
+                <Btnoutlink xtraIcon={true} xclassCSS={"normalTextSmall justWidth200"} textLink={"Check it out"} link={"https://hive.blog/"}/>
             </div>
         </Layout>
     )

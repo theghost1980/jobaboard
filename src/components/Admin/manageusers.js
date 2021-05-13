@@ -116,7 +116,6 @@ const Manageusers = () => {
     function getAllUsersLogs(){
         getDataWT(adminEP+"alllogs",userdata.token)
         .then(response => {
-            // console.log(response);
             if(response.length > 0){
                 setAllUserLogs(response);
             };
@@ -192,7 +191,7 @@ const Manageusers = () => {
                         <input name="accountSearch" type="text" onChange={lookUpUser} />
                     </div> */}
                     <Tablinator toShow={['username','usertype','banned','email']} 
-                        items={users} devMode={false} clickedSubItemCB={(item) => setSelectedUser(item)}
+                        items={users} devMode={true} clickedSubItemCB={(item) => setSelectedUser(item)}
                         titleTable={"User List"}
                     />
                 </div>
@@ -204,6 +203,7 @@ const Manageusers = () => {
                     <Tablinator toShow={['createdAt','event','ipaddress','username','usertype']} 
                         items={allUserLogs} devMode={false} clickedSubItemCB={(item) => console.log(item)}
                         titleTable={"User Logs"} xclassCSS={"justHeight500pOverY"}
+                        pagination={{ perPage: 10, controls: false }}
                     />
                 </div>
             }
