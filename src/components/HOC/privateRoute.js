@@ -7,13 +7,9 @@ import { navigate } from "gatsby";
 import { check } from '../../utils/helpers';
 
 const PrivateRoute = ({ component: Component, location, ...rest }) => {
-  //data comming from context.
-  // const { state: userdata } = useContext(AuthContext);
-  // console.log(`Data on state:${userdata.logged}`);
-  // if (!userdata.logged && location.pathname !== `/app/userlogin`) {
   const userdata = check();
   if (!userdata.logged) {
-    navigate("/app/userlogin")
+    navigate("/signup");
     return null
   }
   return <Component {...rest} />

@@ -20,14 +20,16 @@ import Clickeablelist from './subcompfilters/clickeablelist';
 /**
  * Render a clickeable menu used to filtering options.
  * @param {String} xclassCSS - Extra CSS class if needed.
+ * @param {String} xtraClassUl - intended for the collapsable lists only.
  * @param {function} clickCB - Call back to assign a value on each switch action
  * @param {[Object]} arrayFilter the array you want to use. See definition example above.
+ * @param {[Object]} switchList the array of switches if you need them.
  * @param {Boolean} devMode optional to debug on console.
  */
 
 const Filtersquery = (props) => {
 
-    const { clickCB, xclassCSS, devMode, arrayFilter } = props;
+    const { clickCB, xclassCSS, devMode, arrayFilter, switchList, xtraClassUl } = props;
 
     const [filterSelected, setFilterSelected] = useState(null);
 
@@ -49,17 +51,18 @@ const Filtersquery = (props) => {
     //END functions/CB
 
     return (
-        <div>
+        <div className="standardDivFlexPlain justAligned">
             <div className="relativeDiv">
                 <Collapsablelist 
                     arrayList={[
-                        { title: 'Category', collapsable: true, list: arrayFilter.map((item) => {return { id: item.id, name: item.name, from: 'category'}} ) }, 
+                        { title: 'Category', collapsable: true, list: arrayFilter.map((item) => {return { id: item.id, name: item.name, from: 'category'}}) }, 
                         { title: 'Gig Type', collapsable: true, list: [{ id: 'job_type', name: 'Employer', from: 'job_type'}, { id: 'job_type', name: 'Employee' , from: 'job_type'},] }, 
                         { title: 'Delivery Options', collapsable: true, list: [{ id: 'sortby_delivery_1_day', name: '1  Day or less', from: 'delivery_options'}, { id: 'sortby_delivery_2_day', name: '2 Days', from: 'delivery_options'}, { id: 'sortby_delivery_0_day', name: '3 Days or more', from: 'delivery_options'}] },
                         { title: 'No Filters Needed', collapsable: true, list: [{ id: 'job_type', name: 'Employer Gigs All', from: 'no_filters'}, { id: 'job_type', name: 'Employee Gigs All' , from: 'no_filters'}, { id: 'job_type', name: 'All' , from: 'no_filters'},] }, 
                     ]}
                     clickCB={(item) => clickedItem(item)}
                     devMode={false}
+                    ulDivXtraClass={"whiteBack"}
                 />
                 {/* <Clickeablelist 
                     list={arrayFilter}
@@ -67,14 +70,10 @@ const Filtersquery = (props) => {
                     xclassCSSUl={"standardUlColPlain whiteBack justBorders justMinWidth200px"} xclassCSSLi={"standardLiHovered"}
                 /> */}
             </div>
-            <Switchlist miniSizes={true} xclassCSSUl={"standardUlRowFlexPlain justSpaceAround normalTextSmall"}
-                clickCB={(itemSwitch) => console.log('item Switch clicked', itemSwitch)}
-                switchList={[
-                    { id: 'switch-3', iniValue: false, sideText: 'Local Users', name: 'query_local_users', btnInfo: true, infoMsg: 'Depending on your location, the system will try to filter people near by.'},
-                    { id: 'switch-1', iniValue: false, sideText: 'Users with completed Gig/Services', name: 'query_exp_jab'},
-                    { id: 'switch-2', iniValue: false, sideText: 'Top Users', name: 'query_top_users'},
-
-                ]}
+            <Switchlist miniSizes={true} xclassCSSUl={`standardUlRowFlexPlain justSpaceAround normalTextSmall ${xtraClassUl}`}
+                clickCB={(itemSwitch) => clickedItem({ ...itemSwitch, from: 'switchs_filtersQ'})}
+                // console.log('item Switch clicked', itemSwitch)
+                switchList={switchList}
             />
             {/* <ul className="standardUlRowFlexPlain">
                 {

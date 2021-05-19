@@ -126,10 +126,10 @@ const Visualizator = (props) => {
     },[]);
     //END to load on init
     return (
-        <div className={xclassCSS}>
+        <div className={`${xclassCSS} justiAlig`}>
             {
                 loadingData &&
-                <div className="standardBlock150px marginAuto"><Loader logginIn={loadingData} typegif={"spin"}/></div>
+                <div className="standardFlex150px  justiAlig"><Loader xtraClass={"justMarginAuto"} logginIn={loadingData} typegif={"spin"}/></div>
             }
             {
                 blogPosts && blogPosts.length > 0 && !loadingData &&

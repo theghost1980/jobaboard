@@ -1,5 +1,5 @@
 import React from "react";
-import { graphql, useStaticQuery, Link } from "gatsby"
+import { graphql, useStaticQuery, Link, navigate } from "gatsby"
 
 import Layout from "../components/layout"
 // import SEO from "../components/seo"
@@ -9,6 +9,7 @@ import '../styles/styles.css';
 //components
 import MainCarousel from "../components/maincarousel";
 import Visualizator from "../components/Blog/visualizator";
+import Browseby from "../components/Categories/browseby";
 
 const Index = () => {
     //graphql queries
@@ -63,8 +64,20 @@ const Index = () => {
           </div>
           {/* TODO important: Modify the old cats but the new one in a separate component */}
           <h1>What is JAB?</h1>
-          <p>Simple dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</p>
-          <ul className="catBigUl marginsTB">
+          <p>JobABoard is a jobs and services platform that operates under today's industry standards but, using something that sets us apart. We make use of NFTs.</p>
+          <p>On JobAboard you can post your virtual or physical services and earn money. Like many other platforms, you can create your profile, post your skills and experiences but, here you don't need to have an international bank account because we use Blockchain technology.</p>
+          <h2>What do I need to start on JAB?</h2>
+          <p>All you need is to have an account on our blockchain called HIVE and a huge desire to gain experience and coins.</p>
+          <p>We can summarize the steps in:</p>
+          <ol>
+            <li>Open an account by following the <Link to="/signup">signup</Link> steps.</li>
+            <li>Login with your new Hive Blockchain account.</li>
+            <li>Create your own currency and start publishing services and jobs.</li>
+          </ol>
+          <hr></hr>
+          <Browseby pagination={{ pagination: true, perSlide: 3}} cbSeleted={(item) => navigate(`/explore?category=${item.name}|sub_category=none`)}/>
+          <hr></hr>
+          {/* <ul className="catBigUl marginsTB">
             {
               data.append_menu.edges.map(({ node: item}) => {
                 // console.log(item)
@@ -77,20 +90,18 @@ const Index = () => {
                         <h2 className="justAbsolutePos">{item.name}</h2>
                       </div>
                     </Link>
-                    {/* <p className="content">{item.title}</p>
-                    <p className="content">{item.subtitle}</p> */}
                   </li>
                   : null
                 )
               })
             }
-          </ul>
+          </ul> */}
           <h2>Why do we use NFTs?</h2>
-          <p>It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).</p>
-          <h2>Where does it come from?</h2>
-          <p>Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source. Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of "de Finibus Bonorum et Malorum" (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, "Lorem ipsum dolor sit amet..", comes from a line in section 1.10.32.</p>
-          <p>The standard chunk of Lorem Ipsum used since the 1500s is reproduced below for those interested. Sections 1.10.32 and 1.10.33 from "de Finibus Bonorum et Malorum" by Cicero are also reproduced in their exact original form, accompanied by English versions from the 1914 translation by H. Rackham.</p>
-          <h3>TODO. Explain about NFT. What make us different from other places to hire professionals.</h3>
+          <p>We use NFTs or non-fungible tokens because we can represent, in the form of durable data, something in particular. Imagine you have a lot of experience doing a trade like web pages. You can create your own token and make that token last over time in every job you do from now on.</p>
+          <p>Another reason is because of its level of security that makes it impossible for third parties to tamper with the token. The blockchain technology also serves as a secure and completely autonomous means of exchange. Free from any political or governmental entity.</p>
+          <h2>NFTs are here for stay</h2>
+          <p>By being able to use the benefits of NFTs, we can create digital content that lasts as long as the Internet is active, that is, virtually forever.</p>
+          <p>To learn more about NFTs visit our <Link to="/blog">Blog</Link> or access the <Link to="/nfts">NFTs</Link> section.</p>
           <div className="marginsTB">
             <h2 className="textAlignedCenter">Annoucements on JAB@blog</h2>
             <Visualizator hiveUser={"sexosentido"} limit={10}  filter_tags={['general-accounces']} openMode={"onTopOfAll"}

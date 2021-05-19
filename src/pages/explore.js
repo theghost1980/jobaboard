@@ -12,6 +12,9 @@ import { check } from '../utils/helpers';
 import Jobresult from '../components/User/jobs/subcomponents/jobresult';
 import Btnswitch from '../components/btns/btnswitch';
 import Filtersquery from '../components/interactions/filtersquery';
+import Browseby from '../components/Categories/browseby';
+import Collapsablelist from '../components/interactions/subcompfilters/collapsablelist';
+import Btncollapse from '../components/btns/btncollapse';
 
 //constants
 const jobEP = process.env.GATSBY_jobEP;
@@ -21,10 +24,16 @@ const defaultQuery = {
     category: "Graphics & Design", 
     active: true, 
 }
+const resultsPerPage = 10;
+const omitFields = ['_id', '__v', 'active', 'images', 'escrow_type', 'escrow_username', 'verifyed_profiles_only'];
 //end constants
 
-// TODO: pass the current category/sub category as context so the page
-// will display the required category
+//////////////////////////////////////////
+// NOTE IMPORTANT: We are using pagination from now on.
+// We keep the original results without pagination on resultQuery
+// But we show and filter the second array named as pages
+// Pages as: [{ page: n, result: [{}] }];
+//////////////////////////////////////////
 
 function cleanQuery(q){
     const newNode = {};
@@ -114,7 +123,7 @@ const Explore = (props) => {
     //end grapqhql queries
 
     const [resultQuery, setResultQuery] = useState([]);
-    const [loadingQuery, setLoadingQuery] = useState(false);
+    const [loadingQuery, setLoadingQuery] = useState(true);
     const query  = props.location.search;
     // console.log('Received prop to work with:');
     // console.log(query);
@@ -126,10 +135,18 @@ const Explore = (props) => {
     const initialStateQ = { job_type: "", active: true, category: "", sub_category: ""};
     const [filterQuery, setFilterQuery] = useState(initialStateQ);
     const [showFilters, setShowFilters] = useState(false);
+    const [orderBy, setOrderBy] = useState({ orderBy: '', asc: true, }); //by default as ASC //orderBy.asc ? 1 : -1.
+    const [orderNow, setOrderNow] = useState(false); //kinf of trick to fire re-render after the orderby has been set on click.
+    const [fieldsArray, setFieldsArray] = useState([]);
     const [limit, setLimit] = useState(0);
-    const [subCats, setSubCats] = useState(null);
-    const [selectedSubCat, setSelectedSubCat] = useState("");
-
+    // const [subCats, setSubCats] = useState(null);
+    // const [selectedSubCat, setSelectedSubCat] = useState("");
+    const [pages, setPages] = useState(null);
+    const [actualPage, setActualPage] = useState(0); //initiallly as 0 to show the first element in array.
+    const [searchCatNSub, setSearchCatNSub] = useState(false);
+    const [querySelectedCatSub, setQuerySelectedCatSub] = useState({ category: '', sub_category: '' });
+    const [arrayCats, setArrayCats] = useState([]);
+    const [arraySubCats, setArraySubCats] = useState([]);
     const [queryToExecute, setQueryToExecute] = useState(null); //as {job_type: '', active: true, category: '', sub_category: ''}
     // console.log(props);
 
@@ -153,6 +170,11 @@ const Explore = (props) => {
     //     }
 
     // }, [filterQuery]);
+
+    function updateQueryCatSub(name, value){ 
+        console.log('Received:', { name: name, value: value });
+        setQuerySelectedCatSub(prevState => { return {...prevState, [name]: value }});
+    }
 
     const executeFromFilters = (item) => {
         console.log(item)
@@ -185,12 +207,29 @@ const Explore = (props) => {
                     job_type: job_type, 
                 });
             }
+        }else if(item.from === "switchs_filtersQ"){ //for now just will work "category_n_sub_cat"
+            if(item.switch === "category_n_sub_cat" ){
+                setSearchCatNSub(item.cen);
+            }
         }
     }
     function setValueQuery(name,value){
         setFilterQuery(prevState => {
             return { ...prevState, [name]: value }
         })
+    }
+    function paginateResults(array){
+        function paginate (arr, size) {
+            return arr.reduce((acc, val, i) => {
+                let idx = Math.floor(i / size)
+                let page = acc[idx] || (acc[idx] = [])
+                page.push(val);
+                return acc
+            }, [])
+        }
+        let pages = paginate(array, resultsPerPage);
+        setPages(pages);
+        if(devMode){ console.log('pagination:', pages) };
     }
 
     async function sendQuery(q, limit, sortby){
@@ -204,6 +243,9 @@ const Explore = (props) => {
             // TODO handle pagination
             // if results > max per page(which can be a parameter set as a constant or .env var)
             setResultQuery(response.result);
+            if(response.result.length > 0){
+                paginateResults(response.result);
+            }
             setLoadingQuery(false);
         })
         .catch(error => {
@@ -212,64 +254,53 @@ const Explore = (props) => {
         });
     }
 
-    // to load on each change of state
-    // useEffect(() => {
-    //     if(defaultQuery){
-    //         setLoadingQuery(true);
-    //         var passedQ = {
-    //             category: "", sub_category: ""
-    //         }
-    //         const cleanQ = decodeURI(defaultQuery);
-    //         // console.log(cleanQ);
-    //         const category = cleanQ.split("?category=")[1].split("|");
-    //         passedQ.category = category[0];
-    //         const sub_category = category[1].split("sub_category=")[1];
-    //         passedQ.sub_category = sub_category;
-    //         if(category[0]){
-    //             setValueQuery("category",category[0]);
-    //         }
-    //         if(sub_category){
-    //             setValueQuery("sub_category",sub_category);
-    //         }
-    //         passedQ.active = true;
-    //         const cleanedQ = cleanQuery(passedQ);
-    //         console.log('To execute on this cleaned one:');
-    //         console.log(cleanedQ);
-    //         sendQuery(cleanedQ);
-    //         setDefaultQuery(null);
-    //     }
-    // }, [defaultQuery]);
-    //search jobs 
-    // useEffect(() => {
-    //     if(query){
-    //         setLoadingQuery(true);
-    //         var passedQ = {
-    //             category: "", sub_category: ""
-    //         }
-    //         const cleanQ = decodeURI(query);
-    //         // console.log(cleanQ);
-    //         const category = cleanQ.split("?category=")[1].split("|");
-    //         passedQ.category = category[0];
-    //         const sub_category = category[1].split("sub_category=")[1];
-    //         passedQ.sub_category = sub_category;
-    //         if(category[0]){
-    //             setValueQuery("category",category[0]);
-    //         }
-    //         if(sub_category){
-    //             setValueQuery("sub_category",sub_category);
-    //         }
-    //         passedQ.active = true;
-    //         const cleanedQ = cleanQuery(passedQ);
-    //         console.log('To execute on this cleaned one:');
-    //         console.log(cleanedQ);
-    //         sendQuery(cleanedQ);
-    //     }
-    // },[query]);
     useEffect(() => {
         if(queryToExecute){ //as { job_type: '', active: true, category: '', sub_category: ''
             sendQuery(queryToExecute,limit ? limit : null, {});
         }
     },[queryToExecute]);
+
+    useEffect(() => {
+        if(fieldsArray && devMode){ console.log('Sort by arrayfields:', fieldsArray) };
+    },[fieldsArray]);
+
+    useEffect(() => {
+        if(orderBy.orderBy !== '' && fieldsArray){
+            if(devMode){ console.log('Ordering actual page by:', orderBy)};
+            // const _actualPageAr = pages[actualPage].sort( compare );
+            // const oldStateTo = page
+            setOrderNow(!orderNow);
+        }
+    },[orderBy]);
+
+    useEffect(() => {
+        if(pages){
+            const _arrayField = [];
+            if(devMode){ console.log('pages::::', pages)} ;
+            Object.entries(pages[0][0]).forEach(([key,value]) => {
+                if(!omitFields.find(field => field === key)){
+                    _arrayField.push({ field: key, id: `${key}-field-sortBy-Jab`});
+                }
+            });
+            setFieldsArray(_arrayField);
+        }
+    },[pages]);
+
+    useEffect(() => {
+        if(querySelectedCatSub.category !== ''){
+            const cats = data.categories.edges.map(({ node:cat }) => cat).filter(cat => cat.active === true );
+            const subs = cats.find(cat => cat.name === querySelectedCatSub.category).sub_category.map((subcat, index) => {return { id: `subCat-JAB-${index}`, name: subcat, from: 'sub_category'}});
+            // {return { id: item.id, name: item.name, from: 'sub_category'}}
+            if(devMode){ console.log(subs) };
+            setArraySubCats(subs);
+        }
+    },[querySelectedCatSub]);
+
+    const clearSubNCats = () => {
+        setSearchCatNSub(false);
+        setQuerySelectedCatSub({ category: '', sub_category: '' });
+        setArraySubCats([]);
+    }
 
     //to load on init
     useEffect(() => {
@@ -286,6 +317,8 @@ const Explore = (props) => {
                 console.log('Process:',{ cleanQ: cleanQ, category: category, sub_category: sub_category, tempQ: tempQ, cleanedQ: cleanedQ });
             }
         }
+        //setting arrays for cats & subCats
+        setArrayCats(data.categories.edges.map(({ node:cat }) => cat));
     }, []);
     //END to load on init
 
@@ -298,6 +331,34 @@ const Explore = (props) => {
 
     function closeJOB(){
         setSelectedJOb(null);
+    }
+
+    function showMeName(queryObj){
+        const fieldsAr = [];
+        Object.entries(queryObj).forEach(([key,value]) => {
+            if(key !== 'active'){
+                fieldsAr.push(`"` + String(key).split("_").join(" ") + `"`);
+            }
+        });
+        if(devMode) { console.log('fieldsAr:', fieldsAr) };
+        return fieldsAr.length === 0 ? 'All - No filters' : fieldsAr.join(", ");
+    }
+
+    function setQuery(item){
+        setLoadingQuery(true);
+        setQueryToExecute({
+            active: true, category: item.name
+        });
+        global.window ? window.scroll({ top: 150, left: 0, behavior: 'smooth'}) : null; //scroll to top.
+    }
+
+    const loadQuery = () => {
+        if(querySelectedCatSub.category !== '' && querySelectedCatSub.sub_category !== ''){
+            setQueryToExecute({ active: true, category: querySelectedCatSub.category, sub_category: querySelectedCatSub.sub_category });
+            clearSubNCats();
+        }else{
+            alert('Please fill Category and Subcategory to apply the search!');
+        }
     }
 
     // const executeQuery = () => {
@@ -313,16 +374,16 @@ const Explore = (props) => {
     //     };
     // }
 
-    const handleSelectedCat = (event) => {
-        const cat = event.target.value;
-        setValueQuery("category",cat);
-        if(cat !== null && cat !== ""){
-            const _subCats = data.categories.edges.filter(({node: category}) => category.name === cat)[0].node.sub_category;
-            setSubCats(_subCats);
-        }else{
-            setSubCats(null);
-        }
-    }
+    // const handleSelectedCat = (event) => {
+    //     const cat = event.target.value;
+    //     setValueQuery("category",cat);
+    //     if(cat !== null && cat !== ""){
+    //         const _subCats = data.categories.edges.filter(({node: category}) => category.name === cat)[0].node.sub_category;
+    //         setSubCats(_subCats);
+    //     }else{
+    //         setSubCats(null);
+    //     }
+    // }
 
     const clearQuery = () => {
         setLoadingQuery(false);
@@ -335,13 +396,69 @@ const Explore = (props) => {
         setShowFilters(!showFilters);
     }
 
+    function fixFieldToShow(field){
+        const _field = String(field).split("_").join(" ");
+        return _field.substring(0,1).toUpperCase() + _field.substring(1);
+    }
+
+    function compare(a, b) {
+        if( !isNaN(a[orderBy.orderBy]) && !isNaN(b[orderBy.orderBy]) ){
+            if(devMode) console.log('Comparing as Numbers Detected.');
+            const asNumbers = { a: Number(a[orderBy.orderBy]), b: Number(b[orderBy.orderBy])};
+            if ( asNumbers.a < asNumbers.b ){ return  orderBy.asc ? 1 : -1 }; //orderBy.asc ? -1 : 1
+            if ( asNumbers.a > asNumbers.b ){ return  orderBy.asc ? -1 : 1 }; //orderBy.asc ? 1 : -1 
+        }else{
+            if(devMode) console.log('Comparing as Others(Strings, Booleans, etc.) Detected.');
+            if ( a[orderBy.orderBy] < b[orderBy.orderBy] ){ return orderBy.asc ? 1 : -1 }; //orderBy.asc ? -1 : 1 
+            if ( a[orderBy.orderBy] > b[orderBy.orderBy] ){ return orderBy.asc ? -1 : 1 }; //orderBy.asc ? 1 : -1
+        };
+        return 0;
+    }
+
     return (
         <Layout>
-            <div className="exploreContainer">
+            <div className="exploreContainer spaceEvenly justAligned">
                 {/* testing filter component */}
-                <Filtersquery clickCB={(item) => executeFromFilters(item)}
-                    arrayFilter={data.categories.edges.map(({ node:cat }) => cat)}
-                />
+                <div className="relativeDiv">
+                    <Filtersquery 
+                        clickCB={(item) => executeFromFilters(item)}
+                        arrayFilter={data.categories.edges.map(({ node:cat }) => cat)}
+                        switchList={[
+                            { id: 'switch-4', iniValue: searchCatNSub, sideText: 'Search By Sub Category', name: 'category_n_sub_cat', btnInfo: true, infoMsg: 'Make a search selecting available category and subcategories.'},
+                            { id: 'switch-3', iniValue: false, sideText: 'Local Users', name: 'query_local_users', btnInfo: true, infoMsg: 'Depending on your location, the system will try to filter people near by.'},
+                            { id: 'switch-1', iniValue: false, sideText: 'Users with completed Gig/Services', name: 'query_exp_jab'},
+                            { id: 'switch-2', iniValue: false, sideText: 'Top Users', name: 'query_top_users'},
+        
+                        ]}
+                    />
+                    {
+                        searchCatNSub &&
+                        <div className="standardDivFlexPlain2 normalTextSmall jutsMinHeight200px justBordersRoundedMarginB justAbsolutePos zIndexTop whiteBack">
+                            <div className="standardContentMarginLR">
+                                <Collapsablelist 
+                                    arrayList={[ { title: 'Available Categories', collapsable: true, list: arrayCats.map((item) => {return { id: item.id, name: item.name, from: 'category'}})},]}
+                                    clickCB={(item) => updateQueryCatSub(item.from, item.name)}
+                                    xclassCSS={"whiteBack justHeight300pOverY"}
+                                />
+                                {
+                                    arraySubCats.length > 0 &&
+                                    <Collapsablelist 
+                                        arrayList={[ { title: `Sub categories for ${querySelectedCatSub.category}`, collapsable: true, list: arraySubCats.map((item) => {return { id: item.id, name: item.name, from: 'sub_category'}})},]}
+                                        clickCB={(item) => updateQueryCatSub(item.from, item.name)}
+                                        xclassCSS={"whiteBack"}
+                                        xtraClassUl={"justHeight300pOverY"}
+                                    />
+                                }
+                                <p>Selected Category: {querySelectedCatSub.category}</p>
+                                <p>Selected Sub Category: {querySelectedCatSub.sub_category}</p>
+                                <div className="standardDivRowFullW justSpaceAround justMarginBottom">
+                                    <button onClick={clearSubNCats} className="normalTextXSmall">Cancel</button>
+                                    <button onClick={loadQuery} className="normalTextXSmall">Apply</button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
                 {
                     loadingQuery &&
                         <div className="standardDivRowFlex100pX100pCentered miniMarginTB">
@@ -359,18 +476,57 @@ const Explore = (props) => {
                         </Absscreenwrapper>
                 }
                 {
-                    (resultQuery && resultQuery.length > 0)
+                    (pages && pages.length > 0)
                         &&
-                        <div>
-                            <h1>Results on {queryToExecute.category} > {queryToExecute.sub_category ? queryToExecute.sub_category : null }</h1>
-                            <h4>Showing {resultQuery.length} Result{resultQuery.length === 1 ? '.':'s.'}</h4>
-                            <ul className="standardUlHorMini wrapDiv coloredContrast3Soft justRounded">
+                        <div className="justWidth100per">
+                            <hr></hr>
+                            {
+                                pages &&
+                                <div className="standardDivRowFullW justiAlig">
+                                    <ul className="standardUlRow2 justiAlig">
+                                        {
+                                            pages.map((page,index) => {
+                                                // console.log(page)
+                                                return (
+                                                    <li key={`${index}-page-Job-JAB`} className={`marginRight pointer scaleHovered ${index === actualPage ? 'activePage' : null }`}
+                                                        onClick={() => setActualPage(index)}
+                                                    >
+                                                        {index + 1}
+                                                    </li>
+                                                ) 
+                                            })
+                                        }
+                                    </ul>
+                                    <div className="displayFlex normalTextSmall justAligned">
+                                        <label htmlFor="order_by" className="miniMarginRight">Sort Results By:</label>
+                                        <select name="order_by" onChange={(e) => setOrderBy({ orderBy: e.target.value, asc: true })}>
+                                            <option defaultValue="">order options</option>
+                                            {
+                                                fieldsArray.map(field => {
+                                                    return (
+                                                        <option key={field.id} value={field.field}>{fixFieldToShow(field.field)}</option>
+                                                    )
+                                                })
+                                            }
+                                        </select>
+                                        <Btncollapse xclassCSS={"miniMarginLeft"} miniSizes={true} title={`Ordered result ${orderBy.asc ? 'Ascendent' : 'Descendent'}`}
+                                            toogleValue={orderBy.asc} btnAction={() => setOrderBy(prevState => { return {...prevState, asc: !prevState.asc}})}
+                                        />
+                                    </div>
+                                </div>
+                            }
+                            <div className="standardDivRowFullW justAligned justSpaceAround">
+                                <h3>Results on {queryToExecute.category || queryToExecute.job_type} > {queryToExecute.sub_category ? queryToExecute.sub_category : null }</h3>
+                                <h4>Showing {resultQuery.length} Result{resultQuery.length === 1 ? '.':'s.'} Actual page:{actualPage + 1}</h4>
+                            </div>
+                            <ul className="standardUlHorMini wrapDiv justRounded" key={orderNow}>
                                     {
-                                        resultQuery.map(job => {
+                                        pages[actualPage].sort( compare ).map(job => {
+                                            // console.log(job)
                                             return (
                                                 // to test carousel removed: onClick={() => setSelectedJOb(job)}
                                                 <li key={job._id}>
-                                                    <Jobresult job={job} logged={userdata.logged} openCb={() => setSelectedJOb(job)} sourceQuery={"explore"} />
+                                                    <Jobresult sizeSlider={"small"} job={job} logged={userdata.logged} openCb={() => setSelectedJOb(job)} sourceQuery={"explore"} />
                                                 </li>
                                             )
                                         })
@@ -379,16 +535,16 @@ const Explore = (props) => {
                         </div>
                 }
                 {
-                    (resultQuery.length === 0 && !loadingQuery) &&
-                        <div className="imgContCatHAuto relativeDiv justMargin0auto justHeightAuto">
+                    (resultQuery.length === 0 && !loadingQuery && queryToExecute) &&
+                        <div className="imgContCatHAuto relativeDiv marginsTBX2 justMargin0auto justHeightAuto">
                             {
-                                data.append_menu.edges.filter(cat_menu => cat_menu.node.name === filterQuery.category).map(catFound => {
-                                    console.log('NotFound on::::', catFound)
+                                data.append_menu.edges.filter(cat_menu => cat_menu.node.name === queryToExecute.category).map(catFound => {
+                                    if(devMode){ console.log('NotFound on::::', catFound) }
                                     return (
                                         <div key={catFound.node.id}>
                                             <img src={catFound.node.image} className="imgCat " alt={`${catFound.node.name}-${catFound.node.id}`} />
                                             <div className="justPosAbsTop20p standardDivColFullW justbackgroundblackalpha">
-                                                <h2 className="specialH2H3">Sorry, Not results on {catFound.node.name} > {filterQuery.sub_category}</h2>
+                                                <h2 className="specialH2H3">Sorry, Not results on {catFound.node.name}  {queryToExecute.sub_category ? `> ${queryToExecute.sub_category}` : null }</h2>
                                                 <h3 className="specialH2H3">Please feel free to use the filters above. Or just surf the recommendations bellow.</h3>
                                             </div>
                                         </div>
@@ -397,15 +553,22 @@ const Explore = (props) => {
                             }
                         </div>
                 }
-                <div className="justxxsmalltext">
-                    <p>TODO we could have 2 or 3 sections as</p>
-                    <ul>
-                        <li>Top users</li>
-                        <li>Trending cats AND so on</li>
-                        <li>Also what we do if no query was passed? bring something as default??</li>
-                    </ul>
-                </div>
+                {
+                    resultQuery.length === 0 && !loadingQuery && queryToExecute && (queryToExecute.job_type || queryToExecute.job_type || queryToExecute.days_to_complete ) &&
+                        <div className="imgContCatHAuto jusBordersRounBlackBack  relativeDiv justMargin0auto justHeightAuto">
+                            <h2 className="specialH2H3">Sorry, Not results on {showMeName(queryToExecute)}</h2>
+                            <h3 className="specialH2H3">Please feel free to use the filters above. Or just surf the recommendations bellow.</h3>
+                        </div>
+                }
             </div>
+            {devMode && console.log('query executed:', queryToExecute)}
+            <hr></hr>
+            <div>
+                <Browseby pagination={{ pagination: true, perSlide: 3 }} 
+                    cbSeleted={(item) => setQuery(item)}
+                />
+            </div>
+            <hr></hr>
         </Layout>
     )
 }

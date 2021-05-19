@@ -79,7 +79,7 @@ const Follower = (props) => {
     //Calling on load
     useEffect(() => {
         //get the user's following field.
-        const headers = { 'x-access-token': token, 'query': JSON.stringify({ following: 1})};
+        const headers = { 'x-access-token': token, 'query': JSON.stringify({ following: 1}), };
         console.log('Asking to:',userEP+"jabUserField");
         getUserData(userEP+"jabUserField",headers)
         .then(response => {

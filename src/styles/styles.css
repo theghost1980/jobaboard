@@ -318,6 +318,9 @@ body::-webkit-scrollbar {
 .textColorContrast1 {
     color: rgb(160, 86, 86);
 }
+.textColorContrast2 {
+    color: #214E34;
+}
 .justopacity1 {
     opacity: 1 !important;
 }
@@ -403,10 +406,10 @@ body::-webkit-scrollbar {
     width: 70%;
 }
 .justWidth60{
-    width: 60%;
+    width: 60% !important;
 }
 .justWidth50{
-    width: 50%;
+    width: 50% !important;
 }
 .justWidth40{
     width: 40%;
@@ -443,7 +446,7 @@ body::-webkit-scrollbar {
     width: 250px;
 }
 .justWidth100per{
-    width: 100%;
+    width: 100% !important;
 }
 .justWidthInherit {
     width: inherit;
@@ -583,6 +586,13 @@ body::-webkit-scrollbar {
 .scaleHovered:hover {
     transform: scale(1.1);
 }
+.hoverUnderline:hover {
+    text-decoration: underline;
+    font-weight: bold;
+}
+.justUnderlineText {
+    text-decoration: underline;
+}
 .contentBody > p > img {
     width: 100%;
 }
@@ -601,6 +611,11 @@ body::-webkit-scrollbar {
     height: 100%;
     border-radius: 8px;
 }
+.miniImg2 {
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+}
 .softBackground {
     background: rgba(255, 166, 0, 0.149);
 }
@@ -613,6 +628,13 @@ body::-webkit-scrollbar {
     width: 300px;
     height: 320px;
     margin: var(--marginBewteen-Objects);
+}
+.miniLi {
+    display: flex;
+    flex-direction: column;
+    width: 250px;
+    height: auto;
+    border-radius: 5px;
 }
 .miniDiv15p {
     display: flex;
@@ -907,6 +929,15 @@ body::-webkit-scrollbar {
     background: whitesmoke;
     color: #214E34;
 }
+.formVertFlex2 {
+    display: flex;
+    flex-direction: column;
+    width: auto;
+    height: auto;
+    margin-bottom: var(--marginBewteen-Objects);
+    background: whitesmoke;
+    color: #214E34;
+}
 .marginLeft{
     margin-left: var(--marginBewteen-Objects);
 }
@@ -929,6 +960,13 @@ body::-webkit-scrollbar {
     padding-inline-start: 0px;
     align-items: center;
     align-content: center;
+    height: 40px;
+}
+.standardUlRow2 {
+    display: flex;
+    flex-direction: row;
+    list-style: none;
+    padding-inline-start: 0px;
     height: 40px;
 }
 .standardUlRow li {
@@ -1008,6 +1046,9 @@ body::-webkit-scrollbar {
 }
 .boxShadowBottom {
     box-shadow: 0px 3px 1px 0px rgba(33, 78, 52, 0.637);
+}
+.boxShadowBottomStrong {
+    box-shadow: 0px 3px 5px 1px rgba(33, 78, 52, 0.637);
 }
 .allMargins{
     margin: var(--marginBewteen-Objects);
@@ -1099,6 +1140,12 @@ body::-webkit-scrollbar {
 .justMaxHeight {
     max-height: 90px;
 }
+.justHeight100p {
+    height: 100%;
+}
+.justHeight90p {
+    height: 90%;
+}
 .justHeightZero {
     height: 0px;
 }
@@ -1129,6 +1176,11 @@ body::-webkit-scrollbar {
     border-radius: 10px;
     background: white;
 }
+.jusBordersRounBlackBack {
+    border: 1px solid orange;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.466);
+}
 .justMiniMargins{
     margin: 4px;
 }
@@ -1148,7 +1200,7 @@ body::-webkit-scrollbar {
     margin: 0 auto;
 }
 .justHeight200p {
-    height: 200px;
+    height: 200px !important;
 }
 .justHeight400p {
     height: 400px;
@@ -1320,6 +1372,18 @@ body::-webkit-scrollbar {
     right: -20px;
     top: 0px;
 }
+.justPosMenuAbs {
+    left: 0px;
+    bottom: -30px;
+}
+.justPosAbs0Bmright {
+    right: 30px;
+    bottom: 5px;
+}
+.justPosAbs0Tmright {
+    right: 30px;
+    top: 5px;
+}
 .justL-40T10{
     left: -40px;
     top: 10px;
@@ -1380,6 +1444,12 @@ body::-webkit-scrollbar {
     width: 40%;
     height: auto;
 }
+.standardDiv40PercentH100p {
+    display: flex;
+    flex-direction: column;
+    width: 40%;
+    height: 100%;
+}
 .standardDiv30Percent {
     display: flex;
     flex-direction: column;
@@ -1415,6 +1485,11 @@ body::-webkit-scrollbar {
     width: 150px;
     height: 150px;
 }
+.standardFlex150px {
+    display: flex;
+    width: 150px;
+    height: 150px;
+}
 .marginAuto{
     margin: 0 auto;
 }
@@ -1426,6 +1501,9 @@ body::-webkit-scrollbar {
 }
 .justDisplayFlex {
     display: flex;
+}
+.justFlexDirection {
+    flex-direction: column;
 }
 .justDispInlineFlex {
     display: inline-flex;
@@ -1444,6 +1522,10 @@ body::-webkit-scrollbar {
     align-items: center;
     width: 100%;
     height: 40px;
+}
+.standardDivRowFlexPlain {
+    display: flex;
+    flex-direction: row;
 }
 .standardDiv250x140OverflowH {
     display: flex;
@@ -1610,6 +1692,11 @@ body::-webkit-scrollbar {
     width: 65px;
     height: auto;
 }
+.miniImageJobs3 {
+    display: block;
+    width: 45px;
+    height: auto;
+}
 .imgUploadedCont {
     display: flex;
     flex-direction: column;
@@ -1772,6 +1859,9 @@ body::-webkit-scrollbar {
 }
 .normalTextSmall {
     font-size: small;
+}
+.normalTextXSmall {
+    font-size: x-small !important;
 }
 .goldeBorderRound {
     border: 2px solid gold;
@@ -2008,6 +2098,10 @@ body::-webkit-scrollbar {
     margin-top: var(--marginBewteen-Objects);
     margin-bottom: var(--marginBewteen-Objects);
 }
+.marginsTBX2 {
+    margin-top: calc(2*var(--marginBewteen-Objects));
+    margin-bottom: calc(2*var(--marginBewteen-Objects));
+}
 .miniMarginTB {
     margin-top: calc(var(--marginBewteen-Objects)/2);
     margin-bottom: calc(var(--marginBewteen-Objects)/2);
@@ -2178,14 +2272,23 @@ body::-webkit-scrollbar {
 .justBorders {
     border: 1px solid orange;
 }
+.contrastTextBorders {
+    background: #FFFFEA;
+    border: 1px solid gray;
+    border-radius: 8px;
+    padding: 4px;
+}
 .justSpaceAround {
-    justify-content: space-around;
+    justify-content: space-around !important;
 }
 .justSpaceBewteen {
-    justify-content: space-between;
+    justify-content: space-between !important;
 }
 .justSpaceEvenly {
-    justify-content: space-evenly;
+    justify-content: space-evenly !important;
+}
+.justbackgroundWhitishBeige {
+    background: beige;
 }
 .justshadows {
     box-shadow: 0px 1px 3px 1px orange;
@@ -2429,7 +2532,7 @@ body::-webkit-scrollbar {
 }
 .coverImgJobs {
     width: 100%;
-    height: auto;
+    height: 400px;
 }
 .borderedFlexShadowFullW {
     display: flex;
@@ -2474,7 +2577,11 @@ body::-webkit-scrollbar {
     display: flex;
     flex-direction: column;
     width: 100%;
-    min-height: 400px;
+    min-height: 500px;
+    border-radius: 10px;
+    /* width: 95vw; */
+    /* margin: 0 auto; */
+    background: rgba(51, 124, 160, 0.1);
 }
 /* END explore */
 
@@ -2506,6 +2613,9 @@ body::-webkit-scrollbar {
 .justpaddingTB {
     padding-top: 10px;
     padding-bottom: 10px;
+}
+.justpaddingTop {
+    padding-top: var(--marginBewteen-Objects);
 }
 .justpadding10p {
     padding: 10px;
@@ -2631,6 +2741,10 @@ body::-webkit-scrollbar {
 }
 .standardDivFlexPlain {
     justify-content: center;
+    display: flex;
+    flex-direction: column;
+}
+.standardDivFlexPlain2 {
     display: flex;
     flex-direction: column;
 }
@@ -2761,6 +2875,11 @@ main {
     height: 160px;
     overflow: hidden;
 }
+.miniSlider2 {
+    display: block;
+    width: 320px;
+    height: auto;
+}
 /* end mini slider component */
 
 /* menu option user */
@@ -2863,7 +2982,7 @@ main {
     display: flex;
     flex-direction: column;
     width: 100%;
-    height: 400px;
+    min-height: 400px;
 }
 .manageOrdersContainer {
     display: flex;
@@ -3759,7 +3878,7 @@ input[type=text]:focus{
     list-style: none;
     padding-inline-start: 0px;
     width: 40%;
-    height: 120px;
+    height: 220px;
     justify-content: flex-start;
     overflow-y: auto;
 }
@@ -3780,7 +3899,7 @@ input[type=text]:focus{
     display: flex;
     flex-direction: column;
     margin-left: var(--marginBewteen-Objects);
-    width: 45%;
+    width: 60%;
     height: auto;
 }
 
@@ -3843,10 +3962,15 @@ input[type=text]:focus{
      transition: all .2s cubic-bezier(0.215, 0.610, 0.355, 1);
  }
  button:hover{
-    transform: scale(1.09);
     background: white;
     color: orange;
     border: 1px solid orange;
+ }
+ .btnScaled {
+     transition: all .1s ease-in-out;
+ }
+ .btnScaled:hover {
+     transform: scale(1.1);
  }
  h1 {
      color: rgb(0, 0, 0);

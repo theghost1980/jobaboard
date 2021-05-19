@@ -9,7 +9,7 @@ import { useStaticQuery, graphql } from 'gatsby';
 // TODO: add a mechanism to set options: Update, Edit, Delete.
 /**
  * Used it to visualize a record of any type and amount of fields. 
- * (***) you can specify if the link is a txIb by using {..., link: true, txLink: true }
+ * (***) you can specify if the link is a txIb by using {..., link: true, txLink: true, typeLink: 'hiveExplorer' || 'portfolio' || 'regularOut' }
  * xtraData: is optional to add as side content on that field.
  * @param {String} xclassCSS - Optional The css Extra class.
  * @param {String} imgClassCSS - Mandatory if you need to show a main image for this record.
@@ -58,6 +58,23 @@ import { useStaticQuery, graphql } from 'gatsby';
     //END to load on init
 
     //functions/CB
+    function typeLink(typeLink, text){
+        const linkText = {};
+        switch (typeLink) {
+            case 'hiveExplorer':
+                linkText.link = `https://hiveblocks.com/tx/${text}`;
+                break;
+            case 'portfolio':
+                linkText.link = `/portfoliouser?query=${text}`;
+                break;
+            case 'regularOut':
+        
+                break;
+            default:
+                break;
+        }
+        return linkText;
+    }
     function checkItem(item,type){
         if(devMode){
             console.log('Received:',item);
@@ -116,7 +133,7 @@ import { useStaticQuery, graphql } from 'gatsby';
                                     <p className={`marginLeft xtraMiniMarginTB4p ${stylishOptions ? stylishOptions.xtraCssD : null }`}>
                                         {
                                         item.hasOwnProperty(showField.field) ? 
-                                            showField.link ? <OutLink xclassCSS={"normalTextSmall"} link={`${showField.txLink ? `/jabexplorer?tx_id=${item[showField.field]}` : item[showField.field]}`} textLink={checkItem(item[showField.field],showField.type)} /> : checkItem(item[showField.field],showField.type) 
+                                            showField.link ? <OutLink xclassCSS={"normalTextSmall"} link={`${showField.link ? typeLink(showField.typeLink,item[showField.field]).link : item[showField.field]}`} textLink={checkItem(item[showField.field],showField.type)} /> : checkItem(item[showField.field],showField.type) 
                                             : 'not set'
                                         }
                                     </p>

@@ -266,17 +266,18 @@ const Instantiator = (props) => {
                         <img src={nft.image} className="imageMedium" />
                         <h3 className="marginRL">We are about to create: {amount} token{ amount === 1 ? null: 's'} of {nft.symbol}</h3>
                         <h3 className="marginRL">Total Price to transfer: {(Number(jabFEE.costInstance) * amount)} in {jabFEE.acceptedCur}</h3>
-                        <p className="marginRL">The process is fast but if you are in a hurry. Check the box bellow and the system will do it in a few moments, and send you a notification when is done.(TODO)</p>
+                        <h4>Do not close the window. Please, wait until JAB told you is done casting.</h4>
+                        {/* <p className="marginRL">The process is fast but if you are in a hurry. Check the box bellow and the system will do it in a few moments, and send you a notification when is done.(TODO)</p> */}
                         {
                             working &&
                             <div className="absDivRow100x100">
                                 <Loader logginIn={true} typegif={"blocks"} xtraClass={"absDivRow100x100 marginsTB"} />
                             </div>
                         }
-                        <div className="standardDivRowFullW">
+                        {/* <div className="standardDivRowFullW">
                             <label className="marginRL" htmlFor="set_on_noti">After transfer the funds send me a notification when is ready.</label>
                             <input name="set_on_noti" type="checkbox" defaultChecked={set_onNoti} onChange={setOnNoti} />
-                        </div>
+                        </div> */}
                         {
                             !message &&
                             <button onClick={instantiate} className="width100p marginsTB">Proceed</button>

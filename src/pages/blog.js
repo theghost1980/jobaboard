@@ -32,14 +32,14 @@ const Blog = (props) => {
             <div className="businessPageCont jutsMinHeight420px bgBlocksBlueSofter justiAlig justRounded">
                 <h1 className="textAlignedCenter">Blog Page</h1>
                 <Visualizator 
-                    xclassCSS={"addUtlBlog justiAlig"}
+                    xclassCSS={"addUtlBlog justiAlig justDisplayFlex"}
                     xclassCSSUL={"addUtlBlog justFlexWrap justiAlig"}
                     xclassCSSLi={"activeSelected marginRightX2 justMarginBottomX2"}
                     hiveUser={'sexosentido'}
                     limit={100}
                     filter_tags={blogtags.map(({ tag }) => tag)}
                     openMode={"onTopOfAll"}
-                    hideRefreshBtn={true}
+                    hideRefreshBtn={false}
                 />
             </div>
             <div className="standardDivRowFullW justiAlig">

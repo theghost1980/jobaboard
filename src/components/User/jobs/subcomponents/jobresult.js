@@ -6,6 +6,8 @@ import { useStaticQuery, graphql } from "gatsby"
 import Slider from 'react-carousel-responsive';
 import 'react-carousel-responsive/dist/styles.css';
 import Miniprofile from './miniprofile';
+import Sliderjobimages from './sliderjobimages';
+import { formatDateTime } from '../../../../utils/helpers';
 
 const Jobresult = (props) => {
      //graphql queries
@@ -35,7 +37,7 @@ const Jobresult = (props) => {
     // inside of managejobs maybe????
 
     // TODO add the params to read them anytime we use this component
-    const { job, logged, openCb, sourceQuery } = props; //if loggedIn we show the status icon, otherwise noup.
+    const { job, logged, openCb, sourceQuery, sizeSlider } = props; //if loggedIn we show the status icon, otherwise noup.
 
     return (
         <div className="miniDiv2 fontSmall coloredContrast1 relativeDiv scaleHovered justRounded">
@@ -44,40 +46,13 @@ const Jobresult = (props) => {
                 <h3 className="minimumMarginTB"> > </h3> 
                 <h3 className="lowerOpacity minimumMarginTB">{job.sub_category}</h3>
             </div>
-            <div className="miniSlider">
-                {
-                    job.images.length === 0 &&
-                        <img src={'https://res.cloudinary.com/dbcugb6j4/image/upload/v1615643565/noimage-JAB_geyicy.png'} 
-                            className="miniImg boxShadowBottom"
-                        />
-                }
-                {
-                    job.images.length === 1 &&
-                    <img src={job.images[0]} 
-                        className="miniImg boxShadowBottom"
-                    />
-                }
-                {
-                    job.images.length > 1 &&
-                    <Slider autoplay={false} timingFunction={"ease-in-out"} showIndicators={true}>
-                        {
-                            job.images.map(image => {
-                                return (
-                                    <div key={`${job._id}-miniImage-carousel`} className="slide">
-                                        <img src={image} className="miniImg boxShadowBottom"/>
-                                    </div>
-                                )
-                            })
-                        }
-                    </Slider>
-                }
-            </div>
+            <Sliderjobimages size={sizeSlider} job={job} />
             <div className="standardContentMargin pointer" onClick={openCb}>
                 <h3 className="noMargintop bolder">{job.title}</h3>
-                <div className="whiteBack absDivRow2">
-                    <p className="bolder biggerText noMargins">{job.paying_price}</p>
+                <div className="whiteBack standardDivRowFullW spaceEvenly justAligned">
                     <Img fixed={data.tokenIcon.childImageSharp.fixed} />
-                    <p className="bolder">-{job.nft_symbol}</p>
+                    <p className="bolder biggerText noMargins">{job.paying_price}</p>
+                    <p className="bolder">{job.nft_symbol} NFT{job.paying_price === 1 ? null : 's'}</p>
                 </div>
                 {
                     logged && (sourceQuery !== "explore") &&
@@ -86,8 +61,8 @@ const Jobresult = (props) => {
                         <p>{job.active ? 'Active - Published':'Not Active'}</p>
                     </div>       
                 }
-                <p className="noMargins">Created: {job.createdAt}</p>
-                <Miniprofile username={job.username} />
+                <p className="noMargins textAlignedCenter">Created: {formatDateTime(job.createdAt)}</p>
+                <Miniprofile textClass={"textShadowBasic fontSmall"} username={job.username} />
             </div>
         </div>
     )

@@ -7,7 +7,7 @@ import { check } from '../../utils/helpers';
 const PrivateRouteAdmin = ({ component: Component, location, ...rest }) => {
   const userdata = check();
   if (!userdata.logged || userdata.usertype === "user") {
-    navigate("/app/userlogin")
+    navigate("/signup");
     return null
   }
   return <Component {...rest} />

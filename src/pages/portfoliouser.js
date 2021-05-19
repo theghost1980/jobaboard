@@ -8,6 +8,7 @@ import Menujobs from '../components/User/jobs/menujobs';
 import Previewjob from '../components/User/jobs/previewjob';
 import Loader from '../components/loader';
 import Follower from '../components/interactions/follower';
+import Browseby from '../components/Categories/browseby';
 
 //constants
 const portfolio_EP = process.env.GATSBY_portfolioEP;
@@ -131,6 +132,13 @@ const Porfoliouser = (props) => {
                     <div>
                         <h1>Sorry but @{lookedUpUser} has no portfolio created.</h1>
                         <h3>If you know him, let him know the crypto police is looking for him!</h3>
+                        <h3>But please feel free to browse more Gig/Jobs.</h3>
+                        <Browseby 
+                            size={"small"}
+                            pagination={{ pagination : true, perSlide: 2 }}
+                            xclassCSS={"whiteBack marginTop justRounded boxShadowBottom"}
+                            xclassCSSUl={"justSpaceEvenly"}
+                        />
                     </div>
                 }
                 {
@@ -146,7 +154,10 @@ const Porfoliouser = (props) => {
                             />
                         </div>
                         <blockquote className="italicText">"{portfolio.story_line}"</blockquote>
-                        <Follower xclassCSS={"whiteBack justBorders justRounded marginBottom"} token={userdata.token} interactTo={lookedUpUser} />
+                        {
+                            userdata.logged &&
+                            <Follower xclassCSS={"whiteBack justBorders justRounded marginBottom"} token={userdata.token} interactTo={lookedUpUser} />
+                        }
                         <p>Description: {portfolio.description}</p>
                         <p>Member since: {profile.createdAt}</p>
                         {
@@ -280,13 +291,27 @@ const Porfoliouser = (props) => {
                                             return (
                                                 // to test carousel removed: onClick={() => setSelectedJOb(job)}
                                                 <li key={job._id}>
-                                                    <Jobresult job={job} logged={userdata.logged} openCb={() => setSelectedJOb(job)} />
+                                                    <Jobresult sizeSlider={"small"} job={job} logged={userdata.logged} openCb={() => setSelectedJOb(job)} />
                                                 </li>
                                             )
                                         })
                                     }
                                 </ul>
                         </div>
+                }
+                {
+                    (!activeJobs || activeJobs.length === 0) &&
+                    <div className="standardContentMargin">
+                        <h2 className="textColorWhite textShadowBasic">At this moment, this user do not have any Job/Gig or services.</h2>
+                        <h3 className="textColorWhite">If you know this user, please encourage him/her to start posting amazing JABS...I mean, Jobs.</h3>
+                        <h3 className="textColorWhite textShadowBasic">But please feel free to browse our categories</h3>
+                        <Browseby 
+                            size={"small"}
+                            pagination={{ pagination : true, perSlide: 2 }}
+                            xclassCSS={"whiteBack marginTop justRounded boxShadowBottom"}
+                            xclassCSSUl={"justSpaceEvenly"}
+                        />
+                    </div>
                 }
                 </div>
             </div>

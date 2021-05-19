@@ -4,6 +4,12 @@ import Btnoutlink from '../btns/btnoutlink';
 import Btnswitch from '../btns/btnswitch';
 import Tablinator from '../interactions/tablinator';
 import Recordnator from '../interactions/recordnator';
+import Transmiter from './transmiter';
+
+//constants
+const ssc_test_id = "ssc-testNettheghost1980";
+const orderEP = process.env.GATSBY_orderEP;
+//END contansts
 
 /**
  * This component present the definitions & holdings ON SALE in 2 separate tabs.
@@ -14,18 +20,42 @@ import Recordnator from '../interactions/recordnator';
  * @param {[Object]} market_orders - the market order of this user.
  * @param {Object}  jabFEE - defines fees & accepted currency, to be set later on from .env files.
  * @param {Object} userdata - userdata.
+ * @param {String} nftEP the EP of hive to check for txs.
+ * @param {Function} updateOrders call back to update the orders after an operation as update/buy/sell/cancelled.
+ * @param {String} refreshList - optional use it to refresh a particular list. I.e: 'wishlist'.
  * @param {Boolean} devMode - optional to see console.logs
 */
 
 const Maintabulator = (props) => {
-    const { cbSendItem, nft_definitions, nft_instances, devMode, jabFEE, userdata, market_orders} = props;
+    const { cbSendItem, nft_definitions, nft_instances, devMode, jabFEE, userdata, market_orders, nftEP, updateOrders, refreshList} = props;
     const [definitionsSortBy, setDefinitionsSortBy] = useState([]); //maping the fields from incomming item on useeffect.
     const [instancesSortBy, setInstancesSortBy] = useState([]);
     const [keyOrderBy, setKeyOrderBy] = useState("");
     const [orderAsc, setOrderAsc] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState(null);
+    const initialAction = { 
+        action: '', 
+        items_count: 0,
+        items: [],
+        item_type: '', 
+        json_data: {
+            contractName: '',
+            contractAction: '',
+            contractPayload: {},
+        },
+    }
+    const [action, setAction] = useState(initialAction);
+    const [wishlist, setWishlist] = useState(null);
+    const [wishListedSelected, setWishListedSelected] = useState(null);
 
     //functions/CB
+    /////////fecthing data
+    async function dataRequest(url = '', requestType, headers, formdata) {
+        const response =    !formdata ? fetch(url, { method: requestType, headers: headers,})
+                            : fetch(url, { method: requestType, headers: headers, body: formdata});
+        return (await response).json(); 
+    };
+    //////////end fetchin data
     function compare(a, b,) {
         if ( a[keyOrderBy] < b[keyOrderBy] ){ return !orderAsc ? 1 : -1 };
         if ( a[keyOrderBy] > b[keyOrderBy] ){ return !orderAsc ? -1 : 1 };
@@ -39,10 +69,65 @@ const Maintabulator = (props) => {
     function scanObjectFields(object){
         const arrayFields = [];
         Object.entries(object[0]).forEach(([key,value]) => { 
-            if(key !== "_id" && key !== "__v" && key !== "burned" && key !== "for_sale" && key !== "on_sale" && key !== "image" && key !== "thumb"){ arrayFields.push(key) } 
+            if(key !== "__v" && key !== "burned" && key !== "for_sale" && key !== "on_sale" && key !== "image" && key !== "thumb"){ arrayFields.push(key) } 
         });
         if(devMode){ console.log( {arrayFields: arrayFields} )}
         return arrayFields;
+    }
+    const editMarketOrder = (option) => {
+        if(devMode){ console.log('Option Menu:', option) };
+        if(option === 'close'){ setSelectedOrder(null) };
+        if(option === 'cancel'){
+            const answer = window.confirm('Are you sure to cancel the order?');
+            if(answer){
+                const item_type = selectedOrder.item_type;
+                // const test = selectedOrder[`nft_${item_type}s`];
+                // console.log('to read:', { item_type, test });
+                setAction({
+                    action: 'cancel',
+                    item_type: item_type,
+                    items: [selectedOrder],
+                    json_data: {
+                        contractName: 'nftmarket',
+                        contractAction: 'cancel',
+                        contractPayload: {
+                            symbol: selectedOrder.nft_symbol,
+                            nfts: [ String(selectedOrder.nft_instance_id) ],
+                        }
+                    }
+                });
+            }
+        }
+        if(option === 'edit'){
+            setAction({
+                action: 'update',
+                item_type: selectedOrder.item_type,
+                items: [selectedOrder],
+                json_data: {
+                    contractName: 'nftmarket',
+                    contractAction: 'changePrice',
+                    contractPayload: {
+                        symbol: selectedOrder.nft_symbol,
+                        nfts: [ String(selectedOrder.nft_instance_id) ],
+                    }
+                }
+            });
+        }
+    }
+    const closeNUpdate = () => {
+        setAction(initialAction);
+        updateOrders();
+    }
+    function loadWishList(){
+        const headers = { 'x-access-token': userdata.token, 'operation': 'find', 'query': JSON.stringify({ username: userdata.username, record_active: true }) };
+        dataRequest(orderEP+"handleRequestWishlist", "POST", headers, {}).then(response => {
+            console.log(response);
+            setWishlist(response.result);
+        }).catch(error => console.log('Error adding to wishlist.', error ));
+    }
+    const wishListing = (option) => {
+        console.log('Option Wish List:', option);
+        // if(option === 'remove'){ setWishListedSelected(null)};
     }
     //END functions/CB
 
@@ -50,9 +135,28 @@ const Maintabulator = (props) => {
     useEffect(() => {
         if(nft_definitions){ setDefinitionsSortBy(scanObjectFields(nft_definitions)) };
         if(nft_instances){ setInstancesSortBy(scanObjectFields(nft_instances)) };
+        loadWishList();
         if(devMode){ console.log('Received on props:', { cbSendItem, nft_definitions, nft_instances, jabFEE, market_orders})}
     },[]);
     //END to load on init
+
+    //load on state changes
+    useEffect(() => {
+        if(selectedOrder){ console.log('Selected order:', selectedOrder )};
+    },[selectedOrder]);
+    useEffect(() => {
+        if(action.action !== ''){ console.log('Action changes:', action) };
+    },[action]);
+    useEffect(() => {
+        if(refreshList && refreshList === 'wishlist'){
+            loadWishList();
+            console.log('updating wishlist');
+        }
+    },[refreshList]);
+    useEffect(() => {
+        console.log(wishListedSelected);
+    },[wishListedSelected]);
+    //END load on state changes
 
     return (
         <div>
@@ -73,7 +177,7 @@ const Maintabulator = (props) => {
                 </TabList>
                 <TabPanel>
                     {
-                        nft_definitions &&
+                        nft_definitions && definitionsSortBy &&
                         <div>
                             <div className="standardUlRowFlexPlain">
                                 <label className="normalTextSmall miniMarginRight" htmlFor="sorting_definitions">Sort By: </label>
@@ -119,7 +223,7 @@ const Maintabulator = (props) => {
                 </TabPanel>
                 <TabPanel>
                 {
-                        nft_instances && nft_definitions &&
+                        nft_instances && nft_definitions && instancesSortBy &&
                         <div>
                             <div className="standardUlRowFlexPlain">
                                 <label className="normalTextSmall miniMarginRight" htmlFor="sorting_instances">Sort By: </label>
@@ -168,19 +272,76 @@ const Maintabulator = (props) => {
                 </TabPanel>
                 {
                         userdata.logged && market_orders &&
+                        <div>
                         <TabPanel>
-                            <Tablinator 
-                                xclassCSS={"justMaxHeight400p justOverflowAuto"}
-                                devMode={true}
-                                items={market_orders}
-                                titleTable={`Current Orders of ${userdata.username}`}
-                                toShow={['status','order_type','tx_id','createdAt','orderId','item_type','price_total','price_symbol']}
-                                clickedSubItemCB={(order) => setSelectedOrder(order)}
-                                arraySpecs={[
-                                    {field: 'tx_id', limitTo: 5, link: true, typeLink: 'jabExplorer' },
-                                ]}
-                            />
+                                <Tabs>
+                                    <TabList>
+                                        <Tab>
+                                            <h5 className="extraMiniMarginsTB">My Current Orders</h5>
+                                        </Tab>
+                                        <Tab>
+                                            <h5 className="extraMiniMarginsTB">History</h5>
+                                        </Tab>
+                                        <Tab>
+                                            <h5 className="extraMiniMarginsTB">Wishlist</h5>
+                                        </Tab>
+                                    </TabList>
+                                    <TabPanel>
+                                        {   market_orders &&
+                                            <Tablinator 
+                                                xclassCSS={"justMaxHeight400p justOverflowAuto"}
+                                                devMode={true}
+                                                items={market_orders.filter(order => order.status === 'notFilled')}
+                                                titleTable={`Current Orders of ${userdata.username}`}
+                                                toShow={['status','order_type','nft_symbol','tx_id','createdAt','orderId','item_type','price','priceSymbol']}
+                                                clickedSubItemCB={(order) => setSelectedOrder(order)}
+                                                arraySpecs={[ {field: 'tx_id', limitTo: 5, link: true, typeLink: 'hiveExplorer' },]}
+                                                pagination={{ perPage: 10, controls: false }}
+                                                popMenu={(selectedOrder !== null)}
+                                                arrayMenu={[{ title: 'Change Details', value: 'edit'}, { title: 'Cancel Order', value: 'cancel'},{ title: 'close', value: 'close'}]}
+                                                toPop_id={selectedOrder ? selectedOrder._id : null }
+                                                cbOptionSelected={(option) => editMarketOrder(option)}
+                                            />
+                                        }
+                                    </TabPanel>
+                                    <TabPanel>
+                                        {   market_orders &&
+                                            <Tablinator 
+                                                    xclassCSS={"justMaxHeight400p justOverflowAuto"}
+                                                    devMode={false}
+                                                    items={market_orders.filter(order => (order.status !== 'notFilled'))}
+                                                    titleTable={`Past Orders of ${userdata.username}`}
+                                                    toShow={['status','order_type','nft_symbol','tx_id','createdAt','orderId','item_type','price','priceSymbol']}
+                                                    clickedSubItemCB={(order) => setSelectedOrder(order)}
+                                                    arraySpecs={[ {field: 'tx_id', limitTo: 5, link: true, typeLink: 'hiveExplorer' },]}
+                                                    pagination={{ perPage: 10, controls: false }}
+                                                    // popMenu={(selectedOrder !== null)}
+                                                    // arrayMenu={[{ title: 'Change Details', value: 'edit'}, { title: 'Cancel Order', value: 'cancel'},{ title: 'close', value: 'close'}]}
+                                                    // toPop_id={selectedOrder ? selectedOrder._id : null }
+                                                    cbOptionSelected={(option) => editMarketOrder(option)}
+                                            />
+                                        }
+                                    </TabPanel>
+                                    <TabPanel>
+                                        {
+                                            (wishlist && wishlist.length > 0) ?
+                                            <Tablinator 
+                                                items={wishlist}
+                                                toShow={['createdAt','nft_symbol','item_type','price','priceSymbol']}
+                                                clickedSubItemCB={(item) => setWishListedSelected(item)}
+                                                popMenu={wishListedSelected ? true : false}
+                                                arrayMenu={[{ title: 'Buy Item', value: 'buy'}, { title: 'Remove from list', value: 'remove'}]}
+                                                toPop_id={wishListedSelected ? wishListedSelected._id : null }
+                                                cbOptionSelected={(option) => wishListing(option)}
+                                                pagination={{ perPage: 10, controls: false }}
+                                            />
+                                            :
+                                            <p>Looks like you don't have any wishes on your list.</p>
+                                        }
+                                    </TabPanel>
+                                </Tabs>
                         </TabPanel>
+                        </div>
                 }
                 {
                     selectedOrder &&
@@ -190,17 +351,31 @@ const Maintabulator = (props) => {
                         item={selectedOrder}
                         toShow={[
                             { field:'createdAt', type: 'Date', link: false, },
+                            { field:'updatedAt', type: 'Date', link: false, },
                             { field:'item_type', type: 'String', link: false, },
+                            { field:'nft_symbol', type: 'String', link: false, },
+                            { field:'nft_id', type: 'Number', link: false, }, 
+                            { field:'nft_instance_id', type: 'Number', link: false, },
                             { field:'orderId', type: 'Number', link: false, xtraData: ' Order N, from Hive-chain.' },
                             { field:'order_type', type: 'String', link: false, },
                             { field:'status', type: 'String', link: false, },
-                            { field:'tx_id', type: 'String', link: false, },
-                            { field:'price_total', type: 'Number', link: false, },
-                            { field:'price_symbol', type: 'String', link: false, },
+                            { field:'tx_id', type: 'String', link: true, txLink: true, typeLink: 'hiveExplorer' },
+                            { field:'price', type: 'Number', link: false, },
+                            { field:'priceSymbol', type: 'String', link: false, },
                         ]}
                     />
                 }
             </Tabs>
+            {   action.action !== '' &&
+                <Transmiter 
+                    action={action}
+                    userdata={userdata}
+                    devMode={true}
+                    ssc_id={ssc_test_id}
+                    order={selectedOrder}
+                    closeCB={() => closeNUpdate()}
+                />
+            }
         </div>
     )
 }

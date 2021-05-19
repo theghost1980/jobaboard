@@ -71,20 +71,7 @@ const Nftsender = (props) => {
         }
         sendPostPlain(nfthandlermongoEP+"updateInstanceNFTfield",headers)
         .then(response => console.log(response))
-        .catch(error => console.log('Error trying to add new instance.',error));
-
-        // const headers = { 'x-access-token': userdata.token, 'query': JSON.stringify({ $pull: { nfts: nfts } }), 'toupdateon': null};
-        // sendPostPlain(userEP+"updateUserField", headers)
-        // .then(response => {
-        //     //TODO add to OPlogger on BE
-        //     console.log('User updated by removing the nfts in user.nfts, please check!',response);
-        // }).catch(error => { console.log('Error updating nfts field on user!',error)});
-        // const headers2 = { 'x-access-token': userdata.token, 'query': JSON.stringify({ $push: { nfts: nfts } }), 'toupdateon': transferTo};
-        // sendPostPlain(userEP+"updateUserField", headers2)
-        // .then(response => {
-        //     //TODO add to OPlogger on BE
-        //     console.log('User updated by adding the nfts in user.nfts, please check!',response);
-        // }).catch(error => { console.log('Error updating nfts field on user!',error)});
+        .catch(error => console.log('Error trying to update instances.',error));
     }
     function processCustomJson(jsonData, msg){
         if(isKeychainInstalled){

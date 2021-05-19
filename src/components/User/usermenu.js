@@ -31,6 +31,7 @@ const UserMenu = (props) => {
     const [openSearch, setOpenSearch] = useState(false);
     const [topMiniMessage, setTopMiniMessage] = useState(null);
     const [actualMenu, setActualMenu] = useState("");
+    const [newNotis, setNewNotis] = useState(false);
     //testing react-redux
     // const count = useSelector(selectCount);
     const newmessages = useSelector(selectNotifications);
@@ -148,6 +149,10 @@ const UserMenu = (props) => {
     },[socketBee]);
     //END to handle on every state change
 
+    const isThereNewNotis = (news) => {
+        setNewNotis(news);
+    }
+
     return (
             <div className="userMenuContainer">
                 <ul className={`ulMenuOptionUser  ${fixed ? `makeFixeduserMenu fadeInLonger` : null}`}>
@@ -203,15 +208,23 @@ const UserMenu = (props) => {
                     </li> */}
                     <li className={`menuOptionLi ${openNoti ? 'selectedMenu': null}`} className="gralLink">
                         {/* TODO make the settings option to set chat as flyer or fixed. */}
-                        <div onClick={() => setOpenNoti(!openNoti)}>
+                        <div onClick={() => setOpenNoti(!openNoti)} className="relativeDiv">
                             <Img fixed={data.notiIcon.childImageSharp.fixed} className="imgOptionsUser"  />
+                            {
+                                (newNotis) &&
+                                <div className="absInfoItem">
+                                    <div className="fadeInLongerInf">
+                                        <Img fixed={data.event.childImageSharp.fixed}/>
+                                    </div>
+                                </div>
+                            }
                         </div>
                     </li>
-                    <li className={`menuOptionLi ${openSearch ? 'selectedMenu': null}`} className="gralLink">
+                    {/* <li className={`menuOptionLi ${openSearch ? 'selectedMenu': null}`} className="gralLink">
                         <div onClick={() => setOpenSearch(!openSearch)}>
                             <Img fixed={data.searchIcon.childImageSharp.fixed} className="imgOptionsUser"  />
                         </div>
-                    </li>
+                    </li> */}
                     { 
                         fixed && <Coinprices xtraClassCSSLogos={"whiteBack justMarginAuto justRoundedFull miniMarginLeft"} xtraClassCSSUl={"textColorWhite"} show={true} />
                     }
@@ -229,7 +242,8 @@ const UserMenu = (props) => {
                     <Notifications 
                         username={userdata.username} 
                         token={userdata.token} 
-                        fixedBellowUM={fixed ? 'makeMeFixed60px' : null}    
+                        fixedBellowUM={fixed ? 'makeMeFixed60px' : null} 
+                        newOnes={isThereNewNotis}   
                     />
                 </div>
                 {

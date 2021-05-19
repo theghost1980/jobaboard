@@ -10,6 +10,7 @@ import Managewebcontent from '../components/Admin/managewebcontent';
 import Managenfts from '../components/Admin/managenfts';
 import Managejobsgigs from './Admin/managejobsgigs';
 import Manageorders from './Admin/manageorders';
+import Managenotis from './Admin/managenotis';
 
 // import Loader from '../components/loader';
 // import Notifications from './notifications';
@@ -272,6 +273,11 @@ const AdminPanel = () => {
                     >
                         Orders
                     </li>
+                    <li onClick={() => setComponentSelected("notifications")}
+                        className={`standardLink ${componentSelected === "notifications" ? `activeInnerMenu`: null}`}
+                    >
+                        Notifications
+                    </li>
                     {/* <li>
                         <button onClick={listUsers}>List all Users</button>
                     </li>
@@ -301,6 +307,9 @@ const AdminPanel = () => {
                     }
                     {
                         (componentSelected === "orders") && <Manageorders />
+                    }
+                    {
+                        (componentSelected === "notifications") && <Managenotis />
                     }
             </div>
             {

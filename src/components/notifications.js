@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import Img from 'gatsby-image';
 import { graphql, useStaticQuery } from "gatsby"
+import { formatDateTime } from '../utils/helpers';
 
 //constants
 const notificationsEP = process.env.GATSBY_notiEP;
 
 function Notifications(props) {
-    const { username, token, fixedBellowUM } = props;
+    const { username, token, fixedBellowUM, newOnes } = props;
 
     // const [open, setOpen] = useState(false);
     // const [notification, setNotification] = useState([{
@@ -34,36 +35,30 @@ function Notifications(props) {
                 'x-access-token': token,
             },
         });
-        return response; 
+        return response.json(); 
+    };
+    async function dataRequest(url = '', requestType, headers, formdata) {
+        const response =    !formdata   ? fetch(url, { method: requestType, contentType: 'application/json', headers: headers,})
+                                        : fetch(url, { method: requestType, contentType: 'application/json', headers: headers, body: formdata});
+        return (await response).json(); 
     };
     //////END data fecthing PUT/GET
+
     ///////On Mount
     const mount = () => {
         //check for notifications
         console.log(`Check Noti for:${username}`);
+        //for to reload the notifications.
+        setNoti([]);
         if(username && token){
             getData(`${notificationsEP}${username}`)
-            .then(data => {
-                data.json()
-                .then(msg => {
-                    // console.log(msg);
-                    //testing to set whole object as received
-                    // setProfile(msg);
-                    setNewNotifications(msg.length > 0 ? true : false);
-                    setNoti(msg);
-                })
-                .catch(err => {
-                    console.log('Error on msg');
-                    console.log(err);
-                });
+            .then(response => {
+                console.log(response);
+                setNoti(response);
             })
-            .catch(error => {
-                console.log('Error while requesting notifications data to API.');
-                console.log(error);
-            });
+            .catch(error => { console.log('Error while requesting notifications data to API.', error) });
         }
         // ...end mount components
-      
         const unmount = () => {
           // ...
         }
@@ -118,69 +113,98 @@ function Notifications(props) {
                     }
                 }
             }
-            # notifications_icon: file(relativePath: {eq: "notifications.png"}) {
-            #     childImageSharp {
-            #         fixed(width: 30) {
-            #             ...GatsbyImageSharpFixed_withWebp
-            #         }
-            #     }
-            # }
+            alarmIcon: file(relativePath: {eq: "bell.png"}) {
+                childImageSharp {
+                    fixed(width: 15) {
+                        ...GatsbyImageSharpFixed_withWebp
+                    }
+                }
+            }
         }`
     );
     /////end graphql
 
+    //load on state changes
+    useEffect(() => {
+        if(notiSelected && !notiSelected.opened){
+            markAsRead();
+        }
+    },[notiSelected]);
+    useEffect(() => {
+        if(noti && noti.length > 0){
+            const founds = noti.filter(notif => !notif.opened);
+            if(founds.length > 0){
+                if(newOnes){
+                    newOnes(true);
+                }
+            }else{
+                if(newOnes){
+                    newOnes(false);
+                }
+            }
+        }
+    }, [noti]);
+    //END load on state changes
+
+    // functions/CB
+    function updateState(noti_id, newNoti){
+        const oldState = noti;
+        const filtered = oldState.filter(noti => noti._id !== noti_id);
+        filtered.push(newNoti);
+        setNoti(filtered);
+    }
+    const markAsRead = () => {
+        const headers = {'x-access-token': token, 'operation': 'markread', 'noti_id': notiSelected._id };
+        dataRequest(notificationsEP+"handleNotification", "POST", headers, null).then(response => {
+            console.log(response);
+            if(response.status === 'sucess' && response.message === "Set as read"){
+                const readNoti = response.result;
+                updateState(readNoti._id, readNoti);
+            }
+        }).catch(error => { console.log('Error fetching noti.', error) });
+    }
+    // END functions/CB
+
     return (
-        <div className={`notificationsCont ${fixedBellowUM}`}>
+        <div className={`notificationsCont relativeDiv ${fixedBellowUM}`}>
+            {
+                newNotifications && <Img fixed={data.alarmIcon.childImageSharp.fixed} className="" />
+            }
             <div className="standardDivRowFullW">
                 <ul className="ulNotifications">
                     {
                         noti.map(notification => {
                             return (
                                 <li key={notification._id} onClick={() => setNotiSelected(notification)}>
-                                    <div className="standardDivRowFlex">
-                                        <p>{notification.title} - {notification.createdAt}</p>
-                                        <div className="standardBlock25px">
-                                            <Img fixed={data.view_icon.childImageSharp.fixed} />
-                                        </div>
+                                    <div className={`standardDivRowFullWAuto ${!notification.opened ? 'justBordersRounded' : null }`}>
+                                        <p>{notification.title} - {formatDateTime(notification.createdAt)} {!notification.opened ? null : 'read' }</p>
                                     </div>
                                 </li>
                             )
                         })
                     }
-                    {/* <div>
-                        <Img fixed={data.save_icon.childImageSharp.fixed} className="iconNoti" />
-                        <Img fixed={data.delete_icon.childImageSharp.fixed} className="iconNoti"  />
-                    </div> */}
                 </ul>
                 {
                     (notiSelected !== null) &&
                         <div className={`notiSelectedCont`}>
-                            <p className="normalTextSmall">{notiSelected.title}</p>
-                            <p className="normalTextSmall">By {notiSelected.type}</p>
-                            <p className="normalTextSmall">{notiSelected.content}</p>
-                            <button className="normalTextSmall" onClick={() => setNotiSelected(null)}>close</button>
+                            <div>
+                                <ul className="standardUlRow normalTextSmall">
+                                    <li className="pointer">Archive</li>
+                                    <li className="pointer">Delete</li>
+                                    <li className="pointer" onClick={() => setNotiSelected(null)}>Close</li>
+                                </ul>
+                            </div>
+                            <div className="justMarginBottom">
+                                <div className="standardContentMargin whiteBack textColorContrast2 justRoundedMini">
+                                    <div className="contentMiniMargins">
+                                        <p className="normalTextSmall justBoldtext">{notiSelected.title}</p>
+                                        <p className="normalTextSmall">Marker As: {notiSelected.type} / Sent By: {notiSelected.made_by}</p>
+                                        <p className="normalTextSmall">{notiSelected.content}</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                 }
-            </div>
-            {/* menu options for notifications - TO finish */}
-            <div className="menuOptionNotificationsCont">
-                <ul className="standardUlRowFlexAuto">
-                    <li>
-                        <div>
-                            <Img fixed={data.archive_icon.childImageSharp.fixed} />
-                        </div>
-                    </li>
-                    <li>
-                        <div>
-                            <Img fixed={data.checked_icon.childImageSharp.fixed} />
-                        </div>
-                    </li>
-                    <li>
-                        <div>
-                            <Img fixed={data.deleteAll_icon.childImageSharp.fixed} />
-                        </div>
-                    </li>
-                </ul>
             </div>
         </div>
     )

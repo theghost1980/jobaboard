@@ -9,6 +9,7 @@ import Btncollapse from '../../btns/btncollapse';
 import Tablinator from '../../interactions/tablinator';
 import Menuhover from '../../interactions/menuhover';
 import Menuside from '../../interactions/menuside';
+import Transmiter from '../../Marketplace/transmiter';
 
 //constants
 const nfthandlermongoEP = process.env.GATSBY_nfthandlermongoEP;
@@ -22,11 +23,12 @@ const nfthandlermongoEP = process.env.GATSBY_nfthandlermongoEP;
  * @param {Object} tradeCointBalance - the coin the platform has set to create/cast nfts. For now passed from parent as HIVE balnce as { coin: 'none', balance: 0, }.
  * @param {Boolean} fireAnUpdateNfts - optional if you need this component to fire a GET request on current NFts. I.e: use it when doing changes to refresh the current list.
  * @param {Boolean} fireAnUpdateInstances - optional if you need this component to fire a GET request on current instances. I.e: idem.
+ * @param {String} ssc_id node to trasmit.
  * @param {Boolean} devMode - optional to see console.logs
 */
 
 const Tokentabulator = (props) => {
-    const { cbSendItem, userdata, tradeCointBalance = { coin: 'none', balance: 0, }, fireAnUpdateNfts, fireAnUpdateInstances, devMode } = props;
+    const { cbSendItem, userdata, tradeCointBalance = { coin: 'none', balance: 0, }, fireAnUpdateNfts, fireAnUpdateInstances, devMode, ssc_id } = props;
 
     const [allNfts, setAllNfts] = useState([]); //all NFTs definitions on JAB.
     const [nfts, setNfts] = useState([]);
@@ -41,6 +43,18 @@ const Tokentabulator = (props) => {
     const [arraySelected, setArraySelected] = useState([]);
     const [showSelection, setShowSelection] = useState(false);
     const [showJustSelling, setShowJustSelling] = useState(false);
+    const initialAction = { 
+        action: '', 
+        items_count: 0,
+        item_type: '', 
+        items: [],
+        json_data: { //if not present this will tell transmitter this is a sell order, so it will show input options.
+            contractName: '',
+            contractAction: '',
+            contractPayload: {},
+        },
+    }
+    const [action, setAction] = useState(initialAction);
  
     //to load on init
     useEffect(() => {
@@ -156,6 +170,42 @@ const Tokentabulator = (props) => {
             setShowJustSelling(item.cen);
         }
     }
+    const multipleAction = (action) => {
+        console.log('Clicked on:', action);
+        if(arraySelected.length > 0){
+            if(action === 'Sell All'){
+                //we must check if any is on_sale
+                const on_sale_count = arraySelected.filter(nft => nft.on_sale);
+                if(on_sale_count.length > 0){
+                    const place_s = on_sale_count.length !== 1 ? 's' : '';
+                    return alert(`There is ${on_sale_count.length} Token${place_s} with sell order${place_s} already.\nIf you want to sell tokens, select the one${place_s} available to do so.\nOr go to Marketplace > My Orders and cancel the orders on those NFTs.`);
+                }
+                setAction({
+                    action: 'sell',
+                    item_type: 'instance',
+                    items_count: arraySelected.length,
+                    items: arraySelected,
+                    json_data: {
+                        contractName: 'nftmarket',
+                        contractAction: 'sell',
+                        contractPayload: {
+                            symbol: arraySelected[0].ntf_symbol,
+                            nfts: [...arraySelected.map(item => String(item.nft_instance_id))],
+                            price: '',
+                            priceSymbol: '',
+                            fee: 0,
+                        }
+                    }
+                })
+            }
+        }
+    }
+    const closeNUpdate = () => {
+        setAction(initialAction);
+        setArraySelected([]);
+        updateInstances();
+    }
+
     //data fecthing
     async function sendRequest(url = '', requestType, headers) {
         const response = await fetch(url, {
@@ -297,10 +347,10 @@ const Tokentabulator = (props) => {
                                         arraySelected && enableSelection &&
                                         <div className="standardDivRowFullW justAligned">
                                             <div className="justWidth20">
-                                                <Menuhover xclassCSS={"marginLeft"}
-                                                    clickedSubItemCB={(item) => console.log('Clicked on:',item)}
+                                                <Menuhover xclassCSS={"marginLeft justBordersRounded"}
+                                                    clickedSubItemCB={(item) => multipleAction(item)}
                                                     items={[
-                                                        {title: 'Batch Actions', cbProp: 'bacthActions', subMenu: [ 'Transfer All','Burn All'],},
+                                                        {title: 'Batch Actions', cbProp: 'bacthActions', subMenu: [ 'Sell All', 'Transfer All','Burn All'],},
                                                     ]}
                                                 />
                                             </div>
@@ -334,6 +384,16 @@ const Tokentabulator = (props) => {
                     </div>
                 </TabPanel>
             </Tabs>
+            {
+                action.action !== '' &&
+                <Transmiter 
+                    action={action}
+                    ssc_id={ssc_id}
+                    userdata={userdata}
+                    closeCB={closeNUpdate}
+                    devMode={true}
+                />
+            }
         </div>
     )
 }

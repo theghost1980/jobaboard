@@ -14,53 +14,20 @@ import Previewjob from './jobs/previewjob';
 import Menujobs from './jobs/menujobs';
 import Loader from '../loader';
 import Visualizator from '../Blog/visualizator';
+import Tablinator from '../interactions/tablinator';
 
 //constants
 const jobEP = process.env.GATSBY_jobEP;
 //end constants
 
 const Userjobs = () => {
-     //graphql queries
-     const data = useStaticQuery(graphql`
-     query {
-         statusIcon: file(relativePath: {eq: "status.png"}) {
-             childImageSharp {
-                 fixed(width: 30) {
-                     ...GatsbyImageSharpFixed_withWebp
-                 }
-             }
-         }
-         tokenIcon: file(relativePath: {eq: "tokens.png"}) {
-             childImageSharp {
-                 fixed(width: 30) {
-                     ...GatsbyImageSharpFixed_withWebp
-                 }
-             }
-         } 
-         employeeIcon: file(relativePath: {eq: "employee.png"}) {
-             childImageSharp {
-                 fixed(width: 30) {
-                     ...GatsbyImageSharpFixed_withWebp
-                 }
-             }
-         }
-         employerIcon: file(relativePath: {eq: "employer.png"}) {
-             childImageSharp {
-                 fixed(width: 30) {
-                     ...GatsbyImageSharpFixed_withWebp
-                 }
-             }
-         }
-     }
-     `);
-     //end grapqhql queries
-
     const userdata = check();
 
     const [selected, setSelected] = useState("");
     const [jobs, setJobs] = useState([]);
     const [selectedJob, setSelectedJOb] = useState(null);
     const [loadingData, setLoadingData] = useState(false);
+    const [highLigthThisField, setHighLigthThisField] = useState({ field: '', compareTo: ''});
 
     //search jobs for this user on mongoDB
     useEffect(() => {
@@ -99,7 +66,7 @@ const Userjobs = () => {
         });
         return response.json(); 
     };
-    //end fetchin data
+    //end fetching data
     function closeJOB(){
         setSelectedJOb(null);
     }
@@ -119,20 +86,13 @@ const Userjobs = () => {
                     <li className={`${selected === "managejobs" ? 'activeSelected justMiniPadding justMiniRounded': null}`} onClick={() => setSelected("managejobs")}>Manage Jobs</li>
                     <li className={`${selected === "manageportfolio" ? 'activeSelected justMiniPadding justMiniRounded': null}`} onClick={() => setSelected("manageportfolio")}>Manage Portfolio</li>
                     <li className={`${selected === "myorders" ? 'activeSelected justMiniPadding justMiniRounded': null}`} onClick={() => setSelected("myorders")}>My orders</li>
-                    <li className={`${selected === "jobix" ? 'activeSelected justMiniPadding justMiniRounded': null}`} onClick={() => setSelected("jobix")}>Jobito Helper</li>
+                    {/* <li className={`${selected === "jobix" ? 'activeSelected justMiniPadding justMiniRounded': null}`} onClick={() => setSelected("jobix")}>Jobito Helper</li> */}
                 </ul>
             </div>
             {
                 (selected === "") &&
                     <div>
                         <h1>Job Dashboard</h1>
-                        <ul className="textNomarginXXSmall">
-                            <li>Todo List here</li>
-                            <li>Show posts from @blog as tag 'jabers-dashboard''</li>
-                            <li>Maybe could be also a help starting section, showing another tag blog as 'jabers-jobguides</li>
-                            <li>Move this job list to managejobs</li>
-                            <li>Add just links with small info of: recent orders, ongoing orders and recent jobs.</li>
-                        </ul>
                         <Visualizator 
                             hiveUser={"sexosentido"}
                             filter_tags={['jabers-dashboard']}
@@ -165,43 +125,14 @@ const Userjobs = () => {
                         }
                         {
                             (jobs.length > 0) &&
-                            <div>
-                                <ul className="standardUlHorMini wrapDiv coloredContrast3Soft justRounded pointer">
-                                    {
-                                        jobs.map(job => {
-                                            return (
-                                                <li key={job._id} onClick={() => setSelectedJOb(job)}>
-                                                    <div className="miniDiv2 fontSmall coloredContrast1 relativeDiv scaleHovered justRounded">
-                                                        <div>
-                                                            <img src={job.images.length > 0 ? job.images[0]: 'https://res.cloudinary.com/dbcugb6j4/image/upload/v1615643565/noimage-JAB_geyicy.png'} 
-                                                                className="miniImg boxShadowBottom"
-                                                            />
-                                                        </div>
-                                                        <div className="standardContentMargin">
-                                                            <h3 className="noMargintop bolder">{job.title}</h3>
-                                                            <div className="whiteBack absDivRow2">
-                                                                <p className="bolder biggerText noMargins">{job.paying_price}</p>
-                                                                <Img fixed={data.tokenIcon.childImageSharp.fixed} />
-                                                                <p className="bolder">-{job.nft_symbol}</p>
-                                                            </div>
-                                                            <div className="absDivRow whiteBack hoveredOpaacity justRounded">
-                                                                <Img fixed={data.statusIcon.childImageSharp.fixed} />
-                                                                <p>{job.active ? 'Active - Published':'Not Active'}</p>
-                                                            </div>
-                                                            <p className="noMargins">Created: {job.createdAt}</p>
-                                                            <div className="alignJustCentered displayFlex">
-                                                                <Img fixed={job.job_type === "employee" ? data.employeeIcon.childImageSharp.fixed:data.employerIcon.childImageSharp.fixed} 
-                                                                    title={job.job_type === "employee" ? "Published to get hired":"Published to Hire a professional"} 
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </li>
-                                            )
-                                        })
-                                    }
-                                </ul>
-                            </div>
+                             <Tablinator 
+                                clickedSubItemCB={(job) => console.log('Clicked on job:', job)}
+                                items={jobs}
+                                titleTable={'My Jobs/Gigs/Services'}
+                                toShow={['active','category','createdAt','job_type','nft_symbol','paying_price']}
+                                pagination={{ perPage: 10, controls: false }}
+                                highLight={highLigthThisField}
+                             />
                         }
                     </div>
             }
@@ -221,10 +152,10 @@ const Userjobs = () => {
                 (selected === "myorders") &&
                     <SubmenuRender path={`/app/myorders`} component={Myorders}/>
             }
-            {
+            {/* {
                 (selected === "jobix") &&
                     <SubmenuRender path={`/app/jobassistant`} component={Jobix}/>
-            }
+            } */}
         </div>
     )
 }

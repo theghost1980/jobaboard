@@ -26,6 +26,7 @@ const Footer = () => {
                         link
                         hideOnLoggin
                         order
+                        active
                     }
                 }
             }
@@ -50,7 +51,7 @@ const Footer = () => {
             <ul className="ulFooterMenu">
                 {
                     data.main_menu.edges.map(({ node:item }) => {
-                        if(item.title === 'Log In') return null
+                        if(item.title === 'Log In' || !item.active) return null
                         return (
                             <li key={item.id} className={`${item.hideOnLoggin && userdata.logged ? 'hideOnLoggin': null}`}>
                                 <Link to={item.inner_link}>{item.title}</Link>
@@ -73,7 +74,7 @@ const Footer = () => {
             <div className="devInfoFooter">
                 <p>Made with</p>
                 <Img fluid={data.loveLove.childImageSharp.fluid} className="loveIconSatmano" />
-                <p>by Saturno Mangieri <a href="https://saturnoman.com/" target="_blank" rel="noopener noreferrer">@theghost1980</a></p>
+                <p>by Saturno Mangieri <a className="textColorWhite" href="https://saturnoman.com/" target="_blank" rel="noopener noreferrer">@theghost1980</a></p>
             </div>
         </footer>
     )

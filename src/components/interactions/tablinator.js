@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { formatDateTime } from '../../utils/helpers';
 import Btnoutlink from '../btns/btnoutlink';
+import Flyermenu from '../User/jobs/subcomponents/flyermenu';
 
 //constants
 const fieldsDateAr = [ 'createdAt', 'Date', 'updatedAt', 'ts', 'timestamp'];
@@ -10,6 +11,7 @@ const fieldsDateAr = [ 'createdAt', 'Date', 'updatedAt', 'ts', 'timestamp'];
  * Sets a Ul horizontal menu and pass active prop to parent to activate childs css classes on hovered.
  * (1) - { field: '_id', limitTo: 10, link: true } -> limitTo: amount of max chars to show, link if link.
  * @param {String} xclassCSS - Optional The css Extra class.
+ * @param {String} xclassCSSRow - Optional The css Extra class for the content rows.
  * @param {Function} clickedSubItemCB - The function/CB to return the hovered item on menu.
  * @param {[Object]} items - The Array of objects to map and present.
  * @param {Object} toShow - The props you want to display of this array of items' As ['name','title','query','active']
@@ -17,12 +19,16 @@ const fieldsDateAr = [ 'createdAt', 'Date', 'updatedAt', 'ts', 'timestamp'];
  * @param {Object} highLight - optional if you need to highligth a record based on equalTo. as { field: 'field', compareTo: any }
  * @param {Object} arraySpecs - optional if you need to limit a field or make it a link. (1)
  * @param {Object} pagination - optional if you need to show N record per "page" with a clickeable options menu to move. As { perPage: 10, controls: Boolean }.
+ * @param {Boolean} popMenu - optional if you need to render a popUp menu on the selected item and send back the option selected.
+ * @param {[Object]} arrayMenu mandatory if popMenu activated. As ['option1','option2',...].
+ * @param {String} toPop_id mandatory if popMenu active.
+ * @param {Function} cbOptionSelected mandatory if popMenu activated to return the clicked option.
  * @param {Boolean} devMode - Optional to see all the props and details. default as false.
  */
 
 const Tablinator = (props) => {
 
-    const { xclassCSS, clickedSubItemCB, items, toShow, devMode, titleTable, highLight, arraySpecs, pagination } = props;
+    const { xclassCSS, clickedSubItemCB, items, toShow, devMode, titleTable, highLight, arraySpecs, pagination, xclassCSSRow, popMenu, arrayMenu, cbOptionSelected, toPop_id } = props;
     const [orderBy, setOrderBy] = useState({ keyOrderBy: '', asc: false });
     const [itemsToShow, setItemsToShow] = useState(null);
     // for pagination
@@ -31,8 +37,8 @@ const Tablinator = (props) => {
     // END for pagination
     //to load on init
     useEffect(() => {
-        if(devMode){ console.log('Received on props: tablinator,', { xclassCSS, clickedSubItemCB, items, toShow, devMode, titleTable, highLight, arraySpecs, pagination } );}
-        if(items){
+        if(devMode){ console.log('Received on props: tablinator,', { xclassCSS, clickedSubItemCB, items, toShow, devMode, titleTable, highLight, arraySpecs, pagination, xclassCSSRow, popMenu, arrayMenu, cbOptionSelected, toPop_id } );}
+        if(items && items.length > 0){
             console.log('Applying some showing rules to the state:');
             const newOne = [];
             items.map(item => {
@@ -111,8 +117,12 @@ const Tablinator = (props) => {
             if(found && found.limitTo){
                 if(content === "" || content === null || content === undefined) { return 'Not Set.'}
                 const toReturn = String(content).substring(0,Number(found.limitTo)) + "...";
-                if(found.link && found.typeLink === "jabExplorer"){
-                    return <Btnoutlink xclassCSS={"justWidth100"} link={`/jabexplorer?tx_id=${content}`} textLink={toReturn} toolTip={"Click to view details of this Tx on chain explorer"}/>
+                if(found.link){
+                    if(found.typeLink === "hiveExplorer"){
+                        return <Btnoutlink xclassCSS={"justWidth100"} link={`https://hiveblocks.com/tx/${content}`} textLink={toReturn} toolTip={"Click to view details of this Tx on chain explorer"}/>
+                    }else if(found.typeLink === "jabExplorer"){
+                        return <Btnoutlink xclassCSS={"justWidth100"} link={`/jabexplorer?tx_id=${content}`} textLink={toReturn} toolTip={"Click to view details of this Tx on chain explorer"}/>
+                    }
                 }else{
                     return toReturn;
                 }
@@ -176,11 +186,11 @@ const Tablinator = (props) => {
                 <div>
                 <table className={`tablePortPublic smallText marginsTB relativeDiv`}>
                     <tbody>
-                        <tr className="trTablePortP">
+                        <tr className={'trTablePortP'}>
                             {
                                 toShow.map(keyItem => {
                                     return (
-                                        <th key={`${keyItem}-KeyJAB`} onClick={() => setOrderBy({ keyOrderBy: keyItem, asc: !orderBy.asc })} className="pointer" title={`Order by ${keyItem}`}>
+                                        <th key={`${keyItem}-KeyJAB`} onClick={() => setOrderBy({ keyOrderBy: keyItem, asc: !orderBy.asc })} className={'pointer'} title={`Order by ${keyItem}`}>
                                             {fixTitle(keyItem)}
                                         </th>
                                     )
@@ -190,13 +200,19 @@ const Tablinator = (props) => {
                         {   itemsPagination &&
                             itemsPagination[selectedPage.index].map(item => {
                                 return (
-                                    <tr key={item._id} className={`trTableWhite standardLiHovered ${checkHighLight(item)}`} onClick={() => selectedItem(item)}>
+                                    <tr key={item._id} className={`trTableWhite standardLiHovered ${checkHighLight(item)} ${xclassCSSRow}`} onClick={() => selectedItem(item)}>
                                         {
                                             toShow.map(showThis => {
                                                 return (
-                                                    <td key={`${item._id}-${showThis}`}>{item[showThis] ? item[showThis] : 'Not Set'}</td>
+                                                        <td key={`${item._id}-${showThis}`}>
+                                                            {item[showThis] ? item[showThis] : 'Not Set'}
+                                                        </td>
                                                 )
                                             })
+                                        }
+                                        {
+                                                popMenu && toPop_id && toPop_id === item._id &&
+                                                <Flyermenu devMode={false} arrayMenu={arrayMenu} cbOptionSelected={cbOptionSelected} />
                                         }
                                     </tr>
                                 )
@@ -213,15 +229,15 @@ const Tablinator = (props) => {
                                     return (
                                         <li key={`${index}-pagination-JAB`} 
                                             onClick={() => setSelectedPage({ index: index, page: index + 1})}
-                                            className={`marginRight pointer ${selectedPage.index === index ? 'activePage' : null }`}
+                                            className={`marginRight normalTextSmall pointer ${selectedPage.index === index ? 'activePage' : null }`}
                                         >
-                                            {index + 1}
+                                            page {index + 1}
                                         </li>
                                     )
                                 })
                             }
                         </ul>
-                        <p className="normalTextSmall">Total: {items.length} {titleTable ? titleTable : null}</p>
+                        <p className="normalTextSmall">Total items: {items.length} {titleTable ? titleTable : null}</p>
                     </div>
                 }
                 </div>

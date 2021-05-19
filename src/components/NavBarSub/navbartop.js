@@ -40,6 +40,7 @@ const Navbartop = (props) => {
                         link
                         hideOnLoggin
                         order
+                        active
                     }
                 }
             }
@@ -120,6 +121,7 @@ const Navbartop = (props) => {
                         <ul className={`${(mobile) ? 'hideUl' : 'showUl'} mainMenuUl justPaddingRight20p ${menuClicked ? 'forcedUlRightSide' : null }`}>
                         {
                             data.main_menu.edges.map(({ node: menuItem }) => {
+                                if(!menuItem.active) return null
                             return (
                                 <li key={`${menuItem.id}`} className={`${(menuItem.hideOnLoggin && userdata.logged) ? 'hideOnLoggin': null}`}>
                                 {

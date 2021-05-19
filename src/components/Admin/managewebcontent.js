@@ -363,7 +363,7 @@ const Managewebcontent = (props) => {
             postFire(buildHook)
             .then(response => {
                 console.log(response);
-                if(response.status === 200 && response.statusText === "OK"){
+                if(response.status === 200 && response.ok){
                     alert('Successfully sent/received the build by Netlify.\nJust wait for the email success notification.\nAfter confirming the mail check lives changes on JAB.');
                     setLoadingData(false);
                 }

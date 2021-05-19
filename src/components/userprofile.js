@@ -278,17 +278,17 @@ const UserProfile = () => {
     /////////////////////////
     const mount = () => {
         console.log('mounted');
-        const headers = { 'x-access-token': userdata.token, 'tolookup': null, 'query': JSON.stringify({ following: 1 })};
-        getDataWH(userEP+"jabUserField",headers).then(response => {
-            console.log(response);
-            if(response.status === "sucess" && response.result.following.length > 0){
-                const _following = response.result.following;
-                if(_following.length === 1 && _following[0] === ""){
-                    return setFollowing(null);
-                }
-                setFollowing(response.result.following);
-            }
-        }).catch(error => console.log('Error asking for following field',error));
+        // const headers = { 'x-access-token': userdata.token, 'tolookup': null, 'query': JSON.stringify({ following: 1 })};
+        // getDataWH(userEP+"jabUserField",headers).then(response => {
+        //     console.log(response);
+        //     if(response.status === "sucess" && response.result.following.length > 0){
+        //         const _following = response.result.following;
+        //         if(_following.length === 1 && _following[0] === ""){
+        //             return setFollowing(null);
+        //         }
+        //         setFollowing(response.result.following);
+        //     }
+        // }).catch(error => console.log('Error asking for following field',error));
         //check for userprofile
         console.log(`Asking profile data from:${userdata.username}`);
         //TODO
@@ -301,6 +301,9 @@ const UserProfile = () => {
                 console.log(msg);
                 //testing to set whole object as received
                 setProfile(msg);
+                if(msg.following){
+                    setFollowing(msg.following);
+                }
                 setLoadingData(false);
             });
         })

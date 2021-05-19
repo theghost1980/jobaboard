@@ -70,21 +70,62 @@ const Tokenseller = (props) => {
         return new Date(ts);
     }
     function sendDataMongo(data, order){
+        if(devMode){ console.log('received:', { data, order }) };
         const headers = { 'x-access-token': userdata.token, 'nft_instance_id': data.filter.nft_instance_id, 'ntf_id': data.filter.ntf_id, 'query': JSON.stringify(data.updateData), };
         dataRequest(nfthandlermongoEP+"updateInstanceNFTfield","POST",headers,{})
         .then(response => console.log(response))
         .catch(error => console.log('Error updating NFT instance - sellOrder', error));
-        const headers2 = { 'x-access-token': userdata.token, };
         const formdata = new FormData();
-        const toSendFD = {};
-        Object.entries(order).forEach(([key,value]) => {
-            formdata.append(key,value);
-            toSendFD[key] = value;
-        });
-        if(devMode){ console.log('About to send to BE:', toSendFD)}
-        dataRequest(orderEP+"createMarketOrder","POST",headers2,formdata)
+        const arrayPdata = [order];
+        formdata.append("data", JSON.stringify(arrayPdata));
+        if(devMode){ console.log('About to send to BE:', order)}
+        const headers3 = { 'x-access-token': userdata.token, 'operation': 'sell',};
+        dataRequest(orderEP+"handleMarketOrder","POST", headers3, formdata)
         .then(response =>{ console.log(response) })
         .catch(error => console.log('Error processing MarketOrder.',error));
+    }
+    function seekNForce(){
+        //look up on nftSYMBOL table. queryContractTable //'query': { contract: '', table: '', query: {}, limit: 0, offset: 0, indexes: [] };
+        const symbol = selectedNft_instance.ntf_symbol;
+        const nftId = selectedNft_instance.nft_instance_id;
+        console.log('About to look up on sellBook of: ', symbol);
+        const headers = {'x-access-token': userdata.token, 'query': JSON.stringify( { contract: 'nftmarket', table: `${symbol}sellBook`, query: { nftId: String(nftId) }, limit: 1, offset: 0, indexes: [] } )}
+        dataRequest(nftEP+"queryContractTable", "GET", headers, null).then(response => {
+            console.log(response);
+            if(response.result.length > 0){ //we have an ongoing order on this on hive, now look up on orders_market
+                const ts = Number(response.result[0].timestamp);
+                const orderHive = response.result[0];
+                const headers2 = { 'x-access-token': userdata.token, 'query': JSON.stringify({ username: userdata.username, nft_instance_id: nftId, status: 'notFilled', order_type: 'sell' }), 'limit': 1, 'sortby': JSON.stringify({ createdAt: 1 }),};
+                dataRequest(orderEP+"getMarketOrder","GET", headers2,null)
+                .then(response => {
+                    console.log(response);
+                    const toAdd = { value: false};
+                    if(response.result.length === 1){
+                        const ts2 = Number(response.result[0].ts_hive);
+                        if(ts !== ts2){//then we need to add this order as per some reason it is been missed.
+                            toAdd.value = true;
+                        }
+                    }else if(response.result.length === 0){
+                        toAdd.value = true;
+                    }
+                    if(toAdd.value){
+                        console.log('Applying new order as it was missed on JAB....');
+                        const { account, fee, nftId, price, priceSymbol, timestamp, _id } = orderHive; //_id is the orderId.
+                        const updateDataInstance = {
+                            filter: { username: account, ntf_id: selectedNft_instance.ntf_id, ntf_symbol: symbol, nft_instance_id: nftId,},
+                            updateData: { price: Number(price).toFixed(5), priceSymbol: priceSymbol, on_sale: true, updatedAt: new Date().toString() },
+                        }
+                        const order = { username: userdata.username, order_type: "sell", item_type: "instance", orderId: _id, nft_instance_id: Number(nftId), nft_symbol: symbol, price: price, priceSymbol: priceSymbol, fee: fee, tx_id: 'unknown-recovered', ts_hive: timestamp, createdAt: new Date(),} 
+                        sendDataMongo(updateDataInstance, order);
+                        alert('JAB detected a Sell order for this Item and we added to JAB.\nIf you want to edit/cancel, just go to Marketplace > My Orders.');
+                        // cbOnSucess();
+                    }else{
+                        console.log('Nothing to add. Order already good!');
+                    }
+                })
+                .catch(error => { console.log('Error on GET request to BE.',error);});
+            }
+        }).catch(error => console.log('Error seekNforce.', error));
     }
     function getInfoTX(){
         if(tx){
@@ -102,23 +143,33 @@ const Tokenseller = (props) => {
                         const pLogs = JSON.parse(response.logs);
                         if(devMode) { console.log(pLogs) };
                         if(response.action === "sell" && response.contract === "nftmarket"){
-                            if(!pLogs.events){//means this token is already placed on a sell order.
-                                //TODO if needed maybe look into the info of the token to see if is onsale or not.
-                                alert('This Token has an ongoing Sell Order.\nPlease go to Marketplace > My Orders.');
-                                return closeCB();
+                            if(!pLogs.events){//means this token is already placed on a sell order || and error happened. so first check the errors.
+                                if(pLogs.errors){ //{"errors":["market not enabled for symbol"]}
+                                    const errorsAr = pLogs.errors;
+                                    if(devMode) { console.log(errorsAr) };
+                                    if(errorsAr.find(error => error === "market not enabled for symbol")){
+                                        alert('This NFT definition needs to activate the Market Option.\nIf you are the owner of the definition, please go to Tokens > Sell Options > Enable Market.\nIf you are a holder of this token, please contact the owner and ask him to enable the market on this NFT.');
+                                        return closeCB();
+                                    }
+                                }
+                                seekNForce(); //it will look into hive to confirm that the order has been set. As it happended just now that because of a broadcasting error on Hive Chain, the order was set without confirmation.
+                                // alert('This Token has an ongoing Sell Order.\nPlease go to Marketplace > My Orders.');
+                                // return closeCB();
+                                return null;
                             }
                             const sellEvent = pLogs.events.find(event => event.event === "sellOrder");
                             if(devMode) { console.log(sellEvent) };
                             if(sellEvent && sellEvent.data.account === userdata.username && sellEvent.data.timestamp){ //the order was successfully set
                                 //now we update the instance as on_sale
-                                const { orderId, nftId, account, symbol, price, priceSymbol, timestamp } = sellEvent.data;
+                                const { orderId, nftId, account, symbol, price, priceSymbol, timestamp, fee } = sellEvent.data;
                                 const updateDataInstance = {
                                     filter: { username: account, ntf_id: selectedNft_instance.ntf_id, ntf_symbol: symbol, nft_instance_id: nftId,},
                                     updateData: { price: Number(price).toFixed(5), priceSymbol: priceSymbol, on_sale: true, updatedAt: new Date().toString() },
                                 }
                                 if(devMode){ console.log('About to process:', updateDataInstance )};
-                                const nft_instances =[ { symbol: symbol, nfts: [ Number(nftId) ], price: price, priceSymbol: priceSymbol, fee: 0 } ];
-                                const order = { username: userdata.username, order_type: "sell", item_type: "instance", orderId: orderId, nft_instances: JSON.stringify(nft_instances), price_total: price, price_symbol: priceSymbol, tx_id: tx, ts_hive: Number(timestamp), createdAt: new Date().toString(), };
+                                // const nft_instances =[ { symbol: symbol, nfts: [ Number(nftId) ], price: price, priceSymbol: priceSymbol, fee: 0 } ];
+                                const order = { username: userdata.username, order_type: "sell", item_type: "instance", orderId: orderId, nft_instance_id: Number(nftId), nft_symbol: symbol, price: price, priceSymbol: priceSymbol, fee: fee, tx_id: tx, ts_hive: timestamp, createdAt: new Date(),} 
+                                // const order = { username: userdata.username, order_type: "sell", item_type: "instance", orderId: orderId, nft_instances: JSON.stringify(nft_instances), price_total: price, price_symbol: priceSymbol, tx_id: tx, ts_hive: Number(timestamp), createdAt: new Date().toString(), };
                                 sendDataMongo(updateDataInstance, order);
                                 if(cbOnSucess){ cbOnSucess() };
                                 // TODO send all this info to BE.
@@ -177,6 +228,8 @@ const Tokenseller = (props) => {
         //TODO here as soon as we get the definition info, we must check if market_enabled for that nft, if not, educate the user.
         if(devMode){ console.log('Received as props:', { closeCB, xclassCSS, userdata,  selectedNft_instance, devMode, ssc_test_id, nftEP, nfthandlermongoEP, cbOnSucess, renderMode}) };
         loadTokensHive();
+        //testing to seekNForce at loading
+        seekNForce();
     },[]);
     //END to load on Init
 

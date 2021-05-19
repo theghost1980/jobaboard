@@ -32,6 +32,7 @@ import Transferowner from '../nfthandling/subcomponents/transferowner';
 import Tokenseller from '../nfthandling/subcomponents/tokenseller';
 import Btncollapse from '../btns/btncollapse';
 import Tablinator from '../interactions/tablinator';
+import Transmiter from '../Marketplace/transmiter';
 // import Nfttransfer from '../nfthandling/subcomponents/nfttransfer';
 //testing SSCjs library
 // const SSC = require('sscjs');
@@ -45,6 +46,7 @@ var client = new dhive.Client(["https://api.hive.blog", "https://api.hivekings.c
 const jabFEE = { fee: "0.002", currency: "HIVE", costInstance: "0.001", costCurr: "HIVE", acceptedCur: "HIVE"};
 const nftEP = process.env.GATSBY_nftEP;
 const userEP = process.env.GATSBY_userEP;
+const orderEP = process.env.GATSBY_orderEP;
 const nfthandlermongoEP = process.env.GATSBY_nfthandlermongoEP;
 const ssc_test_id = "ssc-testNettheghost1980";
 const amountArray = [
@@ -58,7 +60,23 @@ const amountArray = [
     {id: 'A-8', amount: 8},
     {id: 'A-9', amount: 9},
     {id: 'A-10', amount: 10},
-]
+];
+const order_market = {
+    username: '', //the ones who makes the order
+    ref_order_id: '', //use when buying.
+    order_type: 'sell', // as "buy" or "sell".
+    item_type: 'definition', //"definition" or "instance"
+    nft_id: '',
+    nft_symbol: '',
+    price: 0,
+    priceSymbol: 'HIVE',
+    fee: 0,
+    price_total: 0, //total price on order.
+    price_symbol: '', //registers the symbol to pay.
+    fee_Total: 0,
+    tx_id: 'no Apply', //as the txId of this transference when successfull.
+    ts_hive: 0, //the timestamp returned by chain. just in case we need it later on.
+};
 const devMode = true;
 
 // IMportant TODO when creating the sale of a token.
@@ -124,6 +142,7 @@ const Tokensuser = () => {
     const [showNftDefinition, setShowNftDefinition] = useState(false);
     const [showCirculatingSupply, setShowCirculatingSupply] = useState(false);
     const [circulatingSupply, setCirculatingSupply] = useState(null);
+    const [order_market_selected, setOrder_market_selected] = useState('');
     //init forms-hooks
     const { register, handleSubmit, errors } = useForm();
     // on load
@@ -171,6 +190,7 @@ const Tokensuser = () => {
             active['source'] = 'selected';
             active['symbol'] = selected.symbol;
             queryData();
+            if(selected.for_sale){ findOpenOrder(selected)};
         }else if(selectedNft_Instance){
             active['source'] = 'selected_instance';
             active['symbol'] = selectedNft_Instance.ntf_symbol;
@@ -199,6 +219,15 @@ const Tokensuser = () => {
     // function addIntoHoldings(value){
     //     setMyHoldings(prevState => [ ...prevState, value]);
     // }
+    function findOpenOrder(selected){ //we get the order_market._id of this nft definition so we can update the status to canccel when place to not sell by user.
+        const headers = { 'x-access-token': userdata.token, 'query': JSON.stringify({ username: userdata.username, status: 'notFilled', item_type: 'definition', nft_id: selected.nft_id }), 'limit': 1, 'sortby': JSON.stringify({ createdAt: 1 }),};
+        dataRequest(orderEP+"getMarketOrder","GET",headers,null)
+        .then(response => {
+            console.log(response);
+            if(response.status === 'sucess' && response.result.length === 1){ setOrder_market_selected(response.result[0]._id) }
+        })
+        .catch(error => { console.log('Error on GET request to BE.',error)});
+    }
     function updateAll(){
         updateNFTs();
         updateInstances();
@@ -348,17 +377,37 @@ const Tokensuser = () => {
     }
     const onSaleNft = () => {
         if(!selected.price_definition || selected.price_definition === 0){ return alert('In order to sell this NFT Definition, you must set a Price Definition.\nPlease go to Edit > Edit Token Info.')}
-        const update_for_sale = selected.for_sale ? false : true; //toogle the status.
-        const answer = window.confirm(`Update NFT definition ${selected.symbol} as ${update_for_sale ? 'For Sale': 'Cancel Sell'}\nDo we proceed?`);
+        const update_for_sale = selected.for_sale ? false : true ; //toogle the status.
+        const answer = window.confirm(`Update NFT definition ${selected.symbol} as ${update_for_sale ? 'For Sale': 'Cancel Sell'}\nThis will create or update the Marketplace order automatically.\nDo we proceed?`);
         if(answer){
             if(selected){
-                // TODO a component abs on top to show the loader while we load data or do something
-                // TODO add the logic so the same component can be used to toogle on_sale
-                // maybe with a cool down to prevent abuse or "fooling around"
-                const query = {
-                    for_sale: update_for_sale,
-                    updatedAt: new Date().toString(),
-                }
+                const operation = selected.for_sale ? 'cancel' : 'sell';
+                const headersOM = operation === 'sell'    ? {'x-access-token': userdata.token, 'operation': operation, } 
+                                                            : {'x-access-token': userdata.token, 'operation': operation, 'order_id': JSON.stringify({ _id: { $in: [order_market_selected] }})}
+                const formdata = new FormData();
+                order_market.username = userdata.username;
+                order_market.order_type = 'sell';
+                order_market.item_type = 'definition';
+                order_market.nft_id = selected.nft_id;
+                order_market.nft_symbol = selected.symbol;
+                order_market.price = selected.price_definition;
+                order_market.priceSymbol = jabFEE.acceptedCur; //this we can set it up later but for now as the same coin used in fees by JAB.
+                order_market.fee = 0;
+                order_market.price_total = selected.price_definition;
+                order_market.price_symbol = jabFEE.acceptedCur;
+                order_market.fee_Total = 0;
+                order_market.tx_id = 'no Apply';
+                order_market.ts_hive = Date.now();
+                order_market.createdAt = new Date();
+                const data = operation === 'sell' ? order_market : { status: 'Cancelled', updatedAt: new Date() };
+                console.log('about to send:', { operation, headersOM, data});
+
+                formdata.append("data", JSON.stringify(data));
+                dataRequest(orderEP+"handleMarketOrder", "POST", headersOM, formdata).then(response => {
+                    console.log(response);
+                }).catch(error => console.log(`Error processing a ${operation} on Orders_Market.`, error));
+
+                const query = { for_sale: update_for_sale, updatedAt: new Date().toString(), };
                 sendPostBEJH(nfthandlermongoEP+"updateNFTfield",query, selected.nft_id)
                 .then(response => {
                     console.log(response); //status, result
@@ -370,8 +419,6 @@ const Tokensuser = () => {
                             alert('Cancelled Sell!');
                         }
                     }
-                    // todo some kind of component that show messages smoothly on top of everything
-                    // maybe we can just improve the topmessenger.
                 }).catch(error => console.log('Error updating field on NFT to DB.',error));
             }
         }
@@ -659,6 +706,16 @@ const Tokensuser = () => {
         setWantToSendInstance(false);
     }
 
+    const scanInstances = () => {
+        const symbol = selected.symbol;
+        console.log('About to look up on sellBook of: ', symbol);
+        const headers = {'x-access-token': userdata.token, 'query': JSON.stringify( { contract: 'nftmarket', table: `${symbol}sellBook`, query: { account: userdata.username }, limit: 0, offset: 0, indexes: [] } )}
+        dataRequest(nftEP+"queryContractTable", "GET", headers, null).then(response => {
+            console.log(response);
+            //TODO to finish later to see if need in order to scan and compare if the same amount of items founded here = orders on mongo.
+        }).catch(error => console.log('Error while scanning hive chain.', error));
+    }
+
     //////////data fecthing BE////////////
     async function getSSCDataTX(url = '',tx) {
         const response = await fetch(url, {
@@ -695,6 +752,11 @@ const Tokensuser = () => {
         });
         return response.json(); 
     };
+    async function dataRequest(url = '', requestType, headers,formdata) {
+        const response = formdata   ? await fetch(url, { method: requestType, mode: 'cors', headers: headers, body: formdata})
+                                    : await fetch(url, { method: requestType, mode: 'cors', headers: headers,});
+        return response.json(); 
+    };
     //////////////////////////////////////
 
     const settingSelected = (item,type) => {
@@ -714,6 +776,7 @@ const Tokensuser = () => {
                 tradeCointBalance={hive ? { coin: 'HIVE', balance: hive} : { coin: 'HIVE', balance: 0 }}
                 fireAnUpdateNfts={fireUpdateNfts} fireAnUpdateInstances={fireUpdateInstances}
                 devMode={true}
+                ssc_id={ssc_test_id}
             />
             <ul className="textNomarginXXSmall">
                 <li>Todo Here</li>
@@ -780,7 +843,7 @@ const Tokensuser = () => {
                                     { field:'createdAt', type: 'Date', link: false },
                                     { field:'updatedAt', type: 'Date', link: false },
                                 ]}
-                                devMode={true}
+                                devMode={false}
                             />
                             <Btnswitch xtraClassCSS={"justAligned"} sideText={"Show me its definition bellow."} initialValue={false} btnAction={(cen) => setShowNftDefinition(cen)}/>
                             {
@@ -833,7 +896,7 @@ const Tokensuser = () => {
                 <Tokenseller 
                     selectedNft_instance={selectedNft_Instance}
                     userdata={userdata} closeCB={() => setWantActionInstance("")}
-                    devMode={true}
+                    devMode={false}
                     ssc_test_id={ssc_test_id}
                     nfthandlermongoEP={nfthandlermongoEP} nftEP={nftEP}
                     renderMode={"onTop"}
@@ -919,6 +982,12 @@ const Tokensuser = () => {
                                                         }
                                                     </p>
                                                     <Btninfo xclassMsg={"textColorBlack"} size={"mini"} msg={"Each NFT has a definition that holds the most important info and properties. If you decide you can sell it on JAB. We suggest a high price."} />
+                                                </div>
+                                            </li>
+                                            <li className="standardLiHovered" onClick={scanInstances}>
+                                                <div className="standardDivRowFullW">
+                                                    <p className="minimumMarginTB">Scan Chain</p>
+                                                    <Btninfo xclassMsg={"textColorBlack"} size={"mini"} msg={"JAB will scan the Hive Chain to find any instances you own that are for sell and add them into JAB Marketplace."} />
                                                 </div>
                                             </li>
                                         </div>
@@ -1055,7 +1124,7 @@ const Tokensuser = () => {
                                 </div>
                             </Abswrapper>
                         } */}
-                        <div className="standardDiv60Percent">
+                        <div className="standardDiv60Percent marginTop">
                             <div className="standardDivRowFlexAutoH">
                                 <p className="extraMiniMarginsTB">
                                     Price Definition:<Btninfo size={"mini"} msg={"Each NFT has its definitions. This is the price you set if you decide to trade the NFT Token definition."} /> {selected.price_definition} {jabFEE.acceptedCur}

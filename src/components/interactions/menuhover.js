@@ -30,7 +30,7 @@ const Menuhover = (props) => {
     }
     //END functions/CB
     return (
-        <div>
+        <div className={`${xclassCSS}`}>
             <ul className="standardUlRowFlexPlain justifyContentSEvenly">
                 {
                     items.map(item => {
