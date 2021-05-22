@@ -11,6 +11,7 @@ import Managenfts from '../components/Admin/managenfts';
 import Managejobsgigs from './Admin/managejobsgigs';
 import Manageorders from './Admin/manageorders';
 import Managenotis from './Admin/managenotis';
+import Managesupport from './Admin/managesupport';
 
 // import Loader from '../components/loader';
 // import Notifications from './notifications';
@@ -278,6 +279,11 @@ const AdminPanel = () => {
                     >
                         Notifications
                     </li>
+                    <li onClick={() => setComponentSelected("support")}
+                        className={`standardLink ${componentSelected === "support" ? `activeInnerMenu`: null}`}
+                    >
+                        Tickets - Support
+                    </li>
                     {/* <li>
                         <button onClick={listUsers}>List all Users</button>
                     </li>
@@ -310,6 +316,9 @@ const AdminPanel = () => {
                     }
                     {
                         (componentSelected === "notifications") && <Managenotis />
+                    }
+                    {
+                        (componentSelected === "support") && <Managesupport />
                     }
             </div>
             {

@@ -14,6 +14,7 @@ import { selectNotifications } from '../../features/notifications/notiSlice';
 import { Socket } from '../BeeChat/socketBee';
 import Sitesearch from '../interactions/sitesearch';
 import Coinprices from '../coinsprices';
+import Btnactionicon from '../btns/btnactionicon';
 // import {
 //     decrement,
 //     increment,
@@ -127,6 +128,13 @@ const UserMenu = (props) => {
                     }
                 }
             }
+            bugIcon: file(relativePath: {eq: "bug_black.png"}) {
+                childImageSharp {
+                    fixed(width: 35) {
+                        ...GatsbyImageSharpFixed_withWebp
+                    }
+                }
+            }
         }
     `);
     //end grapqhql queries
@@ -179,6 +187,11 @@ const UserMenu = (props) => {
                     <Link to="/nftmarket" className="gralLink" onClick={() => setActualMenu("NFT Market")}>
                         <li className="menuOptionLi">
                             <Img fixed={data.market.childImageSharp.fixed} className="imgOptionsUser"  />
+                        </li>
+                    </Link>
+                    <Link to="/support" className="gralLink" onClick={() => setActualMenu("Support")}>
+                        <li className="menuOptionLi">
+                            <Img fixed={data.bugIcon.childImageSharp.fixed} className="imgOptionsUser"  />
                         </li>
                     </Link>
                     {/* TODO make the settings option to set chat as flyer or fixed. */}

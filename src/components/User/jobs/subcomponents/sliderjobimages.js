@@ -8,14 +8,17 @@ import { useState } from 'react';
  * @param {String} xclassCSS - Optional, The extra css class.
  * @param {Object} job - the job selected data.
  * @param {String} size - mandatory. As "big", "small", "mini".
+ * @param {Boolean} devMode - optional, console.logs.
+ * @param {Boolean} hideDefault - optional to hide no image present.
  */
 
 const Sliderjobimages = (props) => {
-    const { job, xclassCSS, size, } = props;
+    const { job, xclassCSS, size, devMode, hideDefault } = props;
     const [imgClass, setImgClass] = useState({ mainCont: '', imgClass: ''});
 
     //load on init
     useEffect(() => {
+        if(devMode){ console.log('My props:', {job, xclassCSS, size, devMode, hideDefault})}
         switch (size) {
             case ('big'):
                 setImgClass({ mainCont: 'standardBlockMaxW80p', imgClass: 'coverImgJobs' });
@@ -35,7 +38,7 @@ const Sliderjobimages = (props) => {
     return (
         <div className={`${imgClass.mainCont} ${xclassCSS}`}>
             {
-                job.images.length === 0 &&
+                job.images.length === 0 && !hideDefault &&
                     <img src={'https://res.cloudinary.com/dbcugb6j4/image/upload/v1615643565/noimage-JAB_geyicy.png'} 
                         className={`${imgClass.imgClass} boxShadowBottom`}
                     />

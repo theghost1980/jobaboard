@@ -5,8 +5,8 @@ import { useStaticQuery, graphql } from 'gatsby';
 /**
  * Assign the project to an employee.
  * @param {String} xclassCSS - Optional, The extra css class.
- * @param {function} btnAction - Call back to assign a value on each switch action
- * @param {String} typeIcon - Type of icon, "refresh", "wishlist".
+ * @param {function} btnAction - optional Call back to assign a value on each switch action
+ * @param {String} typeIcon - Type of icon, "refresh", "wishlist", "bugs".
  * @param {String} title - Tip tool text
  * @param {String} size - Optional to define a smaller version of the icons. "" = default = 35px. "mini" = 15px.
  */
@@ -37,6 +37,20 @@ const Btnactionicon = (props) => {
                         ...GatsbyImageSharpFixed_withWebp
                     }
                 }
+            } 
+            bug_mini: file(relativePath: {eq: "bug_black.png"}) {
+                childImageSharp {
+                    fixed(width: 15) {
+                        ...GatsbyImageSharpFixed_withWebp
+                    }
+                }
+            }
+            bug_Large: file(relativePath: {eq: "bug_black.png"}) {
+                childImageSharp {
+                    fixed(width: 35) {
+                        ...GatsbyImageSharpFixed_withWebp
+                    }
+                }
             }
         }
     `);
@@ -51,6 +65,9 @@ const Btnactionicon = (props) => {
                     break;
                 case 'wishlist':
                     setSelectedIcon(data.wishlist_iconLarge.childImageSharp.fixed);
+                    break;
+                case 'bug':
+                    setSelectedIcon(data.bug_Large.childImageSharp.fixed);
                     break;
                 default:
                     break;

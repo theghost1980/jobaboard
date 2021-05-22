@@ -9,11 +9,15 @@ import Previewjob from '../components/User/jobs/previewjob';
 import Loader from '../components/loader';
 import Follower from '../components/interactions/follower';
 import Browseby from '../components/Categories/browseby';
+import Nojobstoshow from '../components/User/jobs/subcomponents/nojobstoshow';
 
 //constants
 const portfolio_EP = process.env.GATSBY_portfolioEP;
 const publicEP = process.env.GATSBY_publicEP;
 const noImage = process.env.GATSBY_noImg;
+const pagination = { perPage: 5, controls: false }; 
+// const pagination = null;
+const devMode = true;
 //end constants
 
 const Porfoliouser = (props) => {
@@ -23,9 +27,11 @@ const Porfoliouser = (props) => {
     const [profile, setProfile] = useState(null);
     const [activeJobs, setActiveJobs] = useState(null);
     const [selectedJob, setSelectedJOb] = useState(null);
-    const [loadingData, setLoadingData] = useState(false);
+    const [loadingData, setLoadingData] = useState(true);
     const [noPortolfio, setNoPortolfio] = useState(false);
     const [lookedUpUser, setLookedUpUser] = useState(null);
+    const [pages, setPages] = useState(null); //to store all query jobs results, as active.
+    const [indexPage, setIndexPage] = useState(0);
     
     const query  = props.location.search || null;
     console.log(`Query portfolio user:${query}`);
@@ -68,9 +74,24 @@ const Porfoliouser = (props) => {
             
             getData(publicEP+"getActiveJobs", username)
             .then(response => {
-                console.log(response);
+                if(devMode){ console.log(response) };
                 if(response.status === 'sucess'){
-                    setActiveJobs(response.result); //we have the array of active jobs on this user.
+                    if(pagination && pagination.perPage > 0){
+                            function paginate (arr, size) {
+                                return arr.reduce((acc, val, i) => {
+                                  let idx = Math.floor(i / size);
+                                  let page = acc[idx] || (acc[idx] = []);
+                                  page.push(val);
+                                  return acc;
+                                }, [])
+                            }
+                            let page_size = pagination.perPage;
+                            let pages = paginate(response.result, page_size);
+                            setPages(pages);
+                            if(devMode){ console.log('pagination:', pages); };
+                    }else{
+                        setActiveJobs(response.result); //we have the array of active jobs on this user.
+                    }
                     setLoadingData(false);
                 }
             }).catch(error => {
@@ -111,10 +132,10 @@ const Porfoliouser = (props) => {
     return (
         <Layout>
             {
-                    loadingData && 
-                        <div className="standarDiv200x200h">
-                            <Loader logginIn={true} typegif={"spin"}/>
-                        </div>
+                loadingData && 
+                <div className="standarDiv200x200h">
+                    <Loader logginIn={true} typegif={"spin"}/>
+                </div>
             }
             <div className="standardDivRowFullW">
                 {
@@ -129,16 +150,18 @@ const Porfoliouser = (props) => {
                 }
                 {
                     noPortolfio &&
-                    <div>
-                        <h1>Sorry but @{lookedUpUser} has no portfolio created.</h1>
-                        <h3>If you know him, let him know the crypto police is looking for him!</h3>
-                        <h3>But please feel free to browse more Gig/Jobs.</h3>
-                        <Browseby 
-                            size={"small"}
-                            pagination={{ pagination : true, perSlide: 2 }}
-                            xclassCSS={"whiteBack marginTop justRounded boxShadowBottom"}
-                            xclassCSSUl={"justSpaceEvenly"}
-                        />
+                    <div className="portfolioFlexBig justWidth50">
+                        <div className="contentMiniMargins">
+                            <h1>Sorry but @{lookedUpUser} has no portfolio created.</h1>
+                            <h3>If you know him, let him know the crypto police is looking for him!</h3>
+                            {/* <h3>But please feel free to browse more Gig/Jobs.</h3>
+                            <Browseby 
+                                size={"small"}
+                                pagination={{ pagination : true, perSlide: 2 }}
+                                xclassCSS={"whiteBack marginTop justRounded boxShadowBottom"}
+                                xclassCSSUl={"justSpaceEvenly"}
+                            /> */}
+                        </div>
                     </div>
                 }
                 {
@@ -265,7 +288,7 @@ const Porfoliouser = (props) => {
                     <div>
                         {
                             profile && 
-                            <div className="justiAlig">
+                            <div className="justiAlig justWidth50">
                                 <img 
                                     src={profile.avatar ? profile.avatar : noImage} 
                                     className="imageMedium justBorders marginAuto" 
@@ -275,43 +298,73 @@ const Porfoliouser = (props) => {
                                     profile.createdAt &&
                                     <p className="textMediumWhite textAlignedCenter">Member since: {formatDateTime(profile.createdAt)}</p>
                                 }
-                                <Follower xclassCSS={"whiteBack justBorders justRounded marginBottom"} token={userdata.token} interactTo={lookedUpUser} />
+                                {   userdata && userdata.logged &&
+                                    <Follower xclassCSS={"whiteBack justBorders justRounded marginBottom"} token={userdata.token || null} interactTo={lookedUpUser} />
+                                }
                             </div>
                         }
                     </div>
                 }
                 {
-                    (activeJobs && activeJobs.length > 0)
+                    (!loadingData)
                         &&
                         <div>
-                            <h1 className="marginLeft">Active Jobs on this user</h1>
-                            <ul className="standardUlHorMini wrapDiv coloredContrast3Soft justRounded">
-                                    {
-                                        activeJobs.map(job => {
-                                            return (
-                                                // to test carousel removed: onClick={() => setSelectedJOb(job)}
-                                                <li key={job._id}>
-                                                    <Jobresult sizeSlider={"small"} job={job} logged={userdata.logged} openCb={() => setSelectedJOb(job)} />
-                                                </li>
-                                            )
-                                        })
-                                    }
-                                </ul>
+                            <h1 className="marginLeft miniMarginBottom">Active Jobs on this user</h1>
+                            {
+                                (pagination && pages && pages.length > 0) ?
+                                <div>
+                                    <p className="normalTextXSmall textColorWhite marginLeft miniMarginTB">Showing you: {(pages.length * pagination.perPage)} jobs available. Pages menu at bottom.</p>
+                                    <ul className="standardUlHorMini wrapDiv coloredContrast3Soft justRounded">
+                                        {
+                                            pages[indexPage].map(job => {
+                                                return (
+                                                    // to test carousel removed: onClick={() => setSelectedJOb(job)}
+                                                    <li key={job._id}>
+                                                        <Jobresult sizeSlider={"small"} job={job} logged={userdata.logged} openCb={() => setSelectedJOb(job)} />
+                                                    </li>
+                                                )
+                                            })
+                                        }
+                                    </ul>
+                                    <ul className="standardUlRowFlexPlain justiAlig">
+                                        {
+                                            pages.map((page,index) => {
+                                                return (
+                                                    <li key={`${index}-paginated-jobs-JAB`} className={`${indexPage === index ? 'activePage' : null } pointer scaleOnHover textColorWhite biggerText marginRight`} onClick={() => setIndexPage(index)}>
+                                                        {index + 1}
+                                                    </li>
+                                                )
+                                            })
+                                        }
+                                    </ul>
+                                </div>
+                                :
+                                  (activeJobs && activeJobs.length > 0) && !pagination &&
+                                    <div>
+                                        <p className="normalTextXSmall textColorWhite marginLeft miniMarginTB">Showing you: {activeJobs.length} jobs available.</p>
+                                        <ul className="standardUlHorMini wrapDiv coloredContrast3Soft justRounded">
+                                        {
+                                            activeJobs.map(job => {
+                                                return (
+                                                    // to test carousel removed: onClick={() => setSelectedJOb(job)}
+                                                    <li key={job._id}>
+                                                        <Jobresult sizeSlider={"small"} job={job} logged={userdata.logged} openCb={() => setSelectedJOb(job)} />
+                                                    </li>
+                                                )
+                                            })
+                                        }
+                                        </ul>
+                                    </div>
+                            }
                         </div>
                 }
                 {
-                    (!activeJobs || activeJobs.length === 0) &&
-                    <div className="standardContentMargin">
-                        <h2 className="textColorWhite textShadowBasic">At this moment, this user do not have any Job/Gig or services.</h2>
-                        <h3 className="textColorWhite">If you know this user, please encourage him/her to start posting amazing JABS...I mean, Jobs.</h3>
-                        <h3 className="textColorWhite textShadowBasic">But please feel free to browse our categories</h3>
-                        <Browseby 
-                            size={"small"}
-                            pagination={{ pagination : true, perSlide: 2 }}
-                            xclassCSS={"whiteBack marginTop justRounded boxShadowBottom"}
-                            xclassCSSUl={"justSpaceEvenly"}
-                        />
-                    </div>
+                    (!activeJobs || activeJobs.length === 0) && !loadingData && !pagination &&
+                    <Nojobstoshow  devMode={true} pagination={{ pagination : true, perSlide: 2 }}/>
+                }
+                {
+                    (!pages || pages.length === 0) && !loadingData && pagination &&
+                    <Nojobstoshow  devMode={true} pagination={{ pagination : true, perSlide: 2 }}/>
                 }
                 </div>
             </div>

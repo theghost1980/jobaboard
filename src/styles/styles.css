@@ -31,6 +31,7 @@ GatsbyImageSharpFluid_withWebp_tracedSVG */
 /* https://www.svgbackgrounds.com/#protruding-squares */
 /* shine effect: http://jsfiddle.net/nqQc7/512/ https://stackoverflow.com/users/4620771/nenad-vracar */
 /* credits javascript & code */
+/* https://stackoverflow.com/questions/5667888/counting-the-occurrences-frequency-of-array-elements */
 /* https://stackoverflow.com/questions/42761068/paginate-javascript-array */
 /* end credits */
 
@@ -380,6 +381,10 @@ body::-webkit-scrollbar {
     height: auto;
     padding-inline-start: 0px;
 }
+.standardUlColPlain2 {
+    list-style: none;
+    height: auto;
+}
 .standardUlColPlain90p {
     list-style: none;
     width: 90%;
@@ -415,7 +420,10 @@ body::-webkit-scrollbar {
     width: 40%;
 }
 .justWidth90{
-    width: 90%;
+    width: 90% !important;
+}
+.justWidth98{
+    width: 98%;
 }
 .justWidth80{
     width: 80%;
@@ -807,6 +815,10 @@ body::-webkit-scrollbar {
     width: 90px;
     height: auto;
 }
+.btnMini3 {
+    width: 90px;
+    height: auto;
+}
 .textShadowBasic{
     /* text-shadow: 1px 1px 2px #214E34 !important; */
     text-shadow: 1px 2px 4px #214E34;
@@ -1093,6 +1105,9 @@ body::-webkit-scrollbar {
 .standardContentMargin {
     margin: var(--marginBewteen-Objects);
 }
+.bigImage400w {
+    width: 400px;
+}
 .standardContentMarginLR {
     margin-left: var(--marginBewteen-Objects);
     margin-right: var(--marginBewteen-Objects);
@@ -1265,6 +1280,12 @@ body::-webkit-scrollbar {
     flex-direction: column;
     width: auto;
     height: auto;
+}
+.standardDivColFullW100 {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
 }
 .backColorOldLace {
     background: oldlace;
@@ -1501,6 +1522,10 @@ body::-webkit-scrollbar {
 }
 .justDisplayFlex {
     display: flex;
+}
+.justDisplayFlexColumn {
+    display: flex;
+    flex-direction: column;
 }
 .justFlexDirection {
     flex-direction: column;
@@ -2089,6 +2114,13 @@ body::-webkit-scrollbar {
 }
 .loadingImg {
     animation: animFade 1s ease-in-out 0.2s 1;
+}
+.standardUl300px {
+    width: 320px;
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+    list-style: none;
 }
 .minimumMarginTB {
     margin-top: 4px;
@@ -3174,7 +3206,7 @@ nav {
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: center;
+    justify-content: space-around;
     width: 100%;
 }
 .profilePicCont {

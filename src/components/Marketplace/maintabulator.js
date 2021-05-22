@@ -19,6 +19,7 @@ const orderEP = process.env.GATSBY_orderEP;
  * @param {[Object]} nft_instances - Nft tokens on Sale on JAB.
  * @param {[Object]} market_orders - the market order of this user.
  * @param {Object}  jabFEE - defines fees & accepted currency, to be set later on from .env files.
+ * @param {Object} pagination - optional to render lists paginated. AS { perPage: 10, controls: Boolean }.
  * @param {Object} userdata - userdata.
  * @param {String} nftEP the EP of hive to check for txs.
  * @param {Function} updateOrders call back to update the orders after an operation as update/buy/sell/cancelled.
@@ -27,7 +28,7 @@ const orderEP = process.env.GATSBY_orderEP;
 */
 
 const Maintabulator = (props) => {
-    const { cbSendItem, nft_definitions, nft_instances, devMode, jabFEE, userdata, market_orders, nftEP, updateOrders, refreshList} = props;
+    const { cbSendItem, nft_definitions, nft_instances, devMode, jabFEE, userdata, market_orders, nftEP, updateOrders, refreshList, pagination} = props;
     const [definitionsSortBy, setDefinitionsSortBy] = useState([]); //maping the fields from incomming item on useeffect.
     const [instancesSortBy, setInstancesSortBy] = useState([]);
     const [keyOrderBy, setKeyOrderBy] = useState("");
@@ -74,6 +75,20 @@ const Maintabulator = (props) => {
         if(devMode){ console.log( {arrayFields: arrayFields} )}
         return arrayFields;
     }
+    function paginateIt(array){
+            function paginate (arr, size) {
+                return arr.reduce((acc, val, i) => {
+                  let idx = Math.floor(i / size);
+                  let page = acc[idx] || (acc[idx] = []);
+                  page.push(val);
+                  return acc;
+                }, [])
+            }
+            let page_size = pagination.perPage;
+            let pages = paginate(array, page_size);
+            if(devMode){ console.log('pagination results on maintabulator:', pages); };
+            return  pages;
+    }
     const editMarketOrder = (option) => {
         if(devMode){ console.log('Option Menu:', option) };
         if(option === 'close'){ setSelectedOrder(null) };
@@ -119,11 +134,15 @@ const Maintabulator = (props) => {
         updateOrders();
     }
     function loadWishList(){
-        const headers = { 'x-access-token': userdata.token, 'operation': 'find', 'query': JSON.stringify({ username: userdata.username, record_active: true }) };
-        dataRequest(orderEP+"handleRequestWishlist", "POST", headers, {}).then(response => {
-            console.log(response);
-            setWishlist(response.result);
-        }).catch(error => console.log('Error adding to wishlist.', error ));
+        if(userdata.logged){
+            const headers = { 'x-access-token': userdata.token, 'operation': 'find', 'query': JSON.stringify({ username: userdata.username, record_active: true }) };
+            dataRequest(orderEP+"handleRequestWishlist", "POST", headers, {}).then(response => {
+                console.log(response);
+                setWishlist(response.result);
+            }).catch(error => console.log('Error adding to wishlist.', error ));
+        }else{
+            if(devMode){ console.log('No wishlist to load as user not logged yet!') };
+        }
     }
     const wishListing = (option) => {
         console.log('Option Wish List:', option);
@@ -133,10 +152,11 @@ const Maintabulator = (props) => {
 
     //to load on init
     useEffect(() => {
+        //TODO pagination
         if(nft_definitions){ setDefinitionsSortBy(scanObjectFields(nft_definitions)) };
         if(nft_instances){ setInstancesSortBy(scanObjectFields(nft_instances)) };
         loadWishList();
-        if(devMode){ console.log('Received on props:', { cbSendItem, nft_definitions, nft_instances, jabFEE, market_orders})}
+        if(devMode){ console.log('Received on props:', { cbSendItem, nft_definitions, nft_instances, jabFEE, market_orders, pagination})}
     },[]);
     //END to load on init
 
@@ -195,7 +215,7 @@ const Maintabulator = (props) => {
                                 </select>
                                 <Btnswitch xtraClassCSS={"justDisplayFlexRow justiAlig normalTextSmall justWidth100"} miniSizes={true}  btnAction={(cen) => setOrderAsc(cen)} sideText={`${orderAsc ? 'Desc': 'Asc'}`}/>
                             </div>
-                            <ul className="standardUlRowFlexPlain justFlexWrap">
+                            <ul className="standardUlRowFlexPlain justFlexWrap spaceEvenly">
                                 {
                                     nft_definitions.sort( compare ).filter(item => item.for_sale ).map(token => {
                                         return (
@@ -241,7 +261,7 @@ const Maintabulator = (props) => {
                                 </select>
                                 <Btnswitch xtraClassCSS={"justDisplayFlexRow justiAlig normalTextSmall justWidth100"} miniSizes={true}  btnAction={(cen) => setOrderAsc(cen)} sideText={`${orderAsc ? 'Desc': 'Asc'}`}/>
                             </div>
-                            <ul className="standardUlRowFlexPlain justFlexWrap">
+                            <ul className="standardUlRowFlexPlain justFlexWrap spaceEvenly">
                                 {
                                     nft_instances.sort( compare ).map(token => {
                                         return (

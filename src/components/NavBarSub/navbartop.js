@@ -97,7 +97,7 @@ const Navbartop = (props) => {
     return (
         <div className="standardDivFlexPlain justWidth100per">
             {
-                (pathName !== "/nftmarket" && pathName !== "/app/profile" && pathName !== "/checkout")
+                (pathName !== "/nftmarket" && pathName !== "/app/profile" && pathName !== "/checkout" && pathName !== "/support")
                 && !mobile &&
                 <Menucats />
             }
@@ -111,14 +111,14 @@ const Navbartop = (props) => {
                 {
                     mobile && 
                     <div onClick={() => setMenuClicked(!menuClicked)}>
-                        <Img fixed={data.hamMenuOrange.childImageSharp.fixed} className="marginRightX2 scaleOnHover" />
+                        <Img fixed={data.hamMenuOrange.childImageSharp.fixed} className="scaleOnHover" />
                     </div>
                 }
                 {/* TODO ADD this to div makeFixDiv onMouseLeave={() => setMenuClicked(false)} */}
                 {
                     <div className={menuClicked ? 'makeFixDiv fadeInLonger' : null } onMouseLeave={() => setMenuClicked(false)} >
                         { menuClicked && <Menucats menuClicked={menuClicked}/> }
-                        <ul className={`${(mobile) ? 'hideUl' : 'showUl'} mainMenuUl justPaddingRight20p ${menuClicked ? 'forcedUlRightSide' : null }`}>
+                        <ul className={`${(mobile) ? 'hideUl' : 'showUl'} mainMenuUl justPaddingRight20p ${menuClicked ? 'forcedUlRightSide' : !mobile ? null : 'justDisplayNone' }`}>
                         {
                             data.main_menu.edges.map(({ node: menuItem }) => {
                                 if(!menuItem.active) return null

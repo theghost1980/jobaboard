@@ -15,6 +15,7 @@ import Userjobs from '../components/User/userjobs';
 import Beechatfixed from "../components/BeeChat/beechatfixed";
 import Socketbee from "../components/BeeChat/socketBee";
 import Ordercheckout from "../components/User/orders/ordercheckout";
+import Support from "./support";
 // import Status from "../components/Status"
 // testing redux
 // import store from '../store/store';
@@ -37,6 +38,7 @@ const App = () => (
         {/* <PrivateRoute path="/app/wallet" component={Userwallet} /> */}
         <PrivateRoute path="/app/tokens" component={TokensUser} />
         <PrivateRoute path="/app/jobs" component={Userjobs} />
+        <PrivateRoute path="/app/support" component={Support} />
         <PrivateRoute path="/app/order-checkout" component={Ordercheckout}/>
         <UserLogin path="/app/userlogin" />
       </Router>

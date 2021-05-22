@@ -48,6 +48,7 @@ const fieldsByItem = [
     ],},
 ];
 const ssc_test_id = "ssc-testNettheghost1980";
+const pagination = { perPage: 10, controls: false };
 //end constants
 
 //Important note here.
@@ -81,6 +82,7 @@ const Nftmarket = (props) => {
     const [action, setAction] = useState(initialAction);
     const [sameUser, setSameUser] = useState(false);
     const [refresh, setRefresh] = useState('');
+    const [indexPage, setIndexPage] = useState(0);
     
     //to load on each change of state
     useEffect(() => {
@@ -271,12 +273,13 @@ const Nftmarket = (props) => {
                     </div>
                 }
                 {
-                    !loadingData && nft_definitions && nft_instances && myorders && userdata &&
+                    !loadingData && nft_definitions && nft_instances &&
                     <div>
                         <Maintabulator 
+                            pagination={pagination}
                             nft_definitions={nft_definitions}
                             nft_instances={nft_instances}
-                            market_orders={myorders}
+                            market_orders={myorders || []}
                             cbSendItem={setSelectedItem}
                             devMode={true}
                             jabFEE={jabFEE}

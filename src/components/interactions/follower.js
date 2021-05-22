@@ -79,15 +79,17 @@ const Follower = (props) => {
     //Calling on load
     useEffect(() => {
         //get the user's following field.
-        const headers = { 'x-access-token': token, 'query': JSON.stringify({ following: 1}), };
-        console.log('Asking to:',userEP+"jabUserField");
-        getUserData(userEP+"jabUserField",headers)
-        .then(response => {
-            console.log(response);
-            if(response.status === "sucess"){
-                setFollowing(response.result.following);
-            }
-        }).catch(error => console.log('Error fetching user field BE.',error));
+        if(token){
+            const headers = { 'x-access-token': token, 'query': JSON.stringify({ following: 1}), };
+            console.log('Asking to:',userEP+"jabUserField");
+            getUserData(userEP+"jabUserField",headers)
+            .then(response => {
+                console.log(response);
+                if(response.status === "sucess"){
+                    setFollowing(response.result.following);
+                }
+            }).catch(error => console.log('Error fetching user field BE.',error));
+        }
     },[]);
     //END Calling on load
 
