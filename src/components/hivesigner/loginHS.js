@@ -12,9 +12,10 @@ var hivesigner = require('hivesigner');
 // });
 
 // for testing on neflify https://awesome-hoover-fbbbdc.netlify.app/callbackhs
+//for live access 'https://jobaboard.net/callbackhs'
 const client = new hivesigner.Client({
     app: 'jobaboard',
-    callbackURL: 'https://awesome-hoover-fbbbdc.netlify.app/callbackhs',
+    callbackURL: 'https://jobaboard.net/callbackhs',
     scope: ['vote', 'comment']
 });
 /////////////////////////////

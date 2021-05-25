@@ -32,10 +32,10 @@ const Callbackhs = (props) => {
     //to run only once on load, when the props are received
     useEffect(() => {
         const query = new URLSearchParams(props.location.search);
-        localStorage.setItem('query_hs',JSON.stringify(query));
         const access_token = query.get('access_token');
         const username = query.get('username');
         if(access_token && username){
+            localStorage.setItem('data_hs',JSON.stringify({username: username, location: props.location.search  }));
             const expires_in = query.get('expires_in');
             const state = query.get('state');
             // const client = new hivesigner.Client({
