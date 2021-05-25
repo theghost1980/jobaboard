@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { check, formatDateTime } from '../../utils/helpers';
+import { check, formatDateTime, jabFEE } from '../../utils/helpers';
 import axios from 'axios';
 //hooks-forms
 import { useForm } from 'react-hook-form';
@@ -42,8 +42,6 @@ import Transmiter from '../Marketplace/transmiter';
 var dhive = require("@hiveio/dhive");
 var client = new dhive.Client(["https://api.hive.blog", "https://api.hivekings.com", "https://anyx.io", "https://api.openhive.network"]);
 //constants
-// TODO put in on .env
-const jabFEE = { fee: "0.002", currency: "HIVE", costInstance: "0.001", costCurr: "HIVE", acceptedCur: "HIVE"};
 const nftEP = process.env.GATSBY_nftEP;
 const userEP = process.env.GATSBY_userEP;
 const orderEP = process.env.GATSBY_orderEP;
@@ -372,6 +370,7 @@ const Tokensuser = () => {
                 setNfts([]);
                 response.result.map(nft => updateNftArray('created', nft));
                 setLoadingData(false);
+                if(response.result.length === 0) { setNoowned(true)};
             }
         }).catch(error => console.log('Error asking for NFTs on this user from DB, mongo.',error));
     }
@@ -770,6 +769,12 @@ const Tokensuser = () => {
         }
     } 
 
+    //TODO IDEAS check it out
+    // <ul className="textNomarginXXSmall">
+    //     <li>Todo Here</li>
+    //     <li>On holdings: add the options for instance as: send to market(put on sale).</li>
+    // </ul>
+
     return (
         <div className="userTokensContainer">
             <Tokentabulator cbSendItem={(item,type) => settingSelected(item,type)} userdata={userdata}
@@ -778,10 +783,12 @@ const Tokensuser = () => {
                 devMode={true}
                 ssc_id={ssc_test_id}
             />
-            <ul className="textNomarginXXSmall">
-                <li>Todo Here</li>
-                <li>On holdings: add the options for instance as: send to market(put on sale).</li>
-            </ul>
+            {    
+                noowned && <p>Looks like you have no tokens Yet. Feel free to create a new one anytime.</p>
+            }
+            {
+                noHive && <p>Your current HIVE balance do not allow you to create tokens.</p>
+            }
             {
                 !loadingData &&
                 <div>
@@ -1284,12 +1291,6 @@ const Tokensuser = () => {
                         </div>
                     } */}
                 </div>
-                {    
-                noowned && <p>Looks like you have no tokens Yet. Click to follow tutorial. TODO</p>
-                }
-                {
-                noHive && <p>Your current HIVE balance do not allow you to create tokens. Please <Link to="/app/wallet">Top Up</Link></p>
-                }
                 </>
             }
             {/* {

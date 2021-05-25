@@ -60,6 +60,13 @@ const Navbartop = (props) => {
                     }
                 }
             } 
+            logoColorBeta: file(relativePath: {eq: "logoColor_beta.png"}) { 
+                childImageSharp {
+                    fluid {
+                        ...GatsbyImageSharpFluid_withWebp
+                    }
+                }
+            }
             hamMenuOrange: file(relativePath: {eq: "menu_orange.png"}) { 
                 childImageSharp {
                     fixed(width: 50) {
@@ -105,7 +112,7 @@ const Navbartop = (props) => {
                 <Link to="/">
                     <div className="logoSVGCont">
                         {/* <img src={data.logoColor.publicURL} className="logoSVG" /> */}
-                        <Img fluid={data.logoColor.childImageSharp.fluid} className="logoSVG" loading="eager" />
+                        <Img fluid={data.logoColorBeta.childImageSharp.fluid} className="logoSVG" loading="eager" />
                     </div> 
                 </Link>
                 {

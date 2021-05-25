@@ -134,10 +134,7 @@ const Navbar = (props) => {
         setShowLogin(value);
     };
     const successLogin = (account,timestamp,msg) => {
-        if(devMode){
-            console.log('User Logged In!');
-            console.log(`user:${account}, ts:${timestamp}, msg:${msg}`);
-        }
+        if(devMode){ console.log(`User Logged In!. user:${account}, ts:${timestamp}, msg:${msg}`); };
         setShowLogin(false);
         getDataBeeChat(account,timestamp,msg) //check here for newmessages on beeChat.
         navigate("/app/profile"); //this one could be taking the user to dashboard or any other page

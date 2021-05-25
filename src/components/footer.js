@@ -16,6 +16,13 @@ const Footer = () => {
                         ...GatsbyImageSharpFluid_withWebp
                     }
                 }
+            } 
+            logoColorBeta: file(relativePath: {eq: "logoColor_beta.png"}) { 
+                childImageSharp {
+                    fluid {
+                        ...GatsbyImageSharpFluid_withWebp
+                    }
+                }
             }
             main_menu: allMongodbGatsbyMainMenus(sort: {fields: order, order: ASC})  {
                 edges {
@@ -45,7 +52,7 @@ const Footer = () => {
             <Link to="/">
                 <div className="logoSVGCont footerAddings">
                     {/* <img src={data.logoColor.publicURL} className="logoSVG" /> */}
-                    <Img fluid={data.logoColor.childImageSharp.fluid} className="logoSVG" loading="eager" />
+                    <Img fluid={data.logoColorBeta.childImageSharp.fluid} className="logoSVG" loading="eager" />
                 </div>
             </Link>
             <ul className="ulFooterMenu">

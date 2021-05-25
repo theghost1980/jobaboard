@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 // TODO layout must transform itself as different layots
 // - for check out should be minimal, like just logo and menu to avoid user "crazyness".
 import Layout from '../components/layout';
-import { getStoredField, check } from '../utils/helpers';
+import { getStoredField, check, jabFEE } from '../utils/helpers';
 import Btnswitch from '../components/btns/btnswitch';
 import Img from 'gatsby-image';
 import { useStaticQuery, graphql, navigate } from 'gatsby';
@@ -23,7 +23,6 @@ import Btnprint from '../components/btns/btnprint';
 const nfthandlermongoEP = process.env.GATSBY_nfthandlermongoEP;
 const orderEP = process.env.GATSBY_orderEP;
 // TODO take this on .env file
-const jabFEE = { fee: "0.002", currency: "HIVE", costInstance: "0.001", costCurr: "HIVE", acceptedCur: "HIVE"};
 const dhive = require("@hiveio/dhive");
 const client = new dhive.Client([ "https://api.hive.blog", "https://api.hivekings.com", "https://anyx.io", "https://api.openhive.network","https://hived.privex.io/"]);
 const privateKey = dhive.PrivateKey.fromString(process.env.GATSBY_secretJAB);
@@ -309,7 +308,6 @@ const Checkout = (props) => {
             // TODO we must be sure the order is not already placed.
             // So before calling the transfer we must just check using the filter
             // if not found then proceed to transfer. So we dont have to refund money or anything else.
-
             window.hive_keychain.requestTransfer(order.username_employer, order.username_employee, total_amount, memo, jabFEE.acceptedCur, function(result){
                 const { message, success, error } = result;
                 console.log(result);

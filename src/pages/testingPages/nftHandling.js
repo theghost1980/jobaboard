@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { check, getStoredField } from '../../utils/helpers';
+import { check, getStoredField, jabFEE } from '../../utils/helpers';
 import Loader from '../../components/loader';
 import Btnswitch from '../../components/btns/btnswitch';
 //hiveio/keychain
@@ -16,7 +16,6 @@ import {keychain, isKeychainInstalled, hasKeychainBeenUsed} from '@hiveio/keycha
 const dhive = require("@hiveio/dhive");
 const client = new dhive.Client([ "https://api.hive.blog", "https://api.hivekings.com", "https://anyx.io", "https://api.openhive.network","https://hived.privex.io/"]);
 const privateKey = dhive.PrivateKey.fromString(process.env.GATSBY_secretJAB);
-const jabFEE = { fee: "0.002", currency: "HIVE", costInstance: "0.001", costCurr: "HIVE", acceptedCur: "HIVE"};
 const initialState = {
     symbol: "",
     name: "D My NFT created in JAB",
@@ -349,14 +348,13 @@ const Nfthandling = () => {
     //handing to instantiate
     function instantiateNFT(_newNFT){
         console.log(`To instantiate 1 token of: ${_newNFT.symbol}.`);
-        const feeSymbol = "BEE";
         const json = [{
             "contractName": "nft",
             "contractAction": "issue",
             "contractPayload": {
                 "symbol": _newNFT.symbol,
                 "to": userdata.username,
-                "feeSymbol": feeSymbol,
+                "feeSymbol": jabFEE.feeSymbol,
             }
         }];
         const data = {

@@ -8,7 +8,7 @@ import Loader from '../components/loader';
 import Absscreenwrapper from '../components/absscreenwrapper';
 import Menujobs from '../components/User/jobs/menujobs';
 import Previewjob from '../components/User/jobs/previewjob';
-import { check } from '../utils/helpers';
+import { check, jabFEE } from '../utils/helpers';
 import Jobresult from '../components/User/jobs/subcomponents/jobresult';
 import Btnswitch from '../components/btns/btnswitch';
 import Maintabulator from '../components/Marketplace/maintabulator';
@@ -18,9 +18,6 @@ import Transmiter from '../components/Marketplace/transmiter';
 import Btnactionicon from '../components/btns/btnactionicon';
 
 //constants
-// TODO put in on .env
-const jabFEE = { fee: "0.002", currency: "HIVE", costInstance: "0.001", costCurr: "HIVE", acceptedCur: "HIVE"};
-//just the jabFEE.
 const jobEP = process.env.GATSBY_jobEP;
 const nftEP = process.env.GATSBY_nftEP;
 const nfthandlermongoEP = process.env.GATSBY_nfthandlermongoEP;

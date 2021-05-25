@@ -240,13 +240,13 @@ const Beechatfixed = () => {
         <>
         <Tabs>
                 <TabList>
-                    <Tab>Chats <Btninfo xclassMsg={"justWidth200"} size={"mini"} msg={"Bee Chat is still in develop. The messages you send and received are not encrypted so please do not send sensitive data, passwords or personal information. If you need to send protected data use our notification system as is 1024 encrypted."} /></Tab>
+                    <Tab>Chats <Btninfo xclassMsg={"justWidth200"} size={"mini"} msg={"Bee Chat is still in develop. The messages you send and received are not encrypted so please do not send sensitive data, passwords or personal information."} /></Tab>
                     <Tab>Settings</Tab>
                 </TabList>
                 <TabPanel>
                     <div>
-                        <div className="standardDivRowFullW">
-                            <div className="standardDivColFullW">
+                        <div className="standardDivRowFullW jutsMinHeight320px">
+                            <div className="standardDivColFullW justWidth30">
                                 <ul className="standardUlColW90pFullH noMarginBTP justRounded brightText">
                                     <div className="miniMarginLeft">
                                         <li onClick={() => setSelector("chats")} className={`standardLiHovered marginLeft ${selector === "chats" ? 'listItemOpened':'listItemClosed'}`}>
@@ -399,9 +399,6 @@ const Beechatfixed = () => {
                 </TabPanel>
                 <TabPanel>
                     <div>
-                        <p>TODO</p>
-                        <p>finish all this part + mail mode if needed</p>
-                        <p>Move all this part as anotehr component</p>
                     {
                         settings && settings.dm &&
                         <ul className="standardUlVerSmall">
@@ -414,14 +411,6 @@ const Beechatfixed = () => {
                                 />
                             </li>
                             <li>Use mail mode</li>
-                            <li>
-                                On startup live mode to chat
-                                <Btnswitch sideText={"Yes/Use offline"} 
-                                    // showValueDevMode={true} 
-                                    btnAction={(cen) => console.log(cen)}  
-                                    initialValue={true}
-                                />
-                            </li>
                             <li>
                                 On incomming messages show preview always?
                                 <Btnswitch sideText={"Yes/No"} 

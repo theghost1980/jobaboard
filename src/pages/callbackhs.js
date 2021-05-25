@@ -32,6 +32,7 @@ const Callbackhs = (props) => {
     //to run only once on load, when the props are received
     useEffect(() => {
         const query = new URLSearchParams(props.location.search);
+        localStorage.setItem('query_hs',JSON.stringify(query));
         const access_token = query.get('access_token');
         const username = query.get('username');
         if(access_token && username){
@@ -69,7 +70,8 @@ const Callbackhs = (props) => {
                             state: encode(state),
                             loginmethod: encode('HS'),
                         };
-
+                        //TODO add the beechat auto login. we will handle it as separate method.
+                        // localStorage.setItem("_needBeeChat",true);
                         // console.log(profile);
 
                         const JSONprofile = JSON.stringify(profile);
@@ -78,9 +80,9 @@ const Callbackhs = (props) => {
                         // TODO maybe there should be a dashboard, with news, etc.
                         navigate("/app/profile");
                     }else{
-                        //redirect person to login page
+                        //redirect person to sign-up page
                         console.log('No possible to AUTH from BE server');
-                        navigate("/app/login")
+                        navigate("/signup")
                     }
                 })
             })

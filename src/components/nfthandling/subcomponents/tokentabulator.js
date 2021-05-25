@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Tab, TabList, TabPanel, Tabs } from 'react-tabs';
+import { useStaticQuery, graphql } from 'gatsby';
 import Btninfo from '../../btns/btninfo';
 import Loader from '../../loader';
 import Btnswitch from '../../btns/btnswitch';
@@ -55,6 +56,11 @@ const Tokentabulator = (props) => {
         },
     }
     const [action, setAction] = useState(initialAction);
+
+    const data = useStaticQuery(graphql`
+        query{ desert_weed: file(relativePath: {eq: "nothing_to_see_here_jab.gif"}) { publicURL } }
+    `);
+    //end grapqhl queries
  
     //to load on init
     useEffect(() => {
@@ -273,6 +279,10 @@ const Tokentabulator = (props) => {
                         </div>
                     }
                     {
+                        !loadingNfts && nfts.length === 0 &&
+                        <img src={data.desert_weed.publicURL} className="textAlignedCenter justMarginAuto" />
+                    }
+                    {
                         loadingNfts && 
                         <div className="standardDivRowFlex100pX100pCentered">
                             <Loader logginIn={loadingNfts} />
@@ -330,8 +340,12 @@ const Tokentabulator = (props) => {
                                 </div>
                             }
                         </ul>
+                        {
+                            !loadingNfts && myHoldings.length === 0 &&
+                            <img src={data.desert_weed.publicURL} className="textAlignedCenter justMargin0auto" />
+                        }
                          {
-                            !loadingInstances &&
+                            !loadingInstances && myHoldings.length > 0 &&
                                 <div>
                                     <Switchlist xclassCSSUl={"standardUlRowFlexPlain justFlexWrap justSpaceAround normalTextSmall"}
                                         miniSizes={"true"} clickCB={(item) => setSwitchs(item)}
@@ -343,7 +357,7 @@ const Tokentabulator = (props) => {
                                             { id: 'switch-5a', iniValue: showJustSelling, sideText: 'On Sell Only', name: 'just_selling'},
                                         ]}
                                     />
-                                    {
+                                    { 
                                         arraySelected && enableSelection &&
                                         <div className="standardDivRowFullW justAligned">
                                             <div className="justWidth20">
@@ -376,11 +390,6 @@ const Tokentabulator = (props) => {
                 <TabPanel>
                     <div className="jutsMinHeight320px">
                         <Userwallet />
-                        <ul className="textNomarginXXSmall">
-                            <li>Ideas TODO Here</li>
-                            <li>Allow user to topUp/widthdraw any coin they need. I.e: Orbs,LEO,etc.</li>
-                            <li>By using a existing contract that allow todo so, and just invoking it using hive keychain.</li>
-                        </ul>
                     </div>
                 </TabPanel>
             </Tabs>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getStoredField, formatDateTime, check } from '../../../utils/helpers';
+import { getStoredField, formatDateTime, check, jabFEE } from '../../../utils/helpers';
 import Btnoutlink from '../../btns/btnoutlink';
 import Loader from '../../loader';
 import Orderoptions from './ordersoptions';
@@ -10,8 +10,6 @@ import Menuhover from '../../interactions/menuhover';
 
 //constants
 const orderEP = process.env.GATSBY_orderEP;
-// TODO take this on .env file
-const jabFEE = { fee: "0.002", currency: "HIVE", costInstance: "0.001", costCurr: "HIVE", acceptedCur: "HIVE"};
 const optionsOrdersMenu = [
     {title: 'Options For This Order', cbProp: 'manageCat', subMenu: [ 'Mark as Completed', 'Report this Order', 'Cancel this Order'],},
 ]

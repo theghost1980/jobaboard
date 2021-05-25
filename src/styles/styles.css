@@ -417,7 +417,7 @@ body::-webkit-scrollbar {
     width: 50% !important;
 }
 .justWidth40{
-    width: 40%;
+    width: 40% !important;
 }
 .justWidth90{
     width: 90% !important;
@@ -429,7 +429,7 @@ body::-webkit-scrollbar {
     width: 80%;
 }
 .justWidth30{
-    width: 30%;
+    width: 30% !important;
 }
 .justWidth20{
     width: 20%;
@@ -2187,7 +2187,7 @@ body::-webkit-scrollbar {
     justify-content: center; */
     list-style: none;
     flex-wrap: wrap;
-    width: 95%;
+    width: 100%;
     padding-inline-start: 0px;
 }
 .walletUserAmount {

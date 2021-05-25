@@ -2,11 +2,13 @@
 import { navigate } from "gatsby"
 import { isKeychainInstalled, hasKeychainBeenUsed } from '@hiveio/keychain';
 
+//constants
 //JWT
 const jwt = require('jsonwebtoken');
-//constants
 const secret = process.env.GATSBY_SECRET;
 const beechatEP = process.env.GATSBY_beeChatEP;
+export const jabFEE = { fee: process.env.GATSBY_fee, currency: process.env.GATSBY_currency, costInstance: process.env.GATSBY_costInstance, costCurr: process.env.GATSBY_costCurr, acceptedCur: process.env.GATSBY_acceptedCur, feeSymbol: process.env.GATSBY_feeSymbol };
+//END constants
 //helper functions/callbacks
 // export const isBrowser = () => typeof window !== "undefined";
 
