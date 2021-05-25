@@ -21,13 +21,13 @@ const userEP = process.env.GATSBY_userEP;
  * @param {Object} selectedItemCb - The function/CB to return the selected item to parents/components
  * @param {[Object]} items - The Array of objects to map and present.
  * @param {Object} unread - The unread array of objects that contain the unread messages if any.
- * @param {String} username - Username to pass on.
+ * @param {Object} userdata - Username to pass on.
  * @param {String} toList - "chats","channels"
  */
 
 const Listitems = (props) => {
 
-    const { xclassCSS, items, selectedItemCb, username, toList, unread } = props;
+    const { xclassCSS, items, selectedItemCb, userdata, toList, unread } = props;
     const [userList, setUserList] = useState([]);
     const [selectedId, setSelectedId] = useState(null);
 
@@ -49,7 +49,7 @@ const Listitems = (props) => {
     }
     function returnOthers(item){
         if(toList === "chats"){
-            const without = item.members.filter(item => item !== username);
+            const without = item.members.filter(item => item !== userdata.username);
             // console.log(without);
             return item.type === "dm" ? without.join(' ') : without[0] + `... +${without.length}` ;
         }
@@ -57,7 +57,7 @@ const Listitems = (props) => {
     function returnOthersImg(userList){
         if(toList === "chats"){
             //fetch data from BE
-            const headers = { 'filter': JSON.stringify({ username: { $in: [...userList]  } }),'query': JSON.stringify({ avatar: 1, username: 1})};
+            const headers = { 'x-access-token':  userdata.token, 'filter': JSON.stringify({ username: { $in: [...userList]  } }),'query': JSON.stringify({ avatar: 1, username: 1})};
             getUserData(userEP+"jabUsersField",headers)
             .then(response => {
                 console.log(response);

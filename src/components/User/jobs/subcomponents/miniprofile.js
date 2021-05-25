@@ -51,7 +51,7 @@ const Miniprofile = (props) => {
 
             axios.get(publicEP+"getField", { headers: headers })
             .then(response => {
-                // console.log(response);
+                console.log(response);
                 if(response.data.status === 'sucess'){
                     setProfile(response.data.result);
                 }

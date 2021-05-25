@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { formatDateTime } from '../../utils/helpers';
 import Loader from '../loader';
+import { useStaticQuery, graphql } from 'gatsby';
 import AbsWrapper from '../absscreenwrapper';
 import BtnCloseMin from '../btns/btncloseMin';
 import BtnOutLink from '../btns/btnoutlink';
@@ -38,6 +39,11 @@ const md = new Remarkable({
 // LATER on, after tests, change to @jobaboard.
 
 const Visualizator = (props) => {
+    //grapqhl queries
+    const data = useStaticQuery(graphql`
+        query{ desert_weed: file(relativePath: {eq: "nothing_to_see_here_jab.gif"}) { publicURL } }
+    `);//end grapqhl queries
+
     const { xclassCSS, hiveUser, limit, filter_tags, openMode, devMode, noFilter, hideRefreshBtn, xtraClassOnTopDiv, xclassCSSLi, xclassCSSUL, showRefresh } = props;
     // remarkable + sanitize-html
     const optionSanitize = {
@@ -130,6 +136,10 @@ const Visualizator = (props) => {
             {
                 loadingData &&
                 <div className="standardFlex150px  justiAlig"><Loader xtraClass={"justMarginAuto"} logginIn={loadingData} typegif={"spin"}/></div>
+            }
+            {
+                !loadingData && blogPosts && blogPosts.length === 0 &&
+                <img src={data.desert_weed.publicURL} className="textAlignedCenter justMarginAuto" />
             }
             {
                 blogPosts && blogPosts.length > 0 && !loadingData &&

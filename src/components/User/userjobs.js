@@ -94,7 +94,7 @@ const Userjobs = () => {
                     <div>
                         <h1>Job Dashboard</h1>
                         <Visualizator 
-                            hiveUser={"sexosentido"}
+                            hiveUser={"jobaboard"}
                             filter_tags={['jabers-dashboard']}
                             limit={3}
                             openMode={"onTopOfAll"}

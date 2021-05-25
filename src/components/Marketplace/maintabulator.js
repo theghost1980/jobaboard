@@ -153,8 +153,8 @@ const Maintabulator = (props) => {
     //to load on init
     useEffect(() => {
         //TODO pagination
-        if(nft_definitions){ setDefinitionsSortBy(scanObjectFields(nft_definitions)) };
-        if(nft_instances){ setInstancesSortBy(scanObjectFields(nft_instances)) };
+        if(nft_definitions && nft_definitions.length > 0){ setDefinitionsSortBy(scanObjectFields(nft_definitions)) };
+        if(nft_instances && nft_instances.length > 0){ setInstancesSortBy(scanObjectFields(nft_instances)) };
         loadWishList();
         if(devMode){ console.log('Received on props:', { cbSendItem, nft_definitions, nft_instances, jabFEE, market_orders, pagination})}
     },[]);
@@ -197,7 +197,11 @@ const Maintabulator = (props) => {
                 </TabList>
                 <TabPanel>
                     {
-                        nft_definitions && definitionsSortBy &&
+                        nft_definitions && nft_definitions.length === 0 &&
+                        <h2>No definitions on sale to show.</h2>
+                    }
+                    {
+                        nft_definitions && nft_definitions.length > 0 && definitionsSortBy &&
                         <div>
                             <div className="standardUlRowFlexPlain">
                                 <label className="normalTextSmall miniMarginRight" htmlFor="sorting_definitions">Sort By: </label>
@@ -243,7 +247,11 @@ const Maintabulator = (props) => {
                 </TabPanel>
                 <TabPanel>
                 {
-                        nft_instances && nft_definitions && instancesSortBy &&
+                    nft_instances && nft_instances.length === 0 &&
+                    <h2>No definitions on sale to show.</h2>
+                }
+                {
+                        nft_instances && nft_definitions && instancesSortBy && nft_instances.length > 0 &&
                         <div>
                             <div className="standardUlRowFlexPlain">
                                 <label className="normalTextSmall miniMarginRight" htmlFor="sorting_instances">Sort By: </label>
@@ -285,9 +293,6 @@ const Maintabulator = (props) => {
                                 }
                             </ul>
                         </div>
-                    }
-                    {
-                        nft_definitions && nft_instances && nft_instances.length === 0 && <p>No Tokens on Sale yet!</p>
                     }
                 </TabPanel>
                 {

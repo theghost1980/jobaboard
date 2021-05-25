@@ -601,7 +601,7 @@ const Jobs = (props) => {
             }
             {
                 showNewJob &&
-                    <Previewjob job={newReceivedJob} cbClose={() => setShowNewJob(false)} />
+                    <Previewjob job={newReceivedJob} hideJabBtn={true} userdata={userdata} cbClose={() => setShowNewJob(false)} />
             }
             {/* {
                 !ownedTokens && 

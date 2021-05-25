@@ -18,6 +18,8 @@ import Notificationicon from '../../components/icons/notificationicon';
 import Logotext from '../../components/icons/logotext';
 import Btnswitch from '../../components/btns/btnswitch';
 import Btnactionicon from '../btns/btnactionicon';
+import Abswrapper from '../absscreenwrapper';
+import Btnclosemin from '../btns/btncloseMin';
 
 //constants
 const beechatEP = "https://beechat.hive-engine.com/api/";
@@ -51,9 +53,10 @@ const Beechatfixed = () => {
     const [triggerRead, setTriggerRead] = useState(false);
     const [chatMessage, setChatMessage] = useState(null);
     const [payLoad, setPayLoad] = useState(null);
+    const [typePayLoad, setTypePayLoad] = useState(null); //as "create-conversation", "rename-conversation", "leave-conversation", "request-friendship".
 
     //TODO: later on move on their own component
-    const [chatStatus, setChatStatus] = useState(null);
+    const [chatStatus, setChatStatus] = useState(socketBee.chatStatus);
     const [selector, setSelector] = useState("");
     const [subselector, setSubselector] = useState("");
     const [unread, setUnread] = useState([]);
@@ -120,6 +123,7 @@ const Beechatfixed = () => {
 
     const handleItem = (item) => {
         if(selector === "chats"){
+            setConversation(null);
             console.log('Clicked and passes as:',item);
             setConversation(item);
         }
@@ -133,16 +137,22 @@ const Beechatfixed = () => {
                 console.log(`Results from: ${epData.ep}`);
                 console.log(response); //here we set the states as they come
                 if(epData.lsItem === "unread"){
+                    setUnread([]);
                     setUnread(response);
                 }else if(epData.lsItem === "conversations"){
+                    setConversations([]);
                     setConversations(response);
                 }else if(epData.lsItem === "friendList"){
+                    setFriendList([]);
                     setFriendList(response);
                 }else if(epData.lsItem === "friendRequests"){
+                    setFriendRequests([]);
                     setFriendRequests(response);
                 }else if(epData.lsItem === "settings"){
+                    setSettings([]);
                     setSettings(response);
                 }else if(epData.lsItem === "channels"){
+                    setChannels([]);
                     setChannels(response);
                 }
                 // if(count >= epsBee.length){ setLoadingData(false)};
@@ -195,6 +205,78 @@ const Beechatfixed = () => {
     }, []);
     //END handle on init 
 
+    const toggleSelector = (state) => {
+        if(selector === state){
+            setSelector("");
+        }else{
+            setSelector(state);
+        }
+    }
+
+    const toogleSubSelector = (state) => {
+        if(subselector === state){
+            setSubselector("");
+        }else{
+            setSubselector(state);
+        }
+    }
+
+    function updateState(state, name,value){
+        if(state === 'type'){ setType(value)};
+        if(state === 'payload'){ setPayLoad(prevState => { return {...prevState, [name]: value }})};
+    }
+
+    ///data fetching
+    async function dataRequest(url = '', requestType, headers, formdata) {
+        const response =    !formdata   ? fetch(url, { method: requestType, contentType: 'application/x-www-form-urlencoded', headers: headers,})
+                                        : fetch(url, { method: requestType, contentType: 'application/x-www-form-urlencoded', headers: headers, body: formdata});
+        return (await response).json(); 
+    };
+    ///END data fetching
+
+    const sendPayload = (event) => {
+        event.preventDefault();
+        if(typePayLoad === 'create-channel'){
+            const actualToken = localStorage.getItem("bToken");
+            // const formdata = new FormData(); 
+            // formdata.append("name",payLoad.name);
+            // const formdata = JSON.stringify({ payload: { name: payLoad.name }});
+            const headers = { 'Authorization': `Bearer ${actualToken}` };
+            dataRequest(beechatEP + `users/channels`, "POST", headers, { name: payLoad.name }).then(response => {
+                console.log(response);
+            }).catch(error => console.log('Error fetching post API beechat.', error));
+            
+        }else{
+            socketBee.payloadFromChild(
+                {
+                    "type": typePayLoad,
+                    "payload": payLoad,
+                }
+            );
+        }
+        setTypePayLoad(null);
+        setPayLoad(null);
+        getAllData();
+    }
+
+    useEffect(() => {
+        console.log(typePayLoad, payLoad);
+    },[typePayLoad, payLoad]);
+
+    const leaveConversation = () => {
+        if(conversation && conversation.id){
+            socketBee.payloadFromChild(
+                {
+                    "type": "leave-conversation",
+                    "payload": {
+                      "conversation_id": conversation.id,
+                    }
+                  }
+            );
+            setConversation(null);
+            setSelector('');
+        }
+    }
     // code removed
     // <Socketbee readLS={triggerRead} cbMessages={setIncommingChatMsg} sendChatS={setStatus} testBtn={false} 
     //     handlePayLoad={payLoad}
@@ -244,24 +326,28 @@ const Beechatfixed = () => {
                     <Tab>Settings</Tab>
                 </TabList>
                 <TabPanel>
-                    <div>
+                    <div className={`${socketBee.chatStatus !== 'online' ? 'disableDiv2' : null}`} id="beechatFixed">
+                        {
+                            socketBee && socketBee.chatStatus &&
+                            <p>Status: {socketBee.chatStatus}</p>
+                        }
                         <div className="standardDivRowFullW jutsMinHeight320px">
                             <div className="standardDivColFullW justWidth30">
                                 <ul className="standardUlColW90pFullH noMarginBTP justRounded brightText">
                                     <div className="miniMarginLeft">
-                                        <li onClick={() => setSelector("chats")} className={`standardLiHovered marginLeft ${selector === "chats" ? 'listItemOpened':'listItemClosed'}`}>
-                                            <div className="aInlineFlexPlain justWidth100per">Chats <Btnconfirmcancel xclassCSS={"justMarginAuto whiteBack"} title={"Create new chat"} size={"mini"} typeIcon={"confirm"} /></div>
+                                        <li onClick={() => toggleSelector("chats")} className={`standardLiHovered marginLeft ${selector === "chats" ? 'listItemOpened':'listItemClosed'}`}>
+                                            <div className="aInlineFlexPlain justAlignedSpaceAround justWidth100per">Chats <Btnconfirmcancel btnAction={() => setTypePayLoad('create-conversation')} xclassCSS={"whiteBack"} title={"Create new chat"} size={"mini"} typeIcon={"confirm"} /></div>
                                         </li>
                                         {
-                                            (selector === "chats") && <Listitems unread={unread} items={conversations} toList={selector} username={userdata.username} selectedItemCb={handleItem}/>
+                                            (selector === "chats") && <Listitems unread={unread} items={conversations} toList={selector} userdata={userdata} selectedItemCb={handleItem}/>
                                         }
-                                        <li onClick={() => setSelector("friends")} className={`standardLiHovered marginLeft ${selector === "friends" ? 'listItemOpened':'listItemClosed'}`}>
-                                            <div className="aInlineFlexPlain justWidth100per">Friends <Btnconfirmcancel xclassCSS={"justMarginAuto whiteBack"} title={"Add new friend"} size={"mini"} typeIcon={"confirm"} /></div>
+                                        <li onClick={() => toggleSelector("friends")} className={`standardLiHovered marginLeft ${selector === "friends" ? 'listItemOpened':'listItemClosed'}`}>
+                                            <div className="aInlineFlexPlain justAlignedSpaceAround justWidth100per">Friends <Btnconfirmcancel btnAction={() => setTypePayLoad('request-friendship')} xclassCSS={"whiteBack"} title={"Add new friend"} size={"mini"} typeIcon={"confirm"} /></div>
                                         </li>
                                         {
                                             selector === "friends" && friendList &&
                                             <ul>
-                                                <li onClick={() => setSubselector("myfriends")} className={`standardLiHovered marginLeft ${subselector === "myfriends" ? 'listItemOpened':'listItemClosed'}`}>
+                                                <li onClick={() => toogleSubSelector("myfriends")} className={`standardLiHovered marginLeft ${subselector === "myfriends" ? 'listItemOpened':'listItemClosed'}`}>
                                                     Friends:{friendList.friends.length}
                                                 </li>
                                                 {
@@ -320,7 +406,7 @@ const Beechatfixed = () => {
                                                 }
                                             </ul>
                                         }
-                                        <li onClick={() => setSelector("friendrequests")} className={`standardLiHovered marginLeft ${selector === "friendrequests" ? 'listItemOpened':'listItemClosed'}`}>
+                                        <li onClick={() => toggleSelector("friendrequests")} className={`standardLiHovered marginLeft ${selector === "friendrequests" ? 'listItemOpened':'listItemClosed'}`}>
                                             Friend Requests
                                         </li>
                                         {
@@ -360,8 +446,8 @@ const Beechatfixed = () => {
                                                 }
                                             </ul>
                                         }
-                                        <li onClick={() => setSelector("channels")} className={`standardLiHovered marginLeft ${selector === "channels" ? 'listItemOpened':'listItemClosed'}`}>
-                                            <div className="aInlineFlexPlain justWidth100per">Channels <Btnconfirmcancel xclassCSS={"justMarginAuto whiteBack"} title={"Create new channel"} size={"mini"} typeIcon={"confirm"} /></div>
+                                        {/* <li onClick={() => toggleSelector("channels")} className={`standardLiHovered marginLeft ${selector === "channels" ? 'listItemOpened':'listItemClosed'}`}>
+                                            <div className="aInlineFlexPlain justAlignedSpaceAround justWidth100per">Channels <Btnconfirmcancel btnAction={() => setTypePayLoad('create-channel')} xclassCSS={"whiteBack"} title={"Create new channel"} size={"mini"} typeIcon={"confirm"} /></div>
                                         </li>
                                         {
                                             (selector === "channels") && 
@@ -369,7 +455,7 @@ const Beechatfixed = () => {
                                                 <Listitems items={channels} toList={selector} username={userdata.username}/>
                                                 <li>TODO...</li>
                                             </div>
-                                        }
+                                        } */}
                                     </div>
                                 </ul>
                                 <div className="standardDivFlexPlain justWH35 justMargin0auto miniMarginTB justiAlig">
@@ -391,6 +477,7 @@ const Beechatfixed = () => {
                                         _conversation={conversation} 
                                         incommingMsg={socketBee.chatMessage}
                                         chatStatus={socketBee.chatStatus}
+                                        leaveCB={leaveConversation}
                                     />   
                                 }
                             </div>
@@ -398,7 +485,7 @@ const Beechatfixed = () => {
                     </div>
                 </TabPanel>
                 <TabPanel>
-                    <div>
+                    <div className={`${socketBee.chatStatus !== 'online' ? 'disableDiv2' : null}`}>
                     {
                         settings && settings.dm &&
                         <ul className="standardUlVerSmall">
@@ -431,6 +518,43 @@ const Beechatfixed = () => {
                 </TabPanel>
         </Tabs>
         </>
+        {
+            typePayLoad &&
+            <Abswrapper xtraClass={"justiAlig"}>
+                <div className="standardDiv80Auto justBordersRounded whiteBack">
+                    <div className="standardContentMargin">
+                        <Btnclosemin btnAction={() => setTypePayLoad(null)} />
+                        <h3>About to {typePayLoad}</h3>
+                        {
+                            typePayLoad === 'request-friendship' &&
+                            <form className="formVertFlex justWidth80" onSubmit={sendPayload}>
+                                <label htmlFor="input_beeChat">Username:</label>
+                                <input name="input_beeChat" onChange={(e) => updateState("payload", "username", e.target.value)} required />
+                                <button type="submit" className="justWidth30 marginsTB ">{typePayLoad}</button>
+                            </form>
+                        }
+                        {
+                            typePayLoad === 'create-conversation' &&
+                            <form className="formVertFlex justWidth80" onSubmit={sendPayload}>
+                                <label htmlFor="input_beeChat">Username:</label>
+                                <input name="input_beeChat" onChange={(e) => updateState("payload", "to", e.target.value )} required />
+                                <label htmlFor="input_beeChat_message">Message:</label>
+                                <input name="input_beeChat_message" onChange={(e) => updateState("payload", "message", e.target.value )} required />
+                                <button type="submit" className="justWidth30 marginsTB">{typePayLoad}</button>
+                            </form>
+                        }
+                        {
+                            typePayLoad === 'create-channel' &&
+                            <form className="formVertFlex justWidth80" onSubmit={sendPayload}>
+                                <label htmlFor="input_beeChat_channel">Channel Name:</label>
+                                <input name="input_beeChat_channel" onChange={(e) => updateState("payload", "name", e.target.value)} required />
+                                <button type="submit" className="justWidth30 marginsTB ">{typePayLoad}</button>
+                            </form>
+                        }
+                    </div>
+                </div>
+            </Abswrapper>
+        }
     </div>
     )
 };

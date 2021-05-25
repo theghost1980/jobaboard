@@ -61,7 +61,7 @@ const Chatboard = (props) => {
     `);
     //end grapqhql queries
 
-    const { xclassCSS, _conversation, cbHandlePayloadOUT, username, incommingMsg, chatStatus } = props;
+    const { xclassCSS, _conversation, cbHandlePayloadOUT, username, incommingMsg, chatStatus, leaveCB } = props;
     const [currentChat, setCurrentChat] = useState([]); //in case i forget to set it when using it.
     const [conversation, setConversation] = useState([]);
     const [inputChat, setInputChat] = useState("");
@@ -201,8 +201,12 @@ const Chatboard = (props) => {
             const fixedCont = document.querySelector("div.beeChatFixedCont");
             const arrayDivs = document.querySelectorAll("div.beeChatFixedMsgCont");
             const lastDivMessages = arrayDivs[arrayDivs.length - 1];
-            fixedCont.scrollIntoView({block: "center", behavior: "smooth"});
-            lastDivMessages.scrollIntoView({block: "start", behavior: "smooth"});
+            // fixedCont.scrollIntoView({inline: "start", behavior: "smooth"});
+            // lastDivMessages.scrollIntoView({block: "end", behavior: "smooth"});
+            fixedCont.scrollTo({
+                top: lastDivMessages.getBoundingClientRect().bottom,
+                behavior: "smooth",
+            })
         }
     }, [currentChat]);
     // END On each change of state
@@ -261,7 +265,10 @@ const Chatboard = (props) => {
                             <Img fixed={data.smile.childImageSharp.fixed} />
                         </div>
                     </div>
-                    <button onClick={() => setCurrentChat([])}>Close</button>
+                    <div className="standardDivRowFullW justSpaceBewteen">
+                        <button onClick={() => setCurrentChat([])}>Close</button>
+                        <button onClick={() => leaveCB()}>Leave</button>
+                    </div>
                 </div>
             }
         </div>

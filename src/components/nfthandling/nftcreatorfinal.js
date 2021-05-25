@@ -34,6 +34,7 @@ const ssc_test_id = "ssc-testNettheghost1980";
 const nfthandlermongoEP = process.env.GATSBY_nfthandlermongoEP;
 const nftEP = process.env.GATSBY_nftEP;
 const userEP = process.env.GATSBY_userEP;
+const adminEP = process.env.GATSBY_adminEP;
 const tsOP = Date.now();
 // end using main live BE
 
@@ -57,7 +58,7 @@ const Nftcreatorfinal = (props) => {
     const [loadingData, setLoadingData] = useState(false);
     const [logTx, setLogTx] = useState(null);
     const [dataLogs, setDataLogs] = useState(null);
-    const [steps, setSteps] = useState({ step: 1, status: 'Adding Details to NFT', log: {}, currentAction: '', ts: tsOP });
+    const [steps, setSteps] = useState({ step: 1, status: 'Adding Details to NFT', log: {}, currentAction: '', ts: tsOP, sendToLogBe: false, });
     const userdata = check();
 
     //functions/CB//////
@@ -99,6 +100,12 @@ const Nftcreatorfinal = (props) => {
         });
         return response.json(); 
     };
+    async function dataRequest(url = '', requestType, headers, formdata) {
+        const response =    !formdata   ? fetch(url, { method: requestType, headers: headers,})
+                                        : fetch(url, { method: requestType, headers: headers, body: formdata});
+        return (await response).json(); 
+    };
+    ///END data fetching
     function sendNFTBE(){
         const formData = new FormData();
         // the basic data we really need, all the rest will be handled directly with hive ssc.
@@ -204,9 +211,10 @@ const Nftcreatorfinal = (props) => {
                             if(response.logs === "{}"){//means no errors typical response on success {"symbol":"ZZZ","to":"theghost1980","isSignedWithActiveKey":true}
                                 const pPayload = JSON.parse(response.payload);
                                 if(pPayload.symbol === nft.symbol && pPayload.to === userdata.username){ //transfered successful. now we send info into mongoDB.
-                                    updateSteps("step","Final Step.");
+                                    updateSteps("step","9 - Final Step.");
                                     updateSteps('status',"You have a Brand New NFT Definition + 1 Token, added to your balances."); 
                                     updateSteps("log", JSON.stringify({ status: 'sucess', results: 'Added instance + NFT to mongoDB' }));
+                                    updateSteps("sendToLogBe", true);
                                     sendPostNewInstance();
                                     alert('You have a new NFT!'); 
                                     sendNFTBE();
@@ -216,6 +224,8 @@ const Nftcreatorfinal = (props) => {
                             }else{
                                 //TODO handle error as separate function
                                 console.log('Errors to handle HERE dev!');
+                                updateSteps("log", JSON.stringify({ status: 'failed', results: JSON.stringify({ logs: response.logs }) }));
+                                updateSteps("sendToLogBe", true);
                             }
                         }
                     }
@@ -306,9 +316,12 @@ const Nftcreatorfinal = (props) => {
             updateSteps("step", 8);
             updateSteps("status", "Casted & Confirmed. Now transfering Ownership. Token still in the Oven.");
             updateSteps("log", JSON.stringify({ status: 'sucess', results: JSON.stringify(json) }));
+            updateSteps("sendToLogBe", true);
             setTx({txid: result.id, step: 4});
         }).catch(error => {
             console.log('Error while transfering ownership.',error);
+            updateSteps("log", JSON.stringify({ status: 'failed', results: JSON.stringify(error) }));
+            updateSteps("sendToLogBe", true);
         });
     }
     const changeInput = (event) => {
@@ -391,6 +404,7 @@ const Nftcreatorfinal = (props) => {
                 addPropsNFT(response[0]); //adding props on new NFT.
                 updateSteps("step", 5);
                 updateSteps("status", "NFT Confirmed. Now adding props.");
+                updateSteps("sendToLogBe", true);
                 //testing to add id as received and store it in the nftState.
                 setValueNFT("id",response[0]._id);
                 //add it here to mongoDB.
@@ -401,7 +415,11 @@ const Nftcreatorfinal = (props) => {
                 setTimeout(findNft({ issuer: userdata.username, symbol: nft.symbol }),3000);
             }
         })
-        .catch(error => console.log('Error fetching data from BE',error));
+        .catch(error => {
+            console.log('Error fetching data from BE',error);
+            updateSteps("status", "Error fetching data from BE");
+            updateSteps("sendToLogBe", true);
+        });
     }
 
     //handling instantiate, addProps
@@ -418,9 +436,12 @@ const Nftcreatorfinal = (props) => {
             updateSteps("step", 7);
             updateSteps("status", "Confirmed Props. NFT instance being created, waiting confirmation On Blockchain.");
             updateSteps("log", JSON.stringify({ status: 'sucess', results: JSON.stringify(json) }));
+            updateSteps("sendToLogBe", true);
             if(result.id){ setTx({txid: result.id, step: 3}) }; //check results on broadcasting
         }).catch(error => {
             console.log('Error while instantiation.',error);
+            updateSteps("log", JSON.stringify({ status: 'failed', results: JSON.stringify(error) }));
+            updateSteps("sendToLogBe", true);
         });
     }
     function addPropsNFT(_newNFT){
@@ -444,9 +465,12 @@ const Nftcreatorfinal = (props) => {
             updateSteps("step", 6);
             updateSteps("status", "Added props. Now waiting confirmation On Hive Blockhain.");
             updateSteps("log", JSON.stringify({ status: 'sucess', results: JSON.stringify(json) }));
+            updateSteps("sendToLogBe", true);
             if(result.id){ setTx({ txid: result.id, step: 2 }) }; //check results on broadcasting
         }).catch(error => {
             console.log('Error while instantiation.',error);
+            updateSteps("log", JSON.stringify({ status: 'failed', results: JSON.stringify(error) }));
+            updateSteps("sendToLogBe", true);
         });
     }
     //END handling instantiate, addProps
@@ -461,14 +485,17 @@ const Nftcreatorfinal = (props) => {
                 const str = `\nSymbol: ${nft.symbol}\nName: ${nft.name}\nOrganization: ${nft.orgName}\nProduct Name: ${nft.productName}\nUrl: ${nft.url}\nMax Supply: ${nft.maxSupply === "" ? 'Unlimited': nft.maxSupply}\nAbout to create: ${nft.amountInstances} token.\nPrice Definition: ${nft.price_definition} ${jabFEE.acceptedCur}\nCasting Base Price: ${nft.price_base_on_cast} ${jabFEE.acceptedCur}.`
                 const answer = window.confirm(`Please check the current features of your token:${str}\nDo you agree to proceed?`);
                 if(!answer){ 
-                    // TODO: addStateOP({ state: 'User choosed not to continue OP.', data: {} });
+                    updateSteps("step", 1);
+                    updateSteps("status", `About to create: ${nft.symbol}. Username: ${userdata.username}`);
+                    updateSteps("sendToLogBe", true);
                     setDisableDiv(false);
                     setLoadingData(false);
                     updateSteps("log", JSON.stringify({ status: 'failed', error: 'User Choose not to continue.'}));
                     return console.log('User Cancelled NFT creation');
                 }else{//we ask for transfer
                     updateSteps("step", 2);
-                    updateSteps("status", "Waiting Transfer");
+                    updateSteps("status", `Waiting Transfer amount:${nft.totalAmountPay.toString()}-${jabFEE.acceptedCur}`);
+                    updateSteps("sendToLogBe", true);
                     const memo = `Creating my NFT on JAB Symbol:${nft.symbol} on ${new Date().toString()}`
                     window.hive_keychain.requestTransfer(userdata.username, "jobaboard", nft.totalAmountPay.toString(), JSON.stringify(memo), jabFEE.acceptedCur, function(result){
                         const { message, success, error } = result;
@@ -484,6 +511,7 @@ const Nftcreatorfinal = (props) => {
                                     //TODO: handle this shit
                                 }
                                 updateSteps("log", JSON.stringify({ status: 'failed', error: 'Chain Error', message: message }));
+                                updateSteps("sendToLogBe", true);
                                 return console.log('Error while transfering', message);
                             }else if(error === "user_cancel"){
                                 // addStateOP({ state: 'User cancelled before transfer.', data: { date: new Date().toString()} }); 
@@ -492,6 +520,7 @@ const Nftcreatorfinal = (props) => {
                                 setLoadingData(false);
                                 setMoreDetails(false);
                                 updateSteps("log", JSON.stringify({ status: 'failed', error: 'User Cancelled OP.'}));
+                                updateSteps("sendToLogBe", true);
                             }
                         }else if (success){
                             const { type, memo, amount, currency, username } = result.data;
@@ -504,8 +533,10 @@ const Nftcreatorfinal = (props) => {
                             updateSteps("step", 3);
                             updateSteps("status", "Transference Received. Now creating NFT.");
                             updateSteps("log", JSON.stringify({ status: 'sucess', results: JSON.stringify(result.data), note: 'Transfer received'}));
+                            updateSteps("sendToLogBe", true);
                             const issuingAccounts = userdata.username === 'jobaboard' ? ["jobaboard"] : ["jobaboard", userdata.username];
                             updateSteps("currentAction", "create");
+                            updateSteps("sendToLogBe", true);
                             const json = { "contractName": "nft", "contractAction": "create", "contractPayload": { "symbol": nft.symbol, "name": nft.name, "orgName": nft.orgName, "productName": nft.productName, "url": nft.url, "maxSupply": nft.maxSupply, "authorizedIssuingAccounts": issuingAccounts,} }; 
                             const data = { id: ssc_test_id, json: JSON.stringify(json), required_auths: ['jobaboard'], required_posting_auths: [],};
                             client.broadcast
@@ -515,10 +546,12 @@ const Nftcreatorfinal = (props) => {
                                 updateSteps("step", 4);
                                 updateSteps("status", "NFT created. Waiting confirmation on Hive Blockchain.");
                                 updateSteps("log", JSON.stringify({ status: 'sucess', results: JSON.stringify(data), txId: result.id }));
+                                updateSteps("sendToLogBe", true);
                                 setTx({ txid: result.id, step: 1});
                             }).catch(error => {
                                 console.log('Error while creating the NFT.', error);
                                 updateSteps("log", JSON.stringify({ status: 'failed', error: error }));
+                                updateSteps("sendToLogBe", true);
                             });
                         };
                     });
@@ -641,8 +674,20 @@ const Nftcreatorfinal = (props) => {
         if(tx){ setTimeout(getInfoTX,3000) };
     }, [tx]);
     useEffect(() => {
-        if(steps){
-            //TODO HERE we will send data to Operation Logs on BE.
+        if(steps && steps.sendToLogBe){
+            const log = { is_system: false, log_type: 'nft_creation', data: JSON.stringify(steps), username: userdata.username, usertype: userdata.usertype, createdAt: new Date().toString(), }
+            const headers = {'x-access-token': userdata.token}; //x-access-token data on formdata.
+            const formdata = new FormData();
+            formdata.append("is_system", log.is_system);
+            formdata.append("log_type", log.log_type);
+            formdata.append("data", log.data);
+            formdata.append("username", log.username);
+            formdata.append("usertype", log.usertype);
+            formdata.append("createdAt", log.createdAt);
+            dataRequest(adminEP+"addOp", "POST", headers, formdata).then(response => {
+                console.log(response);
+            }).catch(error => console.log('Error sending logs.', error ));
+            updateSteps("sendToLogBe", false); //so we avoid a missmatch assingment.
          };
     }, [steps]);
     //END to load On state changes

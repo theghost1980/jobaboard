@@ -57,10 +57,10 @@ const Tokentabulator = (props) => {
     }
     const [action, setAction] = useState(initialAction);
 
+    //grapqhl queries
     const data = useStaticQuery(graphql`
         query{ desert_weed: file(relativePath: {eq: "nothing_to_see_here_jab.gif"}) { publicURL } }
-    `);
-    //end grapqhl queries
+    `);//end grapqhl queries
  
     //to load on init
     useEffect(() => {

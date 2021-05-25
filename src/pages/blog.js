@@ -35,7 +35,7 @@ const Blog = (props) => {
                     xclassCSS={"addUtlBlog justiAlig justDisplayFlex"}
                     xclassCSSUL={"addUtlBlog justFlexWrap justiAlig"}
                     xclassCSSLi={"activeSelected marginRightX2 justMarginBottomX2"}
-                    hiveUser={'sexosentido'}
+                    hiveUser={'jobaboard'}
                     limit={100}
                     filter_tags={blogtags.map(({ tag }) => tag)}
                     openMode={"onTopOfAll"}

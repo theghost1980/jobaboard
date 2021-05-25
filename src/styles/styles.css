@@ -593,6 +593,7 @@ body::-webkit-scrollbar {
 }
 .scaleHovered:hover {
     transform: scale(1.1);
+    z-index: var(--zindexTop);
 }
 .hoverUnderline:hover {
     text-decoration: underline;
@@ -822,6 +823,14 @@ body::-webkit-scrollbar {
 .textShadowBasic{
     /* text-shadow: 1px 1px 2px #214E34 !important; */
     text-shadow: 1px 2px 4px #214E34;
+}
+.textShadowBasicSoft{
+    /* text-shadow: 1px 1px 2px #214E34 !important; */
+    text-shadow: 1px 2px 4px rgba(33, 78, 52, 0.493);
+}
+.boxShadowBasicSoftBottom{ 
+    /* text-shadow: 1px 1px 2px #214E34 !important; */
+    box-shadow: 0 2px 2px -1px orange;
 }
 .border1pxRounded {
     border: 2px solid orange;
@@ -1059,6 +1068,9 @@ body::-webkit-scrollbar {
 .boxShadowBottom {
     box-shadow: 0px 3px 1px 0px rgba(33, 78, 52, 0.637);
 }
+.boxShadowBottomX {
+    box-shadow: 0px 3px 5px 0px rgba(33, 78, 52, 0.637);
+}
 .boxShadowBottomStrong {
     box-shadow: 0px 3px 5px 1px rgba(33, 78, 52, 0.637);
 }
@@ -1219,6 +1231,9 @@ body::-webkit-scrollbar {
 }
 .justHeight400p {
     height: 400px;
+}
+.justHeight140px {
+    height: 140px;
 }
 .justHeight90p {
     height: 90px;
@@ -1391,6 +1406,10 @@ body::-webkit-scrollbar {
 }
 .justR-20T{
     right: -20px;
+    top: 0px;
+}
+.justR_20T{
+    right: 20px;
     top: 0px;
 }
 .justPosMenuAbs {
@@ -2309,6 +2328,15 @@ body::-webkit-scrollbar {
     border: 1px solid gray;
     border-radius: 8px;
     padding: 4px;
+}
+.justAlignedSpaceAround {
+    align-items: center;
+    justify-content: space-around;
+}
+#beechatFixed {
+    position: relative;
+    bottom: 0px;
+    height: 70vh;
 }
 .justSpaceAround {
     justify-content: space-around !important;

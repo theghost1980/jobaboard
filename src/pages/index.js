@@ -104,7 +104,7 @@ const Index = () => {
           <p>To learn more about NFTs visit our <Link to="/blog">Blog</Link> or access the <Link to="/nfts">NFTs</Link> section.</p>
           <div className="marginsTB">
             <h2 className="textAlignedCenter">Annoucements on JAB@blog</h2>
-            <Visualizator hiveUser={"sexosentido"} limit={10}  filter_tags={['general-accounces']} openMode={"onTopOfAll"}
+            <Visualizator hiveUser={"jobaboard"} limit={10}  filter_tags={['general-annouces']} openMode={"onTopOfAll"}
               xclassCSS={"standardDivFlexPlain bordersRounded justshadows justiAlig bgBlocksBlue justWidthAuto"} devMode={false} hideRefreshBtn={true}
               xtraClassOnTopDiv={"justTop100p bordersRounded"} xclassCSSLi={"marginLeft"} xclassCSSUL={"scrolBarThin"}
             />

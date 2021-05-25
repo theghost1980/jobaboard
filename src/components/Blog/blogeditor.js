@@ -31,21 +31,21 @@ const testTemplate = "## Any updates for today's work?\nLorem ipsum dolor sit am
 const { Client } = require("@hiveio/dhive");
 const client = new Client('https://api.hive.blog');
 const dhive = require('@hiveio/dhive');
-const blogPrivKey = process.env.GATSBY_postingPK;
+const blogPrivKey = process.env.GATSBY_postingKey; //jab posting key.
 const blogtags = [
     {id: 'tagJAB-1', tag: 'test-general', description: 'Use this tag to post a test general related post', willAppearOn: 'None on JAB, hive-chain.'},
     {id: 'tagJAB-2', tag: 'announcement-admins', description: 'Use this tag to post an Annoucement only to admins of JAB.', willAppearOn: 'Admins Dashboard, hive-chain.'},
-    {id: 'tagJAB-3', tag: 'general-accounces', description: 'Use this tag to post a General Annoucement on JAB.', willAppearOn: 'Index Page, Blog page, hive-chain.'},
+    {id: 'tagJAB-3', tag: 'general-annouces', description: 'Use this tag to post a General Annoucement on JAB.', willAppearOn: 'Index Page, Blog page, hive-chain.'},
     {id: 'tagJAB-4', tag: 'promotions', description: 'Use this tag to post a Promotion Annoucement on JAB.', willAppearOn: 'Blog page, hive-chain.'},
     {id: 'tagJAB-5', tag: 'jabers-dashboard', description: 'Use this tag to post Annoucements, promotions, etc related to JOBs/GIGs on JAB.', willAppearOn: 'Blog page, hive-chain, Each User Job Dashboard.'},
 ];
-const footerOnPosts = "\n\nPosted using the Admin's Editor on JobAboard - JAB";
+const footerOnPosts = "\n\nPosted using the Admin's Editor on JobAboard - JAB\n[jobaboard.net](https://jobaboard.net/)";
 const arTags = [];
 blogtags.forEach(tag => {
     arTags.push(tag.tag);
 });
 // TODO change after tests for jobaboard
-const accountToPostTo = 'sexosentido';
+const accountToPostTo = 'jobaboard';
 const md = new Remarkable({
     html: true, // remarkable renders first then sanitize runs...
     breaks: true,
@@ -176,7 +176,7 @@ const Blogeditor = (props) => {
         <div className={xclassCSS}>
             <ul className="warningTextXSmall">
                 <li>Options the Editor</li>
-                <li>Create new Post on @jobaboard, under defined TAGS: announcement-admins, general-accounces, promotions-users, contests.</li>
+                <li>Create new Post on @jobaboard, under defined TAGS: announcement-admins, general-annouces, promotions-users, contests.</li>
                 <li>Edit posts.</li>
                 <li>Delete by adding a deleted-from-jab tag.</li>
                 <li>Visualise posts by tags, date, admin-creator.</li>

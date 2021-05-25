@@ -16,7 +16,7 @@ var hivesigner = require('hivesigner');
 const client = new hivesigner.Client({
     app: 'jobaboard',
     callbackURL: 'https://jobaboard.net/callbackhs',
-    scope: ['vote', 'comment']
+    scope: ['vote', 'comment'],
 });
 /////////////////////////////
 

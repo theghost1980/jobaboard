@@ -11,6 +11,15 @@ import { useStaticQuery, graphql } from 'gatsby';
 //contants
 const publicEP = process.env.GATSBY_publicEP;
 
+/**
+ * Use to Edit/Delete a Job.
+ * @param {String} xclassCSS - Optional The css Extra class.
+ * @param {Object} job - the job we want to show.
+ * @param {Boolean} hideJabBtn - if you want to hide the action btn. I.e: user opening its own job.
+ * @param {Function} cbClose to close the previewJob.
+ * @param {Object} userdata userdata.
+ */
+
 const Previewjob = (props) => {
     //graphQL queries
     const data = useStaticQuery(graphql`
@@ -35,6 +44,7 @@ const Previewjob = (props) => {
 
     // to load on init
     useEffect(() => {
+        console.log('JOBBB passed as props:', job);
         const query = { symbol: String(job.nft_symbol).trim(), account: null,};
         // console.log(query);
         sendGETBEJustH(publicEP + "getNFTquery",query,0, { "null": null })
@@ -101,7 +111,7 @@ const Previewjob = (props) => {
         >
             <Btnclosemin btnAction={cbClose} />
             {
-                job &&
+                job && job.username &&
                     <div>
                         <Sliderjobimages 
                             job={job}
@@ -110,7 +120,9 @@ const Previewjob = (props) => {
                         <div className="standardBlockMaxW80p">
                             <div className="justBordersRounded standardDivRowFullWAuto justiAlig justbackground">
                                 <div className={`allMiniMargins standardDivRowFullWAuto spaceEvenly ${miniProfileLoading ? null : 'justiAlig' }`}>
-                                    <Miniprofile cbLoaded={() => setMiniProfileLoading(false)} textClass={"textShadowBasic normalTextSmall"} username={job.username} />
+                                    {   job.username &&
+                                        <Miniprofile cbLoaded={() => setMiniProfileLoading(false)} textClass={"textShadowBasic normalTextSmall"} username={job.username} />
+                                    }
                                     {
                                         !miniProfileLoading && !hideJabBtn && (userdata.username !== job.username) &&
                                         <div className="justWidth20">
@@ -149,7 +161,7 @@ const Previewjob = (props) => {
                             <p>It will be seen by: {job.verifyed_profiles_only ? "Only verifyed profiles": "Everyone"}</p>
                             <p>Created on: {formatDateTime(job.createdAt)}</p>
                             {
-                                reviewUser &&
+                                reviewUser && reviewUser.length > 0 &&
                                 <div>
                                     <ul className="standardUlColPlain">
                                         {
