@@ -962,6 +962,12 @@ body::-webkit-scrollbar {
 .marginLeft{
     margin-left: var(--marginBewteen-Objects);
 }
+.marginLeftX3{
+    margin-left: calc(3*var(--marginBewteen-Objects));
+}
+.marginLeftX5{
+    margin-left: calc(5*var(--marginBewteen-Objects));
+}
 .justPaddingRight20p {    
     padding-right: 20px;
 }
@@ -1198,6 +1204,9 @@ body::-webkit-scrollbar {
     height: 500px;
     overflow-y: scroll;
 }
+.justWiderBorders {
+    border-width: 2px !important;
+}
 .jusBordersRounWhiteBack {
     border: 1px solid black;
     border-radius: 10px;
@@ -1423,6 +1432,12 @@ body::-webkit-scrollbar {
 .justPosAbs0Tmright {
     right: 30px;
     top: 5px;
+}
+.justLeft65 {
+    left: 65px;
+}
+.justLeft70 {
+    left: 70px;
 }
 .justL-40T10{
     left: -40px;
@@ -2009,6 +2024,10 @@ body::-webkit-scrollbar {
 .justBordersRounded {
     border: 1px solid orange;
     border-radius: 8px;
+}
+.justBordersRoundedGree {
+    border: 1px solid #214E34;
+    border-radius: 10px;
 }
 .justOverflowAuto {
     overflow: auto;
@@ -3561,6 +3580,9 @@ footer {
 .backGroundColorTopGray {
     z-index: var(--zindexTop);
     background: gray;
+}
+.backGroundColorGreen {
+    background: #214E34;
 }
 .backGroundColorBlueJab {
     background: #337CA0;

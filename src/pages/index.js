@@ -10,40 +10,9 @@ import '../styles/styles.css';
 import MainCarousel from "../components/maincarousel";
 import Visualizator from "../components/Blog/visualizator";
 import Browseby from "../components/Categories/browseby";
+import Infographic from "../components/Infographics/infographic";
 
-const Index = () => {
-    //graphql queries
-    const data = useStaticQuery(graphql`
-    query {
-      # append_menu: allMongodbGatsbyCategory {
-      #   edges {
-      #     node {
-      #       id
-      #       image
-      #       sub
-      #       query
-      #       name
-      #       subtitle
-      #       title
-      #     }
-      #   }
-      # }
-      append_menu: allMongodbGatsbyCategories(sort: {fields: name}) {
-          edges {
-              node {
-                  active
-                  id
-                  thumb
-                  image
-                  name
-                  query
-                  sub_category
-                  subtitle
-                  title
-              }
-          }
-      }
-    }`);
+const Index = (props) => {
 
     //functions/CB
     //testing to add navigating_on into redux on each user clicked on Menu
@@ -68,34 +37,10 @@ const Index = () => {
           <p>On JobAboard you can post your virtual or physical services and earn money. Like many other platforms, you can create your profile, post your skills and experiences but, here you don't need to have an international bank account because we use Blockchain technology.</p>
           <h2>What do I need to start on JAB?</h2>
           <p>All you need is to have an account on our blockchain called HIVE and a huge desire to gain experience and coins.</p>
-          <p>We can summarize the steps in:</p>
-          <ol>
-            <li>Open an account by following the <Link to="/signup">signup</Link> steps.</li>
-            <li>Login with your new Hive Blockchain account.</li>
-            <li>Create your own currency and start publishing services and jobs.</li>
-          </ol>
+          <Infographic />
           <hr></hr>
           <Browseby pagination={{ pagination: true, perSlide: 3}} cbSeleted={(item) => navigate(`/explore?category=${item.name}|sub_category=none`)}/>
           <hr></hr>
-          {/* <ul className="catBigUl marginsTB">
-            {
-              data.append_menu.edges.map(({ node: item}) => {
-                // console.log(item)
-                return (
-                  item.active ?
-                  <li key={item.id}>
-                    <Link onClick={() => navigateToApp("explore")} to={`/explore?category=${item.name}|sub_category=none`}>
-                      <div className="imgContCat relativeDiv">
-                        <img src={item.image} className="imgCat" alt={`${item.name}-${item.id}`} />
-                        <h2 className="justAbsolutePos">{item.name}</h2>
-                      </div>
-                    </Link>
-                  </li>
-                  : null
-                )
-              })
-            }
-          </ul> */}
           <h2>Why do we use NFTs?</h2>
           <p>We use NFTs or non-fungible tokens because we can represent, in the form of durable data, something in particular. Imagine you have a lot of experience doing a trade like web pages. You can create your own token and make that token last over time in every job you do from now on.</p>
           <p>Another reason is because of its level of security that makes it impossible for third parties to tamper with the token. The blockchain technology also serves as a secure and completely autonomous means of exchange. Free from any political or governmental entity.</p>

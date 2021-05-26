@@ -39,7 +39,7 @@ const Blog = (props) => {
                     limit={100}
                     filter_tags={blogtags.map(({ tag }) => tag)}
                     openMode={"onTopOfAll"}
-                    hideRefreshBtn={false}
+                    hideRefreshBtn={true}
                 />
             </div>
             <div className="standardDivRowFullW justiAlig">

@@ -188,7 +188,7 @@ const Blogeditor = (props) => {
                 <li>JAB-admins -> goes into admins and so on.</li>
                 <li>JAB-promo -> index page and so on.</li>
             </ul>
-            <Visualizator devMode={true} hiveUser={"sexosentido"} limit={30} filter_tags={arTags}
+            <Visualizator devMode={true} hiveUser={"jobaboard"} limit={100} filter_tags={arTags}
                 xclassCSS={"standardDivFlexPlain"} openMode={"onTopOfAll"}
             />
             <button onClick={() => setShowEditor(!showEditor)}>Create Post</button>

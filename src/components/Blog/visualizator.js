@@ -175,7 +175,7 @@ const Visualizator = (props) => {
                         }
                     </ul>
                     {
-                        hideRefreshBtn ? null : <Btnactionicon xclassCSS={"minidisplay pointer whiteBack scaleHovered"} title={"Click to refresh recent blog posts."} btnAction={() => loadPosts()}/>
+                        hideRefreshBtn ? null : <Btnactionicon typeIcon={"refresh"} xclassCSS={"minidisplay pointer whiteBack scaleHovered"} title={"Click to refresh recent blog posts."} btnAction={() => loadPosts()}/>
                     }
                 </div>
             }

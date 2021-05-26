@@ -21,7 +21,7 @@ const adminEP = process.env.GATSBY_adminEP;
 const itemsMenu = [
         {title: 'Manage Categories', cbProp: 'manageCat', subMenu: [ 'List Categories', 'Add New'],},
         {title: 'Manage Menus', cbProp: 'manageMenus', subMenu: [ 'List Main Menu'],},
-        {title: 'Manage Platform', cbProp: 'managePlat', subMenu: [ 'List Options TODO', 'Blog @sexosentido', 'Manage Image Bank CDN', 'Fire a Rebuild Hook']},
+        {title: 'Manage Platform', cbProp: 'managePlat', subMenu: [ 'List Options TODO', 'Blog @jobaboard', 'Manage Image Bank CDN', 'Fire a Rebuild Hook']},
         {title: 'Logs', cbProp: 'manageLogs', subMenu: [ 'List Logs - TODO']},
 ]
 const initialResponse = { status: '', message: '', result: '',};
@@ -465,7 +465,7 @@ const Managewebcontent = (props) => {
         <div className="standardContentMargin">
             <Menuhover items={itemsMenu} clickedSubItemCB={clickedOnMenu} xtraclassCSS={"jusBordersRounWhiteBack"}/>
             {
-                option === "Blog @sexosentido" &&
+                option === "Blog @jobaboard" &&
                 <div>
                     <Blogeditor />
                 </div>
