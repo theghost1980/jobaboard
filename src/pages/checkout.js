@@ -28,6 +28,7 @@ const client = new dhive.Client([ "https://api.hive.blog", "https://api.hiveking
 const privateKey = dhive.PrivateKey.fromString(process.env.GATSBY_secretJAB);
 const ssc_id = "ssc-testNettheghost1980";
 const nftEP = process.env.GATSBY_nftEP;
+const showValueDevMode = true;
 
 const Checkout = (props) => {
     // const logged = getStoredField("logged");
@@ -315,6 +316,12 @@ const Checkout = (props) => {
                     if(error !== "user_cancel"){
                         const { error, cause, data } = result.error;
                         if( cause.name && cause.name === "RPCError"){
+                            const message_user = `Insufficient HIVE balance on account @${userdata.username}.`;
+                            if(message === message_user){
+                                alert(`You need more HIVE to process this order!\nInsufficient HIVE balance on account @${userdata.username}.`);
+                                //TODO send this log.
+                                return setLoadingData(false);
+                            }
                             // addStateOP({ state: 'Fatal Error', data: { error: JSON.stringify(result.error)} });
                             if(showValueDevMode){ console.log('Error RPCError,', message)};
                             return setResultsOP({
@@ -330,10 +337,6 @@ const Checkout = (props) => {
                         setResultsOP({
                             status: 'failed', results: message,
                         });
-                        const message_user = `Insufficient HIVE balance on account @${userdata.username}.`;
-                        if(message === message_user){
-                            alert(`You need more HIVE to process this order!\nInsufficient HIVE balance on account @${userdata.username}.`);
-                        }
                         setLoadingData(false);
 
                     }else if(error === "user_cancel"){
