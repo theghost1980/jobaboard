@@ -330,6 +330,11 @@ const Checkout = (props) => {
                         setResultsOP({
                             status: 'failed', results: message,
                         });
+                        const message_user = `Insufficient HIVE balance on account @${userdata.username}.`;
+                        if(message === message_user){
+                            alert(`You need more HIVE to process this order!\nInsufficient HIVE balance on account @${userdata.username}.`);
+                        }
+                        setLoadingData(false);
 
                     }else if(error === "user_cancel"){
                         // addStateOP({ state: 'User cancelled before transfer.', data: { date: new Date().toString()} }); 
