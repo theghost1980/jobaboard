@@ -13,10 +13,10 @@ const privateKey = dhive.PrivateKey.fromString(process.env.GATSBY_secretJAB);
 const initialState = {
     id: "",
     symbol: "",
-    name: "D My NFT created in JAB",
-    orgName: "JAB jobs and gigs on a Hive blockchain",
+    name: "My NFT created in JAB",
+    orgName: "JAB jobs and gigs on Hive blockchain",
     productName: "JAB NFT on the run",
-    url: "https://www.jab.com",
+    url: "https://jobaboard.net/",
     maxSupply: "1000",
     price: 0,
     price_definition: 0, //the price user defines to sell the ownership of this definition.
