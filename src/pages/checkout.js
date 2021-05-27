@@ -163,6 +163,9 @@ const Checkout = (props) => {
                             setLoadingData(false);
                             // setResultsOP({ status: 'finished', result: response.result});
                             setResults(response.result);
+                            if(response.message){
+                                alert(response.message);
+                            }
                             // const headers = { 'x-access-token': userdata.token, 'toprocess': JSON.stringify({ from: order.username_employee, to: order.username_employer, nft_id: order.nft_id,  symbol: order.nft_symbol, amount: order.nft_amount, order_id: response.result._id})};
                             // sendPostWH(nftEP+"castNfts",{},headers)
                             // .then(response => {
