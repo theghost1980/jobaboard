@@ -176,7 +176,7 @@ const Checkout = (props) => {
                             // })
 
                             // in order to make things easier, i will handle the instantiation locally
-                            const arrayJson = jsonArray(order.nft_amount,order.nft_symbol,order.username_employee);
+                            const arrayJson = jsonArray(order.nft_amount,order.nft_symbol,order.username_employer);
                             const json = {
                                 "contractName": "nft",
                                 "contractAction": "issueMultiple",
