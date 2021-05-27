@@ -1,9 +1,9 @@
 {
-  "name": "gatsby-starter-default",
+  "name": "jobaboard-app-made-with-gatsbyjs",
   "private": true,
-  "description": "A simple starter to get up and developing quickly with Gatsby",
+  "description": "NFTs HIVE app, an alternative of fivver & freelancer but with blockchain.",
   "version": "0.1.0",
-  "author": "Kyle Mathews <mathews.kyle@gmail.com>",
+  "author": "Saturno Mangieri <jobaboard@prontonmail.com>",
   "dependencies": {
     "@cloudinary/base": "^1.0.0-beta.1",
     "@hiveio/dhive": "^0.14.12",
@@ -16,6 +16,7 @@
     "gatsby": "^2.32.3",
     "gatsby-image": "^2.11.0",
     "gatsby-plugin-create-client-paths": "^2.10.0",
+    "gatsby-plugin-google-gtag": "^3.6.0",
     "gatsby-plugin-manifest": "^2.12.0",
     "gatsby-plugin-offline": "^3.10.0",
     "gatsby-plugin-react-helmet": "^3.10.0",
