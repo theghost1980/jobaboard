@@ -10,20 +10,6 @@ import Btninfo from '../btns/btninfo';
 const dhive = require("@hiveio/dhive");
 const client = new dhive.Client([ "https://api.hive.blog", "https://api.hivekings.com", "https://anyx.io", "https://api.openhive.network","https://hived.privex.io/"]);
 const privateKey = dhive.PrivateKey.fromString(process.env.GATSBY_secretJAB);
-const initialState = {
-    id: "",
-    symbol: "",
-    name: "My NFT created in JAB",
-    orgName: "JAB jobs and gigs on Hive blockchain",
-    productName: "JAB NFT on the run",
-    url: "https://jobaboard.net/",
-    maxSupply: "1000",
-    price: 0,
-    price_definition: 0, //the price user defines to sell the ownership of this definition.
-    price_base_on_cast: 0, //this is the price we will use on JAB to buy/sell gigs. Price to be used as in orders.
-    amountInstances: 1,
-    totalAmountPay: 0,
-}
 // const nfthandlermongoEP = process.env.GATSBY_nfthandlermongoEP;
 const ssc_test_id = "ssc-testNettheghost1980";
 // testing on local
@@ -36,6 +22,20 @@ const nftEP = process.env.GATSBY_nftEP;
 const userEP = process.env.GATSBY_userEP;
 const adminEP = process.env.GATSBY_adminEP;
 const tsOP = Date.now();
+const initialState = {
+    id: "",
+    symbol: "",
+    name: "My NFT created in JAB",
+    orgName: "JAB jobs and gigs on Hive blockchain",
+    productName: "JAB NFT on the run",
+    url: "https://jobaboard.net/",
+    maxSupply: "100000",
+    price: 0,
+    price_definition: 0, //the price user defines to sell the ownership of this definition.
+    price_base_on_cast: 0, //this is the price we will use on JAB to buy/sell gigs. Price to be used as in orders.
+    amountInstances: 1,
+    totalAmountPay: 0,
+};
 // end using main live BE
 
 // TODO VERY important:
@@ -43,8 +43,7 @@ const tsOP = Date.now();
    
 
 const Nftcreatorfinal = (props) => {
-    const { updateOnSuccess } = props;
-
+    const { updateOnSuccess, user_wants_claim } = props; //as BETA mode passed when user wants his free NFT.
     const [moreDetails, setMoreDetails] = useState(false);
     const [nft, setNft] = useState(initialState);
     const [newlyCreatedNFT, setNewlyCreatedNFT] = useState(null);
@@ -475,9 +474,57 @@ const Nftcreatorfinal = (props) => {
     }
     //END handling instantiate, addProps
 
+    function updateClaimed(){
+        const headers = { 'x-access-token': userdata.token, 'query': JSON.stringify({ claimed_free_nft: true }), 'toupdateon': userdata.username };
+        dataRequest(userEP+"updateUserField", "POST", headers, null).then(response => {
+            console.log('User has claimed his Free NFT. Updated field results:', response);
+        }).catch(error => console.log('Error while updating Important NFT claim.', error));
+    }
+
     //new method as we will broadcast witj jab
     const createNFTJAB = () => {
         event.preventDefault();
+        if(user_wants_claim){ //we bypass all the rest of code and execute at once
+            const str = `\nSymbol: ${nft.symbol}\nName: ${nft.name}\nOrganization: ${nft.orgName}\nProduct Name: ${nft.productName}\nUrl: ${nft.url}\nMax Supply: ${nft.maxSupply === "" ? 'Unlimited': nft.maxSupply}\nAbout to create: ${nft.amountInstances} token.\nPrice Definition: ${nft.price_definition} ${jabFEE.acceptedCur}\nCasting Base Price: ${nft.price_base_on_cast} ${jabFEE.acceptedCur}.`
+            const answer = window.confirm(`Please check the current features of your Free Claimed token:${str}\nDo you agree to proceed?`);
+            if(!answer){ 
+                updateSteps("step", 1);
+                updateSteps("status", `About to create: ${nft.symbol}. Username: ${userdata.username}`);
+                updateSteps("sendToLogBe", true);
+                setDisableDiv(false);
+                setLoadingData(false);
+                updateSteps("log", JSON.stringify({ status: 'failed', error: 'User Choose not to continue.'}));
+                return console.log('User Cancelled NFT creation');
+            }else{
+                setDisableDiv(true);
+                setLoadingData(true);
+                updateSteps("step", 1);
+                updateSteps("status", "User claimed Free NFT. Now creating NFT.");
+                updateSteps("log", JSON.stringify({ status: 'sucess', results: 'Claiming Free NFT.', note: 'Claiming Free NFT.'}));
+                updateSteps("sendToLogBe", true);
+                const issuingAccounts = userdata.username === 'jobaboard' ? ["jobaboard"] : ["jobaboard", userdata.username];
+                updateSteps("currentAction", "create");
+                updateSteps("sendToLogBe", true);
+                const json = { "contractName": "nft", "contractAction": "create", "contractPayload": { "symbol": nft.symbol, "name": nft.name, "orgName": nft.orgName, "productName": nft.productName, "url": nft.url, "maxSupply": nft.maxSupply, "authorizedIssuingAccounts": issuingAccounts,} }; 
+                const data = { id: ssc_test_id, json: JSON.stringify(json), required_auths: ['jobaboard'], required_posting_auths: [],};
+                client.broadcast
+                .json(data, privateKey)
+                .then(result => {
+                    console.log(result);
+                    updateSteps("step", 4);
+                    updateSteps("status", "NFT created FREE CLAIM-BETA. Waiting confirmation on Hive Blockchain.");
+                    updateSteps("log", JSON.stringify({ status: 'sucess', results: JSON.stringify(data), txId: result.id }));
+                    updateSteps("sendToLogBe", true); //now bellow we update the claimed_nft field
+                    updateClaimed();
+                    return setTx({ txid: result.id, step: 1});
+                }).catch(error => {
+                    console.log('Error while creating the NFT.', error);
+                    updateSteps("log", JSON.stringify({ status: 'failed', error: error }));
+                    return updateSteps("sendToLogBe", true);
+                });
+            }
+            return null;
+        }
         if(isKeychainInstalled){
             if(!sameSymbol && nft.symbol !== ""){
                 setDisableDiv(true);
@@ -719,10 +766,15 @@ const Nftcreatorfinal = (props) => {
                 }
             </div>
             <div>
-                <ul className="standardUlHorMini backGBaseColor">
-                    <li>Actual System Fee: <span className="textColorContrast1 marginRight">{jabFEE.fee} {jabFEE.currency}</span></li>
-                    <li>Cost Per Instance:<span className="textColorContrast1"> {jabFEE.costInstance} {jabFEE.costCurr}</span></li>
-                </ul>
+                {
+                    user_wants_claim ?
+                    <p>Claiming your Free NFT during BETA phase!</p>
+                    :
+                    <ul className="standardUlHorMini backGBaseColor">
+                        <li>Actual System Fee: <span className="textColorContrast1 marginRight">{jabFEE.fee} {jabFEE.currency}</span></li>
+                        <li>Cost Per Instance:<span className="textColorContrast1"> {jabFEE.costInstance} {jabFEE.costCurr}</span></li>
+                    </ul>
+                }
             </div>
             { sameSymbol && 
                 <div className="standardDivRowFullW justAligned">

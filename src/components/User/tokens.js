@@ -33,6 +33,8 @@ import Tokenseller from '../nfthandling/subcomponents/tokenseller';
 import Btncollapse from '../btns/btncollapse';
 import Tablinator from '../interactions/tablinator';
 import Transmiter from '../Marketplace/transmiter';
+import Img from 'gatsby-image';
+import { useStaticQuery, graphql } from 'gatsby';
 // import Nfttransfer from '../nfthandling/subcomponents/nfttransfer';
 //testing SSCjs library
 // const SSC = require('sscjs');
@@ -86,10 +88,11 @@ const devMode = true;
     // Note: let's play on this to see what is the best way to do it.
 
 const Tokensuser = () => {
-    // grapqhl queries
-    // const data = useStaticQuery(graphql` query{ expandIcon: file(relativePath: {eq: "expand_arrow.png"}) { childImageSharp { fixed(width: 18) { ...GatsbyImageSharpFixed_withWebp }}}
-    //         collapseIcon: file(relativePath: {eq: "collapse_arrow.png"}) { childImageSharp { fixed(width: 18) { ...GatsbyImageSharpFixed_withWebp }} }}
-    // `);
+    //grapqhl queries
+    const data = useStaticQuery(graphql`
+        query{
+            betaToken: file(relativePath: {eq: "JAB_beta_tokens.png"}) { childImageSharp { fixed(width: 120) { ...GatsbyImageSharpFixed_withWebp } } } }
+    `);
     //end grapqhl queries
 
     const userdata = check();
@@ -141,6 +144,9 @@ const Tokensuser = () => {
     const [showCirculatingSupply, setShowCirculatingSupply] = useState(false);
     const [circulatingSupply, setCirculatingSupply] = useState(null);
     const [order_market_selected, setOrder_market_selected] = useState('');
+    const [claimed_free_nft, setClaimed_free_nft] = useState(false);
+    const [loadingClaimed, setLoadingClaimed] = useState(true);
+    const [user_wants_claim, setUser_wants_claim] = useState(false);
     //init forms-hooks
     const { register, handleSubmit, errors } = useForm();
     // on load
@@ -149,6 +155,7 @@ const Tokensuser = () => {
 
     // to load once on first render
     useEffect(() => {
+        check_claimed();
         updateAll();
         // updateHoldings();
         // getUserField({ nfts: 1 },null);
@@ -217,6 +224,20 @@ const Tokensuser = () => {
     // function addIntoHoldings(value){
     //     setMyHoldings(prevState => [ ...prevState, value]);
     // }
+    function check_claimed(){
+        setLoadingClaimed(true);
+        const headers = { 'x-access-token': userdata.token, 'query': JSON.stringify({ claimed_free_nft: 1 })};
+        dataRequest(userEP+"jabUserField", "GET", headers, null).then(response => {
+            console.log(response);
+            if(response.status === 'sucess'){
+                setClaimed_free_nft(response.result.claimed_free_nft);
+            }
+            setLoadingClaimed(false);
+        }).catch(error => {
+            console.log('Error asking user field.', error);
+            setLoadingClaimed(false);
+        });
+    }
     function findOpenOrder(selected){ //we get the order_market._id of this nft definition so we can update the status to canccel when place to not sell by user.
         const headers = { 'x-access-token': userdata.token, 'query': JSON.stringify({ username: userdata.username, status: 'notFilled', item_type: 'definition', nft_id: selected.nft_id }), 'limit': 1, 'sortby': JSON.stringify({ createdAt: 1 }),};
         dataRequest(orderEP+"getMarketOrder","GET",headers,null)
@@ -230,6 +251,9 @@ const Tokensuser = () => {
         updateNFTs();
         updateInstances();
         updateHiveBalance();
+        if(user_wants_claim){
+            check_claimed();
+        }
     }
     function updateHiveBalance(){
         setLoadingData(true);
@@ -769,6 +793,11 @@ const Tokensuser = () => {
         }
     } 
 
+    const claimingNFT = () => {
+        setUser_wants_claim(!user_wants_claim);
+        setShowCreator(!showCreator);
+    }
+
     //TODO IDEAS check it out
     // <ul className="textNomarginXXSmall">
     //     <li>Todo Here</li>
@@ -788,6 +817,19 @@ const Tokensuser = () => {
             }
             {
                 noHive && <p>Your current HIVE balance do not allow you to create tokens.</p>
+            }
+            {
+                    !loadingData && !claimed_free_nft && !loadingClaimed &&
+                    <div className="justBordersRoundedMarginB boxShadowBottomStrong">
+                        <div className="standardDivRowFullWAuto justSpaceBewteen justAligned">
+                            <div className="standardContentMargin">
+                                <p>BETA gift: You can create 1 NFT for free during BETA Mode.</p>
+                                <p>This will happend only once. Click bellow to proceed</p>
+                                <button onClick={claimingNFT}>Claim!</button>
+                            </div>
+                            <Img fixed={data.betaToken.childImageSharp.fixed} className="marginRight" />
+                        </div>
+                    </div>
             }
             {
                 !loadingData &&
@@ -815,7 +857,9 @@ const Tokensuser = () => {
                 showCreator && 
                 <div className="relativeDiv">
                     <Btnclosemin classCSS={"absDivColSmall"} btnAction={closeAndUpdateNFTs}/>
-                    <Nftcreatorfinal updateOnSuccess={successOp} />
+                    <Nftcreatorfinal updateOnSuccess={successOp} 
+                        user_wants_claim={user_wants_claim}
+                    />
                 </div>
             }
             {

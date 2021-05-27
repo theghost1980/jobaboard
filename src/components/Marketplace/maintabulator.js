@@ -227,7 +227,7 @@ const Maintabulator = (props) => {
                                                 <div className="standardDivFlexPlain textAlignedCenter">
                                                     <div onClick={() => cbSendItem("definition",token)} className="pointer hoveredBordered">
                                                         <div>
-                                                            <img src={token.thumb} className="mediumImage" />
+                                                            <img src={token.image} className="mediumImage" />
                                                         </div>
                                                         <p className="normalTextSmall">Symbol: {token.symbol}</p>
                                                         <p className="normalTextSmall">Price: {token.price_definition} On {jabFEE.currency}</p>

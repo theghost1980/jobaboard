@@ -8,7 +8,7 @@ import React from 'react';
 const Absscreenwrapper = (props) => {
     const { xtraClass } = props;
     return (
-        <div className={`blackAbsCont ${xtraClass}`}>
+        <div className={`blackAbsCont ${xtraClass} zIndexMaxTop`}>
             {props.children}
         </div>
     )

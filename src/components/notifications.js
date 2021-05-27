@@ -168,9 +168,12 @@ function Notifications(props) {
     return (
         <div className={`notificationsCont relativeDiv ${fixedBellowUM}`}>
             {
-                newNotifications && <Img fixed={data.alarmIcon.childImageSharp.fixed} className="" />
+                newNotifications && <Img fixed={data.alarmIcon.childImageSharp.fixed} />
             }
-            <div className="standardDivRowFullW">
+            <div className="standardDivRowFullW justiAlig">
+                {
+                    noti.length === 0 && <p className="textColorWhite textAlignedCenter">No Notifications to show.</p>
+                }
                 <ul className="ulNotifications">
                     {
                         noti.map(notification => {

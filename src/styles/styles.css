@@ -41,6 +41,7 @@ GatsbyImageSharpFluid_withWebp_tracedSVG */
 :root {
     --marginBewteen-Objects: 15px;
     --zindexTop: 20000;
+    --zindexTopMax: 25000;
 }
 
 html, body {
@@ -239,6 +240,9 @@ body::-webkit-scrollbar {
 }
 .zIndexTop {
     z-index: var(--zindexTop);
+}
+.zIndexMaxTop {
+    z-index: var(--zindexTopMax);
 }
 .width90 {
     width: 90% !important;
@@ -2991,7 +2995,6 @@ main {
     margin-block-end: 0px;
     margin-block-start: 0px;
     border-bottom: 1px solid orange;
-    justify-content: flex-start;
 }
 /* .makeFixeduserMenu > li:first-child {
     margin-left: var(--marginBewteen-Objects);
@@ -3253,7 +3256,7 @@ nav {
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: space-around;
+    justify-content: space-evenly;
     width: 100%;
 }
 .profilePicCont {
@@ -4065,3 +4068,16 @@ input[type=text]:focus{
     text-shadow: 1px 2px orange;
  }
 /* end global */
+
+/* media rules - media support */
+/* TABLET < 768px */
+@media only screen and (max-width: 768px) {
+    #supportCont {
+        flex-direction: column;
+    }
+    #supportCont-inner-1, #supportCont-inner-2 {
+        width: 100%;
+    }
+}
+/* END TABLET */
+/* END media rules - media support  */

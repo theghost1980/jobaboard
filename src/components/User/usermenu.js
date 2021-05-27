@@ -169,11 +169,6 @@ const UserMenu = (props) => {
                             <Img fixed={data.profileIcon.childImageSharp.fixed} className="imgOptionsUser" />
                         </li>
                     </Link>
-                    {/* <Link to="/app/wallet" className="gralLink" onClick={() => setActualMenu("Wallet")}>
-                        <li className="menuOptionLi">
-                            <Img fixed={data.walletIcon.childImageSharp.fixed} className="imgOptionsUser" />
-                        </li>
-                    </Link> */}
                     <Link to="/app/tokens" className="gralLink" onClick={() => setActualMenu("NFTs")}>
                         <li className="menuOptionLi">
                             <Img fixed={data.tokensIcon.childImageSharp.fixed} className="imgOptionsUser"  />
@@ -233,20 +228,15 @@ const UserMenu = (props) => {
                             }
                         </div>
                     </li>
-                    {/* <li className={`menuOptionLi ${openSearch ? 'selectedMenu': null}`} className="gralLink">
-                        <div onClick={() => setOpenSearch(!openSearch)}>
-                            <Img fixed={data.searchIcon.childImageSharp.fixed} className="imgOptionsUser"  />
-                        </div>
-                    </li> */}
-                    { 
-                        fixed && <Coinprices xtraClassCSSLogos={"whiteBack justMarginAuto justRoundedFull miniMarginLeft"} xtraClassCSSUl={"textColorWhite"} show={true} />
-                    }
-                    {
-                        fixed && actualMenu !== '' &&
-                        <p className="marginLeft textColorWhite">On: {actualMenu}</p>
-                    }
                 </ul>
-                <div className={openSearch ? 'openNoti': 'closedNoti'}>
+                {/* { 
+                        fixed && <Coinprices xtraClassCSSLogos={"whiteBack justMarginAuto justRoundedFull miniMarginLeft"} xtraClassCSSUl={"textColorWhite"} show={true} />
+                }
+                {
+                    fixed && actualMenu !== '' &&
+                    <p className="marginLeft textColorWhite">On: {actualMenu}</p>
+                } */}
+                <div className={openSearch ? 'openNoti boxShadowBottomStrong': 'closedNoti'}>
                     <Sitesearch 
                         fixedBellowUM={fixed ? 'makeMeFixed60px jusBordersRounWhiteBack' : null} 
                     />
@@ -255,7 +245,7 @@ const UserMenu = (props) => {
                     <Notifications 
                         username={userdata.username} 
                         token={userdata.token} 
-                        fixedBellowUM={fixed ? 'makeMeFixed60px' : null} 
+                        fixedBellowUM={fixed ? 'makeMeFixed60px boxShadowBottomStrong' : null} 
                         newOnes={isThereNewNotis}   
                     />
                 </div>

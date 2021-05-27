@@ -38,15 +38,15 @@ const Support = () => {
         <Layout>
             <div>
                 <h1 className="textAlignedCenter">Bugs/Errors Wanted.</h1>
-                <div className="standardDivRowFullW">
-                    <div className="standardDivColW50perc justiAlig">
+                <div className="standardDivRowFullW" id="supportCont">
+                    <div className="standardDivColW50perc justiAlig" id="supportCont-inner-1">
                         <Img fluid={data.wanted_poster.childImageSharp.fluid} className="bigImage400w boxShadowBottomStrong" />
                         {
                             userdata && userdata.logged &&
                             <h3 className="justUnderlineText pointer scaleOnHover" onClick={() => setShowTopUsersList(!showTopUsersList)}>Is there a list of top contributers?</h3>
                         }
                     </div>
-                    <div className="standardDivColW50perc justJustifiedContent">
+                    <div className="standardDivColW50perc justJustifiedContent" id="supportCont-inner-2">
                         {
                             !showHandler &&
                             <div className="standardContentMarginLR">
