@@ -4,7 +4,8 @@ import 'react-carousel-responsive/dist/styles.css';
 import { useStaticQuery, graphql, Link } from "gatsby";
 import Img from 'gatsby-image';
 
-const MainCarousel = () => {
+const MainCarousel = (props) => {
+    const { logged } = props;
     //graphql queries
     const data = useStaticQuery(graphql`
     query {
@@ -60,7 +61,7 @@ const MainCarousel = () => {
                 <div className="slideContBgMainCar">
                     <Img fluid={data.bgImgthree.childImageSharp.fluid} className="imgBGMainCarousel" />
                     <div className="divBGContentMainCarousel">
-                        <h1 className="HeadingMainCarousel">Get on Board. <Link to="/signup">Sign Up</Link></h1>
+                        <h1 className="HeadingMainCarousel">Get on Board. {logged ? null: <Link to="/signup" className="textShadowWhite">Sign Up</Link> }</h1>
                     </div>
                 </div>
             </div>

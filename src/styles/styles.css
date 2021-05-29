@@ -677,6 +677,9 @@ body::-webkit-scrollbar {
 .fadeInLonger {
     animation: fadeLonger 1s cubic-bezier(0.55, 0.055, 0.675, 0.19) 1;
 }
+.fadeInfaster {
+    animation: fadeLonger 0.3s cubic-bezier(0.55, 0.055, 0.675, 0.19) 1;
+}
 .fadeInLongerInf {
     animation: fadeLonger 0.5s cubic-bezier(0.55, 0.055, 0.675, 0.19) 10;
 }
@@ -827,6 +830,10 @@ body::-webkit-scrollbar {
 .textShadowBasic{
     /* text-shadow: 1px 1px 2px #214E34 !important; */
     text-shadow: 1px 2px 4px #214E34;
+}
+.textShadowWhite{
+    /* text-shadow: 1px 1px 2px #214E34 !important; */
+    text-shadow: 1px 2px 4px rgb(255, 255, 255);
 }
 .textShadowBasicSoft{
     /* text-shadow: 1px 1px 2px #214E34 !important; */
@@ -1415,7 +1422,7 @@ body::-webkit-scrollbar {
     display: grid;
 }
 .justDisplayNone {
-    display: none;
+    display: none !important;
 }
 .justR-20T{
     right: -20px;
@@ -2937,17 +2944,17 @@ main {
     height: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
+    /* justify-content: flex-end; */
+    justify-content: center;
     align-items: center;
 }
 .HeadingMainCarousel {
     color: white;
     text-shadow: 2px 2px orange;
-    margin-bottom: calc(3*var(--marginBewteen-Objects));
+    margin-left: calc(2*var(--marginBewteen-Objects));
+    margin-right: calc(2*var(--marginBewteen-Objects));
     font-size: 2.1em;
-    /* position: absolute;
-    top: calc(var(--marginBewteen-Objects)*16);
-    left: calc(var(--marginBewteen-Objects)*5); */
+    text-align: center;
 }
 /* end background carousel */
 

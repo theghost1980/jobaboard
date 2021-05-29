@@ -15,6 +15,7 @@ import Filtersquery from '../components/interactions/filtersquery';
 import Browseby from '../components/Categories/browseby';
 import Collapsablelist from '../components/interactions/subcompfilters/collapsablelist';
 import Btncollapse from '../components/btns/btncollapse';
+import Faqs_finder from '../components/FAQs/faqs_finder';
 
 //constants
 const jobEP = process.env.GATSBY_jobEP;
@@ -562,6 +563,11 @@ const Explore = (props) => {
                 }
             </div>
             {devMode && console.log('query executed:', queryToExecute)}
+            <hr></hr>
+            {
+                !loadingQuery && queryToExecute &&
+                <Faqs_finder category={queryToExecute.category} userdata={userdata}/>
+            }
             <hr></hr>
             <div>
                 <Browseby pagination={{ pagination: true, perSlide: 3 }} 

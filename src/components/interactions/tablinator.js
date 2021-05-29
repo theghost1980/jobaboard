@@ -20,7 +20,7 @@ const fieldsDateAr = [ 'createdAt', 'Date', 'updatedAt', 'ts', 'timestamp'];
  * @param {Object} arraySpecs - optional if you need to limit a field or make it a link. (1)
  * @param {Object} pagination - optional if you need to show N record per "page" with a clickeable options menu to move. As { perPage: 10, controls: Boolean }.
  * @param {Boolean} popMenu - optional if you need to render a popUp menu on the selected item and send back the option selected.
- * @param {[Object]} arrayMenu mandatory if popMenu activated. As ['option1','option2',...].
+ * @param {[Object]} arrayMenu mandatory if popMenu activated. As [{ title: '', value: ''}, ...].
  * @param {String} toPop_id mandatory if popMenu active.
  * @param {Function} cbOptionSelected mandatory if popMenu activated to return the clicked option.
  * @param {Boolean} devMode - Optional to see all the props and details. default as false.

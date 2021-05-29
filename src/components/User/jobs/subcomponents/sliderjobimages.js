@@ -36,7 +36,7 @@ const Sliderjobimages = (props) => {
     //END load on init
 
     return (
-        <div className={`${imgClass.mainCont} ${xclassCSS}`}>
+        <div className={`${imgClass.mainCont} ${xclassCSS} ${job.images.length === 0 ? 'justDisplayNone' : null}`}>
             {
                 job.images.length === 0 && !hideDefault &&
                     <img src={'https://res.cloudinary.com/dbcugb6j4/image/upload/v1615643565/noimage-JAB_geyicy.png'} 

@@ -11,9 +11,10 @@ import MainCarousel from "../components/maincarousel";
 import Visualizator from "../components/Blog/visualizator";
 import Browseby from "../components/Categories/browseby";
 import Infographic from "../components/Infographics/infographic";
+import { check } from "../utils/helpers";
 
 const Index = (props) => {
-
+    const userdata = check();
     //functions/CB
     //testing to add navigating_on into redux on each user clicked on Menu
     const navigateToApp = (goingTo) => {
@@ -29,7 +30,7 @@ const Index = (props) => {
         <div className="homepageContainer">
           {/* <SEO title="Home" /> */}
           <div className="mainCarouselExtCont">
-            <MainCarousel />
+            <MainCarousel logged={userdata.logged} />
           </div>
           {/* TODO important: Modify the old cats but the new one in a separate component */}
           <h1>What is JAB?</h1>
