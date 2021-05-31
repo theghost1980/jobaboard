@@ -14,13 +14,20 @@ const Support = () => {
     //graphql queries
     const data = useStaticQuery(graphql`
         query {
-            wanted_poster: file(relativePath: {eq: "wanted_poster_jab_edited_final.png"}) {
+            supportImg: file(relativePath: {eq: "support_image.jpeg"}) {
                 childImageSharp {
                     fluid {
                         ...GatsbyImageSharpFluid
                     }
                 }
             }
+            wanted_poster: file(relativePath: {eq: "wanted_poster_jab_edited_final.png"}) {
+                childImageSharp {
+                    fluid {
+                        ...GatsbyImageSharpFluid
+                    }
+                }
+            } 
         }
     `);//end graphql queries
 
@@ -37,32 +44,23 @@ const Support = () => {
     return (
         <Layout>
             <div>
-                <h1 className="textAlignedCenter">Bugs/Errors Wanted.</h1>
+                <h1 className="textAlignedCenter">JAB support for you.</h1>
                 <div className="standardDivRowFullW" id="supportCont">
                     <div className="standardDivColW50perc justiAlig" id="supportCont-inner-1">
-                        <Img fluid={data.wanted_poster.childImageSharp.fluid} className="bigImage400w boxShadowBottomStrong" />
-                        {
+                        <Img fluid={data.supportImg.childImageSharp.fluid} className="bigImage100per boxShadowBottomStrong" />
+                        {/* {
                             userdata && userdata.logged &&
                             <h3 className="justUnderlineText pointer scaleOnHover" onClick={() => setShowTopUsersList(!showTopUsersList)}>Is there a list of top contributers?</h3>
-                        }
+                        } */}
                     </div>
                     <div className="standardDivColW50perc justJustifiedContent" id="supportCont-inner-2">
                         {
                             !showHandler &&
                             <div className="standardContentMarginLR">
-                                <p>Please fill all the necessary information bellow and submit.</p>
-                                <p>We will be giving away prizes, HIVE and splinterlands cards for those users who contribute the most.</p>
-                                <h3>Why do we need you?</h3>
-                                <p>Because we want to test many features and improve the current work on Jobaboard, so we can go live improved and reloaded.</p>
-                                <p>You have more chances to win prizes if you:</p>
-                                <ul>
-                                    <li>Test out all the features of JAB. That means: create NFTs, transfer, buy/sell.</li>
-                                    <li>Post Gig/Jobs/Services by using the NFTs you created.</li>
-                                    <li>Order other users Gigs/Jobs.</li>
-                                    <li>Submit the form bellow under any Bug, error or failed transaction or process.</li>
-                                </ul>
-                                <h4>After this 2 weeks we will check all the data received and give prizes away.</h4>
-                                <button className="justWidth50" onClick={interactSupport}>Enough talk, Show me the form!</button>
+                                <p>If you need support.</p>
+                                <p>If you have bugs to report.</p>
+                                <p>If you have complains to tell.</p>
+                                <button className="justWidth50" onClick={interactSupport}>I do</button>
                             </div>
                         }
                         {

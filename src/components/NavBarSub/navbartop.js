@@ -112,7 +112,7 @@ const Navbartop = (props) => {
                 <Link to="/">
                     <div className="logoSVGCont">
                         {/* <img src={data.logoColor.publicURL} className="logoSVG" /> */}
-                        <Img fluid={data.logoColorBeta.childImageSharp.fluid} className="logoSVG" loading="eager" />
+                        <Img fluid={data.logoColor.childImageSharp.fluid} className="logoSVG" loading="eager" />
                     </div> 
                 </Link>
                 {

@@ -323,7 +323,7 @@ const Beechatfixed = () => {
         <Tabs>
                 <TabList>
                     <Tab>Chats <Btninfo xclassMsg={"justWidth200"} size={"mini"} msg={"Bee Chat is still in develop. The messages you send and received are not encrypted so please do not send sensitive data, passwords or personal information."} /></Tab>
-                    <Tab>Settings</Tab>
+                    {/* <Tab>Settings</Tab> */}
                 </TabList>
                 <TabPanel>
                     <div className={`${socketBee.chatStatus !== 'online' ? 'disableDiv2' : null}`} id="beechatFixed">
@@ -484,7 +484,7 @@ const Beechatfixed = () => {
                         </div>
                     </div>
                 </TabPanel>
-                <TabPanel>
+                {/* <TabPanel>
                     <div className={`${socketBee.chatStatus !== 'online' ? 'disableDiv2' : null}`}>
                     {
                         settings && settings.dm &&
@@ -492,7 +492,6 @@ const Beechatfixed = () => {
                             <li>
                                 Direct Messages: Only received from friends
                                 <Btnswitch sideText={"Yes/No"} 
-                                    // showValueDevMode={true} 
                                     btnAction={(cen) => console.log(cen)} 
                                     initialValue={settings.dm.only_from_friends}
                                 />
@@ -501,7 +500,6 @@ const Beechatfixed = () => {
                             <li>
                                 On incomming messages show preview always?
                                 <Btnswitch sideText={"Yes/No"} 
-                                    // showValueDevMode={true} 
                                     btnAction={(cen) => console.log(cen)} 
                                     initialValue={true}
                                 />
@@ -515,7 +513,7 @@ const Beechatfixed = () => {
                         </ul>
                             }
                     </div>
-                </TabPanel>
+                </TabPanel> */}
         </Tabs>
         </>
         {

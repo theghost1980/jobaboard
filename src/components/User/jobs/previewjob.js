@@ -132,8 +132,8 @@ const Previewjob = (props) => {
                                 </div>
                             </div>
                             <h1 className="textAlignedCenter">{job.title}</h1>
-                            <div className="standardDivRowFullW">
-                                <div className="standardDiv60Percent">
+                            <div className="standardDivRowFullW" id="previewCont">
+                                <div className="standardDiv60Percent"id="previewInnerCont">
                                     <div className="marginRight">
                                     {
                                         job.days_to_complete &&
@@ -143,7 +143,7 @@ const Previewjob = (props) => {
                                     <p>Desc: {job.description ? job.description : 'none'}</p>
                                     </div>
                                 </div>
-                                <div className="standardDiv40PercentH100p justBorders justRounded justshadows justbackground justMarginAuto">
+                                <div className="standardDiv40PercentH100p justBorders justRounded justshadows justbackground justMarginAuto" id="previewInnerCont">
                                     <div className="standardContentMarginMini">
                                         {
                                             nftToUse &&
@@ -203,7 +203,7 @@ const Previewjob = (props) => {
                                 </div>
                             }
                             <div className="justBordersRoundedMarginB justMarginAuto">
-                                <div className="standardContentMarginLR normalTextXSmall standardDivRowFullW justiAlig">
+                                <div className="standardContentMarginLR normalTextXSmall standardDivRowFullW justiAlig" id="previewCont">
                                     <p>Explore more on this Cat: <Link to={`/explore?category=${job.category}|sub_category=none`}>{job.category}{" "}</Link> </p>
                                     <p className="miniMarginLeft">| Or Sub Cat: <Link to={`/explore?category=${job.category}|sub_category=${job.sub_category}`}>{job.sub_category}</Link></p>
                                 </div>

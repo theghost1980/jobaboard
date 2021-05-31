@@ -246,6 +246,8 @@ const Explore = (props) => {
             setResultQuery(response.result);
             if(response.result.length > 0){
                 paginateResults(response.result);
+            }else{
+                paginateResults([]);
             }
             setLoadingQuery(false);
         })
@@ -275,7 +277,7 @@ const Explore = (props) => {
     },[orderBy]);
 
     useEffect(() => {
-        if(pages){
+        if(pages && pages.length > 0){
             const _arrayField = [];
             if(devMode){ console.log('pages::::', pages)} ;
             Object.entries(pages[0][0]).forEach(([key,value]) => {

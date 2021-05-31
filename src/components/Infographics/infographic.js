@@ -59,17 +59,17 @@ const Infographic = (props) => {
                 <hr className="textColorWhite justWidth80"></hr>
                 <h3 className="textAlignedCenter textColorWhite">In about 3 steps. Yep, that easy.</h3>
             </div>
-            <ul className="justWidth80 justiAlig justDisplayFlexColumn justMarginAuto">
+            <ul className="justWidth80 justiAlig justDisplayFlexColumn justMarginAuto" id="ulInfographic">
                 {
                     items.map(item => {
                         return (
-                            <li key={item.id} className="standardDivRowFullW marginBottom">
-                                <div className={`justBorders justRoundedFull paddings justWiderBorders relativeDiv justLeft70 whiteBack ${item.link ? 'scaleHovered' : null}`}>
+                            <li key={item.id} className="standardDivRowFullW marginBottom" id="liInfographic">
+                                <div className={`justBorders justRoundedFull paddings justWiderBorders relativeDiv justLeft70 whiteBack ${item.link ? 'scaleHovered' : null}`} id="divImgInfographic">
                                     {
                                         item.link ? <Link to={item.link}><Img fixed={item.iconImgData} /></Link> : <Img fixed={item.iconImgData} />
                                     }
                                 </div>
-                                <div className="justDisplayFlexColumn  justBorders justWiderBorders justWidth60 justRounded">
+                                <div className="justDisplayFlexColumn  justBorders justWiderBorders justWidth60 justRounded" id="divContentInfographic">
                                     <div className="justbackgroundOrange"><h2 className="miniMarginTB marginLeftX5 textColorWhite textShadowBasic">{item.title}</h2></div>
                                     <ul className="marginLeftX5 miniMarginTop">
                                         {

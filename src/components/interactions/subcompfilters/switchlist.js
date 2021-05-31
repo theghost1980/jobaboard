@@ -31,13 +31,13 @@ const Switchlist = (props) => {
     }
     //END functions/CB
     return (
-        <ul className={xclassCSSUl}>
+        <ul className={xclassCSSUl} id="ulFilters">
             {
                 switchList.map(switche => {
                     return (
                         <li key={switche.id} className={xclassCSSLi}>
                             <Btnswitch 
-                                xtraClassCSS={"justAligned"} 
+                                xtraClassCSS={"justAligned space768"} 
                                 miniSizes={miniSizes ? miniSizes : null } 
                                 initialValue={switche.iniValue} 
                                 sideText={switche.sideText} 

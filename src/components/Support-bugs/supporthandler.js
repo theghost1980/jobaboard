@@ -86,7 +86,7 @@ const Supporthandler = (props) => {
     //END load on each state change
 
     return (
-        <div>
+        <div className="standardContentMargin">
             {
                 loadingData && <div className="standardDivRowFlex100pX100pCentered"><Loader logginIn={loadingData} /></div>
             }
@@ -165,7 +165,7 @@ const Supporthandler = (props) => {
                             </div>
                         </form>
                     }
-                </div>
+                    </div>
             }
         </div>
     )

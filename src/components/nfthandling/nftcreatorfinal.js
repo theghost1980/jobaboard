@@ -770,7 +770,7 @@ const Nftcreatorfinal = (props) => {
                     user_wants_claim ?
                     <p>Claiming your Free NFT during BETA phase!</p>
                     :
-                    <ul className="standardUlHorMini backGBaseColor">
+                    <ul className="standardUlHorMini backGBaseColor" id="ulFees">
                         <li>Actual System Fee: <span className="textColorContrast1 marginRight">{jabFEE.fee} {jabFEE.currency}</span></li>
                         <li>Cost Per Instance:<span className="textColorContrast1"> {jabFEE.costInstance} {jabFEE.costCurr}</span></li>
                     </ul>

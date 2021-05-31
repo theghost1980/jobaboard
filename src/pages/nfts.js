@@ -83,7 +83,7 @@ const Nfts = () => {
                             return (
                                 <li key={`${item.id}-FAQ-JAB`} className="boxShadowBasicSoftBottom">
                                     <h2>{item.title}</h2>
-                                    <div className="standardDivRowFlexAutoH">
+                                    <div className={`standardDivRowFlexAutoH ${item.image ? 'divChange768' : null}`}>
                                         <p className={`textShadowBasicSoft ${item.image !== '' ? 'marginRight' : null}`}>{item.content}</p>
                                         {
                                             item.image !== '' ? <img src={item.image} className="justRounded border1pxContrast" /> : null

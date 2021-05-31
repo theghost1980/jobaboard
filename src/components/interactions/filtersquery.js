@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React, { useState } from 'react';
+import { useEffect } from 'react';
 import Btncollapse from '../btns/btncollapse';
 import Collapsablelist from './subcompfilters/collapsablelist';
 import Switchlist from './subcompfilters/switchlist';
@@ -30,7 +31,7 @@ import Clickeablelist from './subcompfilters/clickeablelist';
 const Filtersquery = (props) => {
 
     const { clickCB, xclassCSS, devMode, arrayFilter, switchList, xtraClassUl } = props;
-
+    const [fixed, setFixed] = useState(false);
     const [filterSelected, setFilterSelected] = useState(null);
 
     //functions/CB
@@ -50,8 +51,25 @@ const Filtersquery = (props) => {
     }
     //END functions/CB
 
+    //load on init
+    useEffect(() => {
+        function checkScroll(){
+            if(window.pageYOffset >= 152){
+                setFixed(true);
+            }else{
+                setFixed(false)
+            }
+        }
+        window.document.addEventListener('scroll', checkScroll);
+        //unmount
+        return () => {
+            window.document.removeEventListener('scroll', checkScroll);
+        };
+    },[]);
+    //END load on init
+
     return (
-        <div className="standardDivFlexPlain justAligned">
+        <div className={`standardDivFlexPlain justAligned ${fixed ? 'makeFixeduserMenu2 fadeInLonger' : null}`}>
             <div className="relativeDiv">
                 <Collapsablelist 
                     arrayList={[
@@ -70,7 +88,7 @@ const Filtersquery = (props) => {
                     xclassCSSUl={"standardUlColPlain whiteBack justBorders justMinWidth200px"} xclassCSSLi={"standardLiHovered"}
                 /> */}
             </div>
-            <Switchlist miniSizes={true} xclassCSSUl={`standardUlRowFlexPlain justSpaceAround normalTextSmall ${xtraClassUl}`}
+            <Switchlist miniSizes={true} xclassCSSUl={`standardUlRowFlexPlain justSpaceAround normalTextSmall ${xtraClassUl} ${fixed ? 'nodisplay' : null}`}
                 clickCB={(itemSwitch) => clickedItem({ ...itemSwitch, from: 'switchs_filtersQ'})}
                 // console.log('item Switch clicked', itemSwitch)
                 switchList={switchList}

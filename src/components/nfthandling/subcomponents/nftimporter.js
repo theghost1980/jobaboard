@@ -209,8 +209,8 @@ const Nftimporter = (props) => {
         <Absscreenwrapper xtraClass={"justiAlig"}>
             <div className="whiteBack standardDiv80Auto jutsMinHeight320px">
                 <Btnclosemin btnAction={closeCB} />
-                <div className="standardDivRowFullW marginsTB">
-                    <div className="standardDiv20Percent">
+                <div className="standardDivRowFullW marginsTB" id="importerCont">
+                    <div className="standardDiv20Percent importerDiv">
                     <Menuside 
                         items={[
                             {id: '1-JAB', title: 'Search NFTs', hasSubMenu: false, clickeable: true }, 
@@ -225,7 +225,7 @@ const Nftimporter = (props) => {
                         <p className="fontSmall">The imported NFT will appear will a default image. You can change it later on edition menu.</p>
                     </div>
                     </div>
-                    <div className="standardDiv80Auto">
+                    <div className="standardDiv80Auto importerDiv">
                         {
                             loadingData && <Loader xtraClass={"standardDivRowFlex100pX100pCentered"} logginIn={loadingData}/>
                         }

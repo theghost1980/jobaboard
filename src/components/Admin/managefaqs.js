@@ -34,7 +34,7 @@ const Managefaqs = (props) => {
 
     //functions/CB
     function loadFaqs(){
-        const headers = {'x-access-token': userdata.token, 'query': JSON.stringify({ 'filter': {}, 'limit': 0, 'sortby': {}}) }; //
+        const headers = {'query': JSON.stringify({ 'filter': {}, 'limit': 0, 'sortby': {}}) }; // removed 'x-access-token': userdata.token, as it is public for now.
         setFaqs(null);
         dataRequest(adminEP+"getFaq", "GET", headers, null).then(response => {
             console.log(response);

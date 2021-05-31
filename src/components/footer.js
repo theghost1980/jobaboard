@@ -52,7 +52,7 @@ const Footer = () => {
             <Link to="/">
                 <div className="logoSVGCont footerAddings">
                     {/* <img src={data.logoColor.publicURL} className="logoSVG" /> */}
-                    <Img fluid={data.logoColorBeta.childImageSharp.fluid} className="logoSVG" loading="eager" />
+                    <Img fluid={data.logoColor.childImageSharp.fluid} className="logoSVG" loading="eager" />
                 </div>
             </Link>
             <ul className="ulFooterMenu">
@@ -81,7 +81,7 @@ const Footer = () => {
             <div className="devInfoFooter">
                 <p>Made with</p>
                 <Img fluid={data.loveLove.childImageSharp.fluid} className="loveIconSatmano" />
-                <p>by Saturno Mangieri <a className="textColorWhite" href="https://saturnoman.com/" target="_blank" rel="noopener noreferrer">@theghost1980</a></p>
+                <p>by <a className="textColorWhite" href="https://saturnoman.com/" target="_blank" rel="noopener noreferrer">@theghost1980</a></p>
             </div>
         </footer>
     )

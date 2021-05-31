@@ -328,8 +328,8 @@ const UserProfile = () => {
                 loadingData ? <Loader logginIn={true} typegif={"spin"} />
                     :
                     <>
-                    <div className={`rowContainer ${uploadingData ? 'disableDiv': null}`}>
-                        <div className="rowRightPicContainer">
+                    <div className={`rowContainer ${uploadingData ? 'disableDiv': null}`} id="divContProf">
+                        <div className="rowRightPicContainer" id="contProfile">
                             <div className="userProfilePicCont">
                                 <img src={profile.avatar} 
                                     className="userProfilePic" 
@@ -392,7 +392,7 @@ const UserProfile = () => {
                                     </div>
                             }
                         </div>
-                        <form id="profileUserForm" onSubmit={handleUpdate}>
+                        <form id="profileUserForm" onSubmit={handleUpdate} id="contProfile">
                         <h1>@{userdata.username} - Profile Page</h1>
                         <label className="lblProfileUser">
                             Full Name:

@@ -19,7 +19,7 @@ const Faqs_finder = (props) => {
     //functions/CB
     function loadFaq(category){
         console.log('About to query FAQs on:', category)
-        const headers = {'x-access-token': userdata.token, 'query': JSON.stringify({ 'filter': { category: category, active: true }, 'limit': 1, 'sortby': {}}) };
+        const headers = {'query': JSON.stringify({ 'filter': { category: category, active: true }, 'limit': 1, 'sortby': {}}) }; // removed for now, 'x-access-token': userdata.token, 
         dataRequest(adminEP+"getFaq", "GET", headers, null).then(response => {
             console.log(response);
             if(response.status === 'sucess'){ setFaq(response.result[0]);}

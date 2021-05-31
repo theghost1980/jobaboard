@@ -818,7 +818,7 @@ const Tokensuser = () => {
             {
                 noHive && <p>Your current HIVE balance do not allow you to create tokens.</p>
             }
-            {
+            {/* {
                     !loadingData && !claimed_free_nft && !loadingClaimed &&
                     <div className="justBordersRoundedMarginB boxShadowBottomStrong">
                         <div className="standardDivRowFullWAuto justSpaceBewteen justAligned">
@@ -830,7 +830,7 @@ const Tokensuser = () => {
                             <Img fixed={data.betaToken.childImageSharp.fixed} className="marginRight" />
                         </div>
                     </div>
-            }
+            } */}
             {
                 !loadingData &&
                 <div>
@@ -840,9 +840,9 @@ const Tokensuser = () => {
                                 hive > 1 ? <button onClick={showCreatorHideRest}>Create Token</button> : <button>Top Up</button>
                             }
                         </li>
-                        <li>
+                        {/* <li>
                             <button onClick={() => setShowImporter(true)}>Import Token</button>
-                        </li>
+                        </li> */}
                     </ul>
                 </div>
             }
@@ -866,9 +866,9 @@ const Tokensuser = () => {
                 selectedNft_Instance && !selected &&
                 <div className="relativeDiv marginsTB borderTPGroove">
                     <Btnclosemin classCSS={"pointer"} btnAction={() => setSelectedNft_Instance(null)} />
-                    <div className="standardDivRowFullW">
-                        <div className="standardDiv30Percent">
-                            <img src={selectedNft_Instance.image} className="imageMedium" />
+                    <div className="standardDivRowFullW" id="contTokenview">
+                        <div className="standardDiv30Percent" id="innerContToken">
+                            <img src={selectedNft_Instance.image} className="imageMedium" id="imgToken" />
                             {   
                                 <Menuside xclassCSS={`${selectedNft_Instance.burned ? 'disableDiv': null }`}
                                     clickedSubItemCB={(item) => wantToPlayWithInstance(item)}
@@ -882,7 +882,7 @@ const Tokensuser = () => {
                             }
                             { selectedNft_Instance.burned && <p className="smallText">Token Burned. Sadness.</p>}
                         </div>
-                        <div className="standardDiv70Percent">
+                        <div className="standardDiv70Percent" id="contentToken">
                             <Recordnator 
                                 item={selectedNft_Instance}
                                 toShow={[
@@ -959,9 +959,9 @@ const Tokensuser = () => {
                 selected && selectedFromHive &&
                 <div className="relativeDiv marginsTB borderTPGroove">
                     <Btnclosemin classCSS={"absDivColSmall"} btnAction={() => setSelected(null)} />
-                    <div className="standardDivRowFullW">
-                        <div className="standardDiv30Percent">
-                            <img src={selected.image} className="imageMedium" />
+                    <div className="standardDivRowFullW" id="contTokenview">
+                        <div className="standardDiv30Percent" id="innerContToken">
+                            <img src={selected.image} className="imageMedium" id="imgToken"/>
                             <ul className="standardUlColPlain90p normalTextSmall">
                                 {   (selected.account === userdata.username) &&
                                     <li className={`standardLiHovered ${!wantToInstantiate ? 'listItemClosed':'listItemOpened'}`} onClick={collapseClean}>Cast More</li>
@@ -1035,12 +1035,12 @@ const Tokensuser = () => {
                                                     <Btninfo xclassMsg={"textColorBlack"} size={"mini"} msg={"Each NFT has a definition that holds the most important info and properties. If you decide you can sell it on JAB. We suggest a high price."} />
                                                 </div>
                                             </li>
-                                            <li className="standardLiHovered" onClick={scanInstances}>
+                                            {/* <li className="standardLiHovered" onClick={scanInstances}>
                                                 <div className="standardDivRowFullW">
                                                     <p className="minimumMarginTB">Scan Chain</p>
                                                     <Btninfo xclassMsg={"textColorBlack"} size={"mini"} msg={"JAB will scan the Hive Chain to find any instances you own that are for sell and add them into JAB Marketplace."} />
                                                 </div>
-                                            </li>
+                                            </li> */}
                                         </div>
                                     </div>
                                 }
@@ -1053,7 +1053,7 @@ const Tokensuser = () => {
                                                 <h2 className="noMargintop">{selectedInstances.length.toString()} {selectedInstances.length === 1 ? 'Token':'Tokens'}</h2>
                                             }
                                             <ul className="normalTextSmall standardUlColPlain90p">
-                                            <li className="standardLiHovered" onClick={() => alert('TODO. We open a new tab, to show transactions on this NFT and its instances.')}>Review History of {selected.symbol}</li>
+                                            {/* <li className="standardLiHovered" onClick={() => alert('TODO. We open a new tab, to show transactions on this NFT and its instances.')}>Review History of {selected.symbol}</li> */}
                                             {
                                                 (selectedInstances.length > 0) &&
                                                     <div>
@@ -1175,7 +1175,7 @@ const Tokensuser = () => {
                                 </div>
                             </Abswrapper>
                         } */}
-                        <div className="standardDiv60Percent marginTop">
+                        <div className="standardDiv60Percent marginTop" id="contentToken">
                             <div className="standardDivRowFlexAutoH">
                                 <p className="extraMiniMarginsTB">
                                     Price Definition:<Btninfo size={"mini"} msg={"Each NFT has its definitions. This is the price you set if you decide to trade the NFT Token definition."} /> {selected.price_definition} {jabFEE.acceptedCur}

@@ -51,7 +51,7 @@ const Jabcha = (props) => {
     return (
         <div className={`${xtraClassCss}`}>
             { title && <h2 className="textAlignedCenter">{title}</h2>}
-            <div className="standardDivRowFullW">
+            <div className="standardDivRowFullW" id="jabptachaDiv">
                 <div>
                     <Img fixed={data.jabpchatIcon.childImageSharp.fixed} />
                 </div>

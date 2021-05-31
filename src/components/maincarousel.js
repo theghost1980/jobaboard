@@ -61,7 +61,7 @@ const MainCarousel = (props) => {
                 <div className="slideContBgMainCar">
                     <Img fluid={data.bgImgthree.childImageSharp.fluid} className="imgBGMainCarousel" />
                     <div className="divBGContentMainCarousel">
-                        <h1 className="HeadingMainCarousel">Get on Board. {logged ? null: <Link to="/signup" className="textShadowWhite">Sign Up</Link> }</h1>
+                        <h1 className="HeadingMainCarousel scaleHovered">Get on Board. {logged ? null: <Link to="/signup" className="textShadowWhite">Sign Up</Link> }</h1>
                     </div>
                 </div>
             </div>

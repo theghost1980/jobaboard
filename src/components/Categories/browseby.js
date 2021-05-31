@@ -17,6 +17,33 @@ import 'react-carousel-responsive/dist/styles.css';
 const Browseby = (props) => {
     const { xclassCSS, size, pagination, devMode, cbSeleted, xclassCSSUl } = props;
     const [slides, setSlides] = useState(null);
+    const [perPageWidth, setPerPageWidth] = useState(null);
+    function checkWidth(){
+        const _screenWidth = window.innerWidth;
+        if(_screenWidth <= 577){
+            return setPerPageWidth({ perPage: 1, width: 577})
+        }
+        if(_screenWidth > 842){
+            return setPerPageWidth({ perPage: 3, width: 843})
+        }
+        if(_screenWidth <= 842){
+            return setPerPageWidth({ perPage: 2, width: 842})
+        }
+    }
+    useEffect(() => {
+        checkWidth();
+        window.addEventListener('resize',checkWidth);
+        return () => { window.removeEventListener('resize', checkWidth);}
+    }, []);
+
+    //load on state changes
+    useEffect(() => {
+        if(perPageWidth){
+            let pages = paginate(data.append_menu.edges.map(item => item.node), perPageWidth.perPage);
+            setSlides(pages);
+        }
+    },[perPageWidth]);
+    //END load on state changes
 
     //graphql queries
     const data = useStaticQuery(graphql`
@@ -39,26 +66,23 @@ const Browseby = (props) => {
     }`);
     //END graphql queries
 
-    //load in init
-    useEffect(() => {
-        if(pagination && pagination.pagination && data.append_menu && data.append_menu.edges){
-            function paginate (arr, size) {
-                return arr.reduce((acc, val, i) => {
-                  let idx = Math.floor(i / size)
-                  let page = acc[idx] || (acc[idx] = [])
-                  page.push(val)
-              
-                  return acc
-                }, [])
-            }
-            let pages = paginate(data.append_menu.edges.map(item => item.node), pagination.perSlide);
-            setSlides(pages);
-            if(devMode){ console.log('pagination:', pages) };
-        }
-    },[]);
-    //END load on init
+    // //load in init
+    // useEffect(() => {
+    //     let pages = paginate(data.append_menu.edges.map(item => item.node),perPageWidth.perPage);
+    //     setSlides(pages);
+    // },[]);
+    // //END load on init
 
     //functions/CB
+    function paginate (arr, size) {
+        return arr.reduce((acc, val, i) => {
+            let idx = Math.floor(i / size)
+            let page = acc[idx] || (acc[idx] = [])
+            page.push(val)
+        
+            return acc
+        }, [])
+    }
     const sendItem = (item) => {
         if(cbSeleted){
             cbSeleted(item);
@@ -76,7 +100,7 @@ const Browseby = (props) => {
                         {
                             slides.map(pageSlide => {
                                 return (
-                                    <ul key={`${pageSlide[0].id}-slide-pagination-JAB`} className={`${xclassCSSUl} justSpaceBewteen justFlexWrap standardUlRowFlexPlain`}>
+                                    <ul key={`${pageSlide[0].id}-slide-pagination-JAB`} className={`${xclassCSSUl} justSpaceBewteen justFlexWrap standardUlRowFlexPlain`} id="ulBrowseCats">
                                         {
                                             pageSlide.map(_slide => {
                                                 if(!_slide.active) return null;

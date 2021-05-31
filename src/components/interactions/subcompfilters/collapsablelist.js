@@ -46,7 +46,7 @@ const Collapsablelist = (props) => {
     //END to load on init
 
     return (
-        <ul className={`standardUlRowFlexPlain ${xtraClass}`}>
+        <ul className={`standardUlRowFlexPlain ${xtraClass}`} id="ulFilters">
             {
                 arrayList.map(item => {
                     return(

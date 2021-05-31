@@ -91,7 +91,7 @@ const Miniprofile = (props) => {
         <div className={`${xtraClass}`}>
             {   !loadingData &&
                 (profile && portfolio) &&
-                    <div className="standardDivRowFullW justiAlig">
+                    <div className="standardDivRowFullW justiAlig" id="miniProfCont">
                         <img src={profile.avatar ? profile.avatar : noImage} className="miniImageJobs2" />
                         <div className={'normalTextSmall contentMiniMargins'}>
                             <p className={`${textClass}`}>{portfolio.description}</p>

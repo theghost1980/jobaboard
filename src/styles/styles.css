@@ -25,6 +25,7 @@ GatsbyImageSharpFluid_withWebp_tracedSVG */
 /* https://www.pexels.com/photo/stylish-black-woman-in-hat-looking-away-6547287/ */
 /* https://www.pexels.com/photo/people-inside-strucure-449559/ */
 /* https://www.pexels.com/photo/two-white-printer-papers-near-macbook-on-brown-surface-590016/ */
+/* https://www.pexels.com/es-es/foto/mujer-vistiendo-auricular-con-ordenador-portatil-blanco-210647/ */
 /* https://www.pexels.com/photo/photo-of-ipad-on-orange-fruits-927802/ */
 /* about svg bg TODO: add the license info on credits page */
 /* https://www.svgbackgrounds.com/license/ */
@@ -1136,6 +1137,9 @@ body::-webkit-scrollbar {
 }
 .bigImage400w {
     width: 400px;
+}
+.bigImage100per {
+    width: 100%;
 }
 .standardContentMarginLR {
     margin-left: var(--marginBewteen-Objects);
@@ -3003,6 +3007,17 @@ main {
     margin-block-start: 0px;
     border-bottom: 1px solid orange;
 }
+.makeFixeduserMenu2 {
+    /* z-index TOP for now */
+    z-index: 10100; 
+    position: fixed;
+    height: 45px;
+    top: 50px;
+    left: 0px;
+    width: 100%;
+    margin-block-end: 0px;
+    margin-block-start: 0px;
+}
 /* .makeFixeduserMenu > li:first-child {
     margin-left: var(--marginBewteen-Objects);
 } */
@@ -4086,6 +4101,165 @@ input[type=text]:focus{
     #supportCont-inner-1, #supportCont-inner-2 {
         width: 100%;
     }
+    #liInfographic {
+        width: 100%;
+    }
+    #divImgInfographic {
+        left: 0px;
+    }
+    #divContentInfographic {
+        width: 80% !important;
+    }
+    .poweredByULFooter, .ulFooterMenu {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .divChange768 {
+        flex-direction: column;
+    }
+    .ulCoinList {
+        flex-wrap: wrap;
+    }
+    .newsCoinsContainer {
+        width: 100%;
+    }
+    #importerCont {
+        flex-direction: column;
+        justify-content: center;
+    }
+    .importerDiv {
+        width: 100% !important;
+    }
+    .ulJobMenu {
+        flex-wrap: wrap;
+    }
+    .ulJobMenu > li {
+        margin-right: 15px;
+        margin-bottom: 10px;
+    }
+    .manageOrdersContainer > div {
+        overflow: auto;
+    }
+    .coverImgJobs {
+        height: auto;
+    }
+    .adminPanelCont {
+        flex-direction: column;
+    }
+    .adminPanelMenu, .adminRenderContainer {
+        width: 100%;
+    }
 }
 /* END TABLET */
+@media only screen and (max-width: 630px) {
+    #ulInfographic {
+        width: 95%;
+        padding-inline-start: 0px;
+    }
+    #liInfographic {
+        flex-direction: column;
+    }
+    #divImgInfographic {
+        width: 100px;
+        margin: 0 auto;
+    }
+    #divContentInfographic {
+        margin: 0 auto;
+        width: 100% !important;
+    }
+    .devInfoFooter {
+        flex-direction: column;
+        justify-content: center;
+    }
+    #ulFilters {
+        flex-direction: column;
+    }
+    #ulFilters > li {
+        width: 100%;
+    }
+    .space768 {
+        justify-content: center;
+        width: 100%;
+    }
+    .makeFixeduserMenu2 {
+        display: none;
+    }
+}
+
+@media only screen and (max-width: 550px) {
+    #divContProf {
+        flex-direction: column;
+    }
+    #contProfile {
+        width: 100%;
+    }
+    #contTokenview {
+        flex-direction: column !important;
+    }
+    #innerContToken {
+        width: 100%;
+        flex-direction: row;
+    }
+    #imgToken {
+        width: 150px;
+        height: 150px;
+        margin-right: 15px;
+    }
+    #contentToken {
+        width: 100%;
+    }
+    #ulFees {
+        flex-wrap: wrap;
+    }
+    #miniProfCont {
+        flex-direction: column;
+    }
+    #previewCont {
+        flex-direction: column;
+    }
+    #previewInnerCont {
+        width: 100%;
+    }
+}
+
+/* mobile < 425 px */
+@media only screen and (max-width: 425px) {
+    #jabptachaDiv {
+        flex-direction: column;
+        width: 100%;
+    }
+    .ulMenuOptionUser {
+        flex-wrap: wrap;
+    }
+    .makeFixeduserMenu {
+        height: auto;
+    }
+}
+/* END mobile < 425 px */
+
+/* mobile < 375px */
+@media only screen and (max-width: 375px) {
+    .logoSVG {
+        width: 100%;
+    }
+    .logoSVGCont {
+        width: 280px;
+    }
+    #innerContToken {
+        flex-direction: column;
+    }
+    #imgToken {
+        width: 100%;
+        height: auto;
+    }
+}
+/* END mobile 375px */
+
+/* just for ulBrowseCats */
+@media only screen and (max-width: 577px) {
+    #ulBrowseCats {
+        justify-content: center !important;
+    }
+}
+/* END just for ulBrowseCats */
 /* END media rules - media support  */
