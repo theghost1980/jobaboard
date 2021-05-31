@@ -37,7 +37,7 @@ const Signup = () => {
     return (
         <Layout>
             <div className="signUpContainer">
-                <div className="divRowSignUp">
+                <div className="divRowSignUp" id="divSignUp">
                     <div className="contentDivSignUp">
                         <h1>One Crypto account to rule them all?</h1>
                         <p>
@@ -61,11 +61,13 @@ const Signup = () => {
                     </div>
                 </div>
                 <div className="blockChainObserver">
-                    <Blockchainobserver renderMode={"compactMode"} testingData={false} showBlocks={false}/>
-                    <p>We are showing you each 4 seconds. But in fact, a new block is created every 2 seconds. Amazing Right?</p>
-                    <BtnOutLink toolTip={"Check our own Hive Block explorer."}
-                        textLink={"New tab, new blocks."} link={"/jabexplorer?tx_id=default"}
-                    />
+                    <div className="standardContentMargin">
+                        <Blockchainobserver renderMode={"compactMode"} testingData={false} showBlocks={false}/>
+                        <p>We are showing you each 4 seconds. But in fact, a new block is created every 2 seconds. Amazing Right?</p>
+                        <BtnOutLink toolTip={"Check our own Hive Block explorer."}
+                            textLink={"New tab, new blocks."} link={"/jabexplorer?tx_id=default"}
+                        />
+                    </div>
                 </div>
                 <div className="divRowSignUp">
                     {/* benefits section */}

@@ -3258,7 +3258,7 @@ main {
     justify-content: center;
     align-items: center;
     width: 100%;
-    height: 200px;
+    height: auto;
     border: 1px solid orange;
     border-radius: 10px;
     background: #E9F9F0;
@@ -4093,8 +4093,20 @@ input[type=text]:focus{
 /* end global */
 
 /* media rules - media support */
+@media only screen and (max-width: 1160px) {
+    .ulBenefits {
+        flex-wrap: wrap;
+    }
+}
 /* TABLET < 768px */
 @media only screen and (max-width: 768px) {
+    #divSignUp {
+        flex-direction: column-reverse;
+        width: 100%;
+    }
+    .signImgCont, .contentDivSignUp {
+        width: 100%;
+    }
     #supportCont {
         flex-direction: column;
     }

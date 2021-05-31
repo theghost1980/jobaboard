@@ -75,7 +75,6 @@ const Footer = () => {
                     <li>ReactJS</li>
                     <li>GatsbyJS</li>
                     <li>MongoDB Atlas</li>
-                    <li>more on credits</li>
                 </ul>
             </div>
             <div className="devInfoFooter">

@@ -250,7 +250,7 @@ const Blockchainobserver = (props) => {
                     </div>
                 </div>
             }
-        </div>
+            </div>
     )
 }
 
