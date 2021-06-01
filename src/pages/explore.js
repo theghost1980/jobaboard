@@ -545,8 +545,8 @@ const Explore = (props) => {
                                     if(devMode){ console.log('NotFound on::::', catFound) }
                                     return (
                                         <div key={catFound.node.id}>
-                                            <img src={catFound.node.image} className="imgCat " alt={`${catFound.node.name}-${catFound.node.id}`} />
-                                            <div className="justPosAbsTop20p standardDivColFullW justbackgroundblackalpha">
+                                            <img src={catFound.node.image} className="imgCat" alt={`${catFound.node.name}-${catFound.node.id}`} />
+                                            <div className="justPosAbsTop20p standardDivColFullW justbackgroundblackalpha" id="contentNoResults">
                                                 <h2 className="specialH2H3">Sorry, Not results on {catFound.node.name}  {queryToExecute.sub_category ? `> ${queryToExecute.sub_category}` : null }</h2>
                                                 <h3 className="specialH2H3">Please feel free to use the filters above. Or just surf the recommendations bellow.</h3>
                                             </div>

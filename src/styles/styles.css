@@ -4220,6 +4220,12 @@ input[type=text]:focus{
     #ulBrowseCats {
         justify-content: center !important;
     }
+    .imgContCatHAuto, .imgContCat {
+        width: 100% !important;
+    }
+    .imgContCat {
+        height: auto;
+    }
 }
 /* END just for ulBrowseCats */
 
@@ -4256,6 +4262,10 @@ input[type=text]:focus{
     }
     #previewInnerCont {
         width: 100%;
+    }
+    #contentNoResults {
+        top: -5% !important;
+        background: rgba(0, 0, 0, 0.252) !important;
     }
 }
 
