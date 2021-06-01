@@ -4280,7 +4280,7 @@ input[type=text]:focus{
         width: 100%;
     }
     .logoSVGCont {
-        width: 280px;
+        width: 250px;
     }
     #innerContToken {
         flex-direction: column;
