@@ -622,12 +622,12 @@ body::-webkit-scrollbar {
 }
 .miniImg {
     width: 100%;
-    height: 100%;
+    height: auto;
     border-radius: 8px;
 }
 .miniImg2 {
     width: 100%;
-    height: 100%;
+    height: auto;
     border-radius: 8px;
 }
 .softBackground {
@@ -1600,6 +1600,10 @@ body::-webkit-scrollbar {
 .standardDivRowFlexPlain {
     display: flex;
     flex-direction: row;
+}
+.addsDiv {
+    width: 100%;
+    height: auto;
 }
 .standardDiv250x140OverflowH {
     display: flex;
@@ -4090,6 +4094,19 @@ input[type=text]:focus{
  .shadowsTitlesSoft{
     text-shadow: 1px 2px orange;
  }
+ #browseByCont {
+     display: flex;
+     flex-direction: column;
+     width: 100%;
+     height: 350px;
+ }
+ .limitTest {
+     height: 250px;
+ }
+ .browseByImg{
+     width: 100%;
+     height: auto;
+ }
 /* end global */
 
 /* media rules - media support */
@@ -4198,6 +4215,14 @@ input[type=text]:focus{
     }
 }
 
+/* just for ulBrowseCats */
+@media only screen and (max-width: 577px) {
+    #ulBrowseCats {
+        justify-content: center !important;
+    }
+}
+/* END just for ulBrowseCats */
+
 @media only screen and (max-width: 550px) {
     #divContProf {
         flex-direction: column;
@@ -4267,11 +4292,4 @@ input[type=text]:focus{
 }
 /* END mobile 375px */
 
-/* just for ulBrowseCats */
-@media only screen and (max-width: 577px) {
-    #ulBrowseCats {
-        justify-content: center !important;
-    }
-}
-/* END just for ulBrowseCats */
 /* END media rules - media support  */

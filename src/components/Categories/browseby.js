@@ -91,7 +91,7 @@ const Browseby = (props) => {
     //END functions/CB
 
     return (
-        <div className={`${xclassCSS}`}>
+        <div className={`${xclassCSS}`} id="browseByCont">
             <h3 className="textAlignedCenter">Browse More Categories</h3>
             <div className="standardDivRowFlexPlain">
                 {
@@ -107,7 +107,7 @@ const Browseby = (props) => {
                                                 return (
                                                     <div key={`${_slide.id}-div-cont-Cats-JAB`}  className="scaleHovered pointer" onClick={() => sendItem(_slide)}>
                                                         <li key={_slide.id} className="miniLi boxShadowBottomStrong">
-                                                            <img src={_slide.image} className="justMiniRounded" />
+                                                            <img src={_slide.image} className="justMiniRounded browseByImg" />
                                                         </li>
                                                         <p className="normalTextSmall textAlignedCenter hoverUnderline">More on {_slide.name}</p>
                                                         <p className="textXSmallOrange textAlignedCenter hoverUnderline">More on {_slide.title}</p>
@@ -121,23 +121,6 @@ const Browseby = (props) => {
                         }
                     </Slider>
                 }
-                {/* <ul className="catBigUl marginsTB">
-                {
-                data.append_menu.edges.map(({ node: item}) => {
-                    if(!item.active) return null;
-                    return (
-                    <li key={item.id}>
-                        <Link onClick={() => navigateToApp("explore")} to={`/explore?category=${item.name}|sub_category=none`}>
-                        <div className="imgContCat relativeDiv">
-                            <img src={item.image} className="imgCat" alt={`${item.name}-${item.id}`} />
-                            <h2 className="justAbsolutePos">{item.name}</h2>
-                        </div>
-                        </Link>
-                    </li>
-                    )
-                })
-                }
-                </ul> */}
             </div>
         </div>
     )
